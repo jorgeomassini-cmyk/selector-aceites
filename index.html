@@ -1,112 +1,305 @@
 
+Sí. Pegá **todo este código** en `index.html`, reemplazando el contenido actual. La app permite buscar por marca, modelo, año y versión, y muestra motor, caja, aceites y filtros **solo para vehículos que estén cargados en la base**.
 
-```html
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Selector de lubricantes</title>
+  <title>Ficha de aceites y filtros</title>
   <style>
+    * { box-sizing: border-box; }
+
     body {
-      font-family: system-ui, sans-serif;
-      max-width: 680px;
-      margin: 40px auto;
-      padding: 0 16px;
-      color: #202124;
+      margin: 0;
+      padding: 20px 14px;
+      background: #f1f5f9;
+      color: #172033;
+      font-family: Arial, sans-serif;
     }
-    input, button {
-      font: inherit;
+
+    main {
+      max-width: 760px;
+      margin: 20px auto;
+      padding: 22px;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px #17203318;
+    }
+
+    h1 { color: #14532d; }
+    h2 { margin-top: 24px; color: #14532d; }
+    p { line-height: 1.5; }
+
+    label {
+      display: block;
+      margin: 15px 0 6px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 20px;
+      border: 0;
+      background: #15803d;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .nota, .aviso {
+      margin-top: 18px;
       padding: 12px;
       border-radius: 8px;
+      line-height: 1.5;
     }
-    input { width: min(100%, 390px); border: 1px solid #aaa; }
-    button { border: 0; background: #1769aa; color: white; cursor: pointer; }
-    #resultado { margin-top: 24px; padding: 16px; background: #f3f6f8; border-radius: 10px; }
-    .aviso { color: #765500; }
+
+    .nota { background: #eff6ff; }
+    .aviso { background: #fff7ed; }
+
+    #resultado {
+      display: none;
+      margin-top: 24px;
+      padding: 18px;
+      background: #f0fdf4;
+      border-radius: 10px;
+      line-height: 1.6;
+    }
+
+    .item { margin: 8px 0; }
+    .etiqueta { font-weight: bold; }
   </style>
 </head>
 <body>
-  <h1>Selector de lubricantes</h1>
-  <p>Ingresá el VIN para identificar el vehículo.</p>
+  <main>
+    <h1>🛢️ Ficha de aceites y filtros</h1>
+    <p>Buscá un vehículo para consultar su motor, caja, lubricantes, capacidades y filtros.</p>
 
-  <form id="formulario">
-    <input id="vin" placeholder="VIN de 17 caracteres" maxlength="17"
-           aria-label="VIN" required>
-    <button type="submit">Buscar vehículo</button>
-  </form>
+    <form id="formulario">
+      <label for="marca">Marca</label>
+      <select id="marca" required>
+        <option value="">Elegí una marca</option>
+      </select>
 
-  <div id="resultado" aria-live="polite">Los datos del vehículo aparecerán acá.</div>
+      <label for="modelo">Modelo</label>
+      <select id="modelo" required disabled>
+        <option value="">Primero elegí una marca</option>
+      </select>
+
+      <label for="anio">Año</label>
+      <select id="anio" required disabled>
+        <option value="">Primero elegí un modelo</option>
+      </select>
+
+      <label for="version">Versión o motor</label>
+      <select id="version" required disabled>
+        <option value="">Primero elegí un año</option>
+      </select>
+
+      <button type="submit">Ver ficha</button>
+    </form>
+
+    <div id="resultado" aria-live="polite"></div>
+
+    <div class="nota">
+      <strong>¿Querés buscar por VIN o patente?</strong>
+      Esta versión todavía no los decodifica. Para hacerlo hace falta conectarla a una fuente de datos compatible. No cargues VIN ni patentes personales en una página pública.
+    </div>
+
+    <div class="aviso">
+      Los datos técnicos deben verificarse con el manual o catálogo confiable del vehículo. Si un dato no está cargado, la app lo indicará en lugar de adivinarlo.
+    </div>
+  </main>
 
   <script>
-    const formulario = document.querySelector("#formulario");
-    const campoVin = document.querySelector("#vin");
-    const resultado = document.querySelector("#resultado");
+    /*
+      BASE DE VEHÍCULOS
+      Agregá aquí fichas verificadas.
 
-    formulario.addEventListener("submit", async (evento) => {
+      No dejes datos de ejemplo como si fueran reales.
+      Si un dato no está confirmado, dejalo como "".
+    */
+    const vehiculos = [
+      /*
+      {
+        marca: "Marca verificada",
+        modelo: "Modelo",
+        anio: 2020,
+        version: "Versión / motor",
+        motor: {
+          codigo: "Código verificado",
+          descripcion: "Descripción del motor"
+        },
+        caja: {
+          tipo: "Manual, automática, CVT, etc.",
+          codigo: "Código verificado"
+        },
+        aceites: [
+          {
+            componente: "Motor",
+            viscosidad: "La indicada por el fabricante",
+            norma: "Norma exacta",
+            capacidad: "Cantidad en litros",
+            condicion: "Aclarar si incluye el filtro"
+          },
+          {
+            componente: "Caja",
+            viscosidad: "La indicada por el fabricante",
+            norma: "Norma exacta",
+            capacidad: "Cantidad en litros",
+            condicion: "Cambio parcial o llenado completo"
+          }
+        ],
+        filtros: [
+          { tipo: "Aceite", codigo: "Código verificado" },
+          { tipo: "Aire", codigo: "Código verificado" },
+          { tipo: "Combustible", codigo: "Código verificado" },
+          { tipo: "Habitáculo", codigo: "Código verificado" }
+        ],
+        fuente: "Manual, catálogo o fuente consultada"
+      }
+      */
+    ];
+
+    const marca = document.getElementById("marca");
+    const modelo = document.getElementById("modelo");
+    const anio = document.getElementById("anio");
+    const version = document.getElementById("version");
+    const resultado = document.getElementById("resultado");
+
+    function llenarSelector(selector, valores, textoInicial) {
+      selector.innerHTML = `<option value="">${textoInicial}</option>`;
+      [...new Set(valores)].forEach(valor => {
+        const opcion = document.createElement("option");
+        opcion.value = valor;
+        opcion.textContent = valor;
+        selector.appendChild(opcion);
+      });
+      selector.disabled = valores.length === 0;
+    }
+
+    function fichasFiltradas() {
+      return vehiculos.filter(auto =>
+        auto.marca === marca.value &&
+        auto.modelo === modelo.value &&
+        String(auto.anio) === anio.value
+      );
+    }
+
+    llenarSelector(
+      marca,
+      vehiculos.map(auto => auto.marca),
+      vehiculos.length ? "Elegí una marca" : "Todavía no hay vehículos cargados"
+    );
+
+    marca.addEventListener("change", () => {
+      const autos = vehiculos.filter(auto => auto.marca === marca.value);
+      llenarSelector(modelo, autos.map(auto => auto.modelo), "Elegí un modelo");
+      llenarSelector(anio, [], "Primero elegí un modelo");
+      llenarSelector(version, [], "Primero elegí un año");
+      resultado.style.display = "none";
+    });
+
+    modelo.addEventListener("change", () => {
+      const autos = vehiculos.filter(auto =>
+        auto.marca === marca.value && auto.modelo === modelo.value
+      );
+      llenarSelector(anio, autos.map(auto => auto.anio), "Elegí un año");
+      llenarSelector(version, [], "Primero elegí un año");
+      resultado.style.display = "none";
+    });
+
+    anio.addEventListener("change", () => {
+      const autos = fichasFiltradas();
+      llenarSelector(
+        version,
+        autos.map(auto => auto.version),
+        "Elegí una versión o motor"
+      );
+      resultado.style.display = "none";
+    });
+
+    document.getElementById("formulario").addEventListener("submit", evento => {
       evento.preventDefault();
-      const vin = campoVin.value.trim().toUpperCase();
 
-      if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) {
-        resultado.textContent = "Revisá el VIN: debe tener 17 caracteres.";
+      const auto = vehiculos.find(item =>
+        item.marca === marca.value &&
+        item.modelo === modelo.value &&
+        String(item.anio) === anio.value &&
+        item.version === version.value
+      );
+
+      if (!auto) {
+        mostrarMensaje("No encontramos esa configuración en la base.");
         return;
       }
 
-      resultado.textContent = "Buscando datos del vehículo…";
-
-      try {
-        const url =
-          `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${encodeURIComponent(vin)}?format=json`;
-        const respuesta = await fetch(url);
-        if (!respuesta.ok) throw new Error("No se pudo consultar el servicio.");
-
-        const datos = await respuesta.json();
-        const vehiculo = datos.Results?.[0];
-
-        if (!vehiculo || (!vehiculo.Make && !vehiculo.Model)) {
-          resultado.textContent =
-            "No encontramos datos para ese VIN. Verificá que esté bien escrito.";
-          return;
-        }
-
-        const campos = [
-          ["Marca", vehiculo.Make],
-          ["Modelo", vehiculo.Model],
-          ["Año", vehiculo.ModelYear],
-          ["Motor", vehiculo.DisplacementL
-            ? `${vehiculo.DisplacementL} L`
-            : vehiculo.EngineModel],
-          ["Combustible", vehiculo.FuelTypePrimary],
-          ["Transmisión", vehiculo.TransmissionStyle]
-        ];
-
-        resultado.replaceChildren();
-        const titulo = document.createElement("h2");
-        titulo.textContent = "Vehículo identificado";
-        resultado.append(titulo);
-
-        const lista = document.createElement("ul");
-        for (const [etiqueta, valor] of campos) {
-          if (valor) {
-            const item = document.createElement("li");
-            item.textContent = `${etiqueta}: ${valor}`;
-            lista.append(item);
-          }
-        }
-        resultado.append(lista);
-
-        const aviso = document.createElement("p");
-        aviso.className = "aviso";
-        aviso.textContent =
-          "Aceites: sin recomendación verificada todavía. Confirmá motor y transmisión con el manual del fabricante.";
-        resultado.append(aviso);
-      } catch (error) {
-        resultado.textContent =
-          "No pudimos consultar el servicio. Revisá tu conexión e intentá de nuevo.";
-      }
+      mostrarFicha(auto);
     });
+
+    function textoSeguro(valor) {
+      const elemento = document.createElement("span");
+      elemento.textContent = valor || "Dato no cargado";
+      return elemento.innerHTML;
+    }
+
+    function mostrarMensaje(mensaje) {
+      resultado.style.display = "block";
+      resultado.innerHTML = `<p>${textoSeguro(mensaje)}</p>`;
+    }
+
+    function mostrarFicha(auto) {
+      const aceites = (auto.aceites || []).map(item => `
+        <div class="item">
+          <span class="etiqueta">${textoSeguro(item.componente)}:</span>
+          ${textoSeguro(item.viscosidad)}; norma: ${textoSeguro(item.norma)};
+          capacidad: ${textoSeguro(item.capacidad)};
+          ${textoSeguro(item.condicion)}
+        </div>
+      `).join("");
+
+      const filtros = (auto.filtros || []).map(item => `
+        <div class="item">
+          <span class="etiqueta">${textoSeguro(item.tipo)}:</span>
+          ${textoSeguro(item.codigo)}
+        </div>
+      `).join("");
+
+      resultado.innerHTML = `
+        <h2>${textoSeguro(auto.marca)} ${textoSeguro(auto.modelo)} ${textoSeguro(auto.anio)}</h2>
+        <p><span class="etiqueta">Versión:</span> ${textoSeguro(auto.version)}</p>
+
+        <h2>Motor y caja</h2>
+        <p><span class="etiqueta">Motor:</span>
+          ${textoSeguro(auto.motor && auto.motor.descripcion)}
+          — código: ${textoSeguro(auto.motor && auto.motor.codigo)}
+        </p>
+        <p><span class="etiqueta">Caja:</span>
+          ${textoSeguro(auto.caja && auto.caja.tipo)}
+          — código: ${textoSeguro(auto.caja && auto.caja.codigo)}
+        </p>
+
+        <h2>Aceites y capacidades</h2>
+        ${aceites || "<p>Datos de lubricantes no cargados.</p>"}
+
+        <h2>Filtros</h2>
+        ${filtros || "<p>Datos de filtros no cargados.</p>"}
+
+        <p><span class="etiqueta">Fuente:</span> ${textoSeguro(auto.fuente)}</p>
+      `;
+
+      resultado.style.display = "block";
+      resultado.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   </script>
 </body>
 </html>
 ```
-
