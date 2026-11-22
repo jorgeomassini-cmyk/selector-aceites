@@ -44,7 +44,7 @@
 
     <form id="fc" class="panel">
       <label>VIN (17 dígitos nacional o importado) o Patente guardada</label>
-      <input id="cod" class="mayus" maxlength="17" placeholder="Ej: WBA..., JF1..., 9BW... o AB123CD" required>
+      <input id="cod" class="mayus" maxlength="17" placeholder="Ej: 9BWCB05W26T176579 o AB123CD" required>
       <button type="submit">Decodificar VIN / Buscar Patente</button>
       <div id="est"></div>
     </form>
@@ -106,38 +106,61 @@
       "988":"Jeep (Brasil)","1C4":"Jeep (EE.UU.)","1J4":"Jeep (EE.UU.)","ZAC":"Jeep (Italia)","1C6":"RAM (EE.UU.)","3C6":"RAM (México)","1C3":"Chrysler/Dodge","2C3":"Chrysler/Dodge (Canadá)",
       "YV1":"Volvo (Suecia)","YV4":"Volvo SUV (Suecia)","LVY":"Volvo (China)","SAL":"Land Rover (Reino Unido)","SAJ":"Jaguar (Reino Unido)","WP0":"Porsche (Alemania)","WP1":"Porsche SUV (Alemania)",
       "JF1":"Subaru (Japón)","JF2":"Subaru SUV (Japón)","4S3":"Subaru (EE.UU.)","JMZ":"Mazda (Japón)","JM1":"Mazda (Japón)","3MZ":"Mazda (México)","JSA":"Suzuki (Japón)","JS3":"Suzuki SUV (Japón)","MA3":"Suzuki (India)","JA3":"Mitsubishi (Japón)","JA4":"Mitsubishi SUV (Japón)","MMB":"Mitsubishi (Tailandia)",
-      "LVS":"Ford/Changan (China)","LGW":"Great Wall / Haval (China)","LVV":"Chery (China)","8AE":"Chery (Mercosur)","LFV":"FAW/VW (China)","LDC":"Dongfeng/PSA (China)","LSG":"SAIC/GM (China)","LZW":"SGMW (China)","L6T":"Geely (China)","LB3":"Geely (China)","LNB":"BAIC (China)","LPA":"Changan/PSA (China)","LRW":"Tesla (China)","5YJ":"Tesla (EE.UU.)"
+      "LVS":"Ford/Changan (China)","LGW":"Great Wall / Haval (China)","LVV":"Chery (China)","8AE":"Chery (Mercosur)","LFV":"FAW/VW (China)","LDC":"Dongfeng/PSA (China)","LSG":"SAIC/GM (China)","LZW":"SGMW (China)","L6T":"Geely (China)","LB3":"Geely (China)","LNB":"BAIC (China)","LPA":"Changan/PSA (China)"
     };
     const ANIOS_VIN = {A:2010,B:2011,C:2012,D:2013,E:2014,F:2015,G:2016,H:2017,J:2018,K:2019,L:2020,M:2021,N:2022,P:2023,R:2024,S:2025,T:2026,V:2027,W:2028,X:2029,Y:2030,1:2001,2:2002,3:2003,4:2004,5:2005,6:2006,7:2007,8:2008,9:2009};
 
     const base = [
+      // JEEP (Toda la línea en Argentina)
+      {p:[],v:[],m:"Jeep",mo:"Renegade",a:2019,ve:"1.8 E.torQ AT6",mc:"E.torQ Evo",cj:"Aisin TF-72SC (AT6)",ma:"5W-30 / 0W-20 Chrysler MS-6395",ml:4.5,aa:"ATF AW-1 / Toyota WS",al:9,fc:"Interno (no sale por cárter)",fm:"HU 7019 z / C 22 037"},
+      {p:[],v:[],m:"Jeep",mo:"Renegade",a:2022,ve:"1.3 Turbo T270 AT6",mc:"GSE T270",cj:"Aisin TF-72SC (AT6)",ma:"0W-30 ACEA C2 / Fiat 9.55535-GS1",ml:4.5,aa:"ATF AW-1 / Toyota WS",al:9,fc:"Interno (no sale por cárter)",fm:"WOE-628 / C 22 037"},
+      {p:[],v:[],m:"Jeep",mo:"Compass",a:2019,ve:"2.4 Tigershark AT6 / AT9",mc:"ED6 Tigershark",cj:"Aisin AT6 (4x2) / ZF 9HP48 (4x4)",ma:"0W-20 Chrysler MS-6395",ml:5.2,aa:"ATF WS (AT6) / ZF Lifeguard 9 (AT9)",al:10,fc:"Interno (no sale por cárter)",fm:"W 7030 / C 25 028"},
+      {p:[],v:[],m:"Jeep",mo:"Commander",a:2022,ve:"1.3 T270 AT6 / 2.0 TD380 AT9",mc:"T270 / Multijet",cj:"Aisin AT6 / ZF 9HP48",ma:"0W-30 ACEA C2 (DPF)",ml:4.8,aa:"ATF WS (AT6) / ZF Lifeguard 9 (AT9)",al:10,fc:"Interno (no sale por cárter)",fm:"HU 7019 z / C 25 028"},
+      {p:[],v:[],m:"Jeep",mo:"Grand Cherokee",a:2016,ve:"3.6 V6 Pentastar ZF 8HP",mc:"ERB Pentastar",cj:"ZF 8HP45 / 8HP70 (8v)",ma:"5W-20 / 5W-30 Chrysler MS-6395",ml:5.6,aa:"ZF LifeguardFluid 8",al:12,fc:"Cárter plástico con filtro integrado",fm:"HU 7026 z / C 24 024"},
+      {p:[],v:[],m:"Jeep",mo:"Grand Cherokee",a:2015,ve:"3.0 V6 CRD Diesel ZF 8HP",mc:"EXF VM Motori",cj:"ZF 8HP70 (8v)",ma:"5W-30 / 5W-40 ACEA C3 / MB 229.51",ml:7.7,aa:"ZF LifeguardFluid 8",al:12,fc:"Cárter plástico con filtro integrado",fm:"HU 7018 z / C 24 024"},
+      {p:[],v:[],m:"Jeep",mo:"Wrangler",a:2018,ve:"3.6 V6 / 2.0 Turbo AT5-AT8",mc:"Pentastar / GME",cj:"W5A580 (NAG1) / ZF 8HP50",ma:"5W-20 / 5W-30 MS-6395",ml:5.6,aa:"ATF+4 (5v) / ZF Lifeguard 8 (8v)",al:11,fc:"Filtro interno cárter + junta",fm:"HU 7026 z / C 28 043"},
+      {p:[],v:[],m:"Jeep",mo:"Patriot / Cherokee",a:2014,ve:"2.4 / 3.2 V6 CVT / ZF 9HP",mc:"ED3 / EHB",cj:"Jatco JF011E CVT / ZF 9HP48",ma:"5W-20 / 0W-20 MS-6395",ml:4.3,aa:"CVTF+4 / NS-2 (CVT) o Lifeguard 9",al:10,fc:"Cartucho enfriador + malla",fm:"W 7030 / C 25 010"},
+
+      // VOLKSWAGEN
       {p:[],v:[],m:"Volkswagen",mo:"Amarok",a:2019,ve:"2.0 TDI Biturbo ZF 8HP",mc:"CNEA / CSHA",cj:"ZF 8HP45 / 8HP70",ma:"5W-30 VW 504/507 (DPF)",ml:7,aa:"ZF Lifeguard 8 / G 060 162",al:12,fc:"Cárter completo con filtro",fm:"HU 7008 z / C 32 130 / WK 8026 z"},
       {p:[],v:[],m:"Volkswagen",mo:"Amarok",a:2021,ve:"3.0 V6 TDI ZF 8HP",mc:"DDXC / DDXE",cj:"ZF 8HP70",ma:"5W-30 VW 504/507 (DPF)",ml:8,aa:"ZF Lifeguard 8 / G 060 162",al:12,fc:"Cárter completo con filtro",fm:"HU 7012 z / C 32 130 / WK 8026 z"},
-      {p:[],v:[],m:"Volkswagen",mo:"Polo / Virtus / T-Cross",a:2019,ve:"1.6 MSI / 1.0 TSI Tiptronic",mc:"EA211",cj:"Aisin 09G / AQ160",ma:"5W-40 VW 502.00",ml:4,aa:"VW G 055 540 A2 / Toyota WS",al:10,fc:"Filtro interno cárter + junta",fm:"W 712/95 / C 27 009"},
-      {p:[],v:[],m:"Volkswagen",mo:"Vento / Golf / Tiguan",a:2017,ve:"2.0 TSI DSG 6v (DQ250)",mc:"CCZA / CULC",cj:"DSG DQ250 (Embrague húmedo)",ma:"5W-40 VW 502.00",ml:4.7,aa:"VW G 052 182 A2 (DCT/DSG)",al:8,fc:"Cartucho superior + junta",fm:"HU 6002 z / C 35 154"},
+      {p:[],v:[],m:"Volkswagen",mo:"Gol / Voyage / Saveiro",a:2016,ve:"1.6 8v / 16v Manual o I-Motion",mc:"CFZA / CWSA",cj:"Manual MQ200 / Robotizada ASG",ma:"5W-40 / 10W-40 VW 502.00",ml:4,aa:"Engranajes 75W-90 GL-4 (1.9L) + Actuador Pentosin CHF 11S",al:2,fc:"No lleva diálisis",fm:"W 712/52 o W 712/95 / C 2295/2"},
+      {p:[],v:[],m:"Volkswagen",mo:"Polo / Virtus / T-Cross / Nivus",a:2019,ve:"1.6 MSI / 1.0 TSI Tiptronic",mc:"EA211",cj:"Aisin 09G / AQ160",ma:"5W-40 VW 502.00",ml:4,aa:"VW G 055 540 A2 / Toyota WS",al:10,fc:"Filtro interno cárter + junta",fm:"W 712/95 / C 27 009"},
+      {p:[],v:[],m:"Volkswagen",mo:"Vento / Golf / Tiguan",a:2017,ve:"1.4 TSI DSG7 / 2.0 TSI DSG6",mc:"CZCA / CULC",cj:"DSG DQ200 (Seca) / DQ250 (Húmeda)",ma:"5W-40 VW 502.00",ml:4.7,aa:"G 052 182 A2 (DQ250 - 8L diálisis)",al:8,fc:"Cartucho superior (DQ250)",fm:"HU 6002 z / C 35 154"},
+
+      // TOYOTA
       {p:[],v:[],m:"Toyota",mo:"Hilux / SW4",a:2020,ve:"2.8 TDI 4x4 AT",mc:"1GD-FTV",cj:"Aisin AC60F (6v)",ma:"5W-30 ACEA C2 (DPF)",ml:7.5,aa:"Toyota Genuine ATF WS",al:12,fc:"Malla interna + junta cárter",fm:"W 712/83 / C 23 007 / PU 8021"},
       {p:[],v:[],m:"Toyota",mo:"Corolla / Corolla Cross",a:2019,ve:"1.8 / 2.0 CVT",mc:"2ZR-FE / M20A",cj:"Aisin K311 / Direct Shift CVT",ma:"0W-20 / 5W-30 ILSAC GF-5/6",ml:4.2,aa:"Toyota CVT Fluid FE",al:10,fc:"Filtro interno cárter + junta",fm:"W 610/9 / C 24 005"},
-      {p:[],v:[],m:"Fiat",mo:"Cronos / Argo / Toro",a:2020,ve:"1.8 E.torQ AT6 (Aisin)",mc:"E.torQ Evo",cj:"Aisin TF-72SC (AT6)",ma:"5W-30 / 0W-20 Chrysler MS-6395",ml:4.5,aa:"ATF AW-1 / Toyota WS",al:9,fc:"Interno (no sale por cárter)",fm:"W 7019 z / C 22 037"},
-      {p:[],v:[],m:"Fiat",mo:"Toro / Renegade Diesel",a:2019,ve:"2.0 Multijet AT9 (ZF 9HP)",mc:"55263088",cj:"ZF 9HP48 (9v)",ma:"0W-30 ACEA C2 (DPF)",ml:4.5,aa:"ZF LifeguardFluid 9",al:10,fc:"Interno (no sale por cárter)",fm:"HU 7019 z / C 22 037"},
-      {p:[],v:[],m:"Chevrolet",mo:"Cruze",a:2018,ve:"1.4 Turbo AT",mc:"LE2",cj:"GM 6T35 / 6T40 (GF6)",ma:"5W-30 dexos1 Gen2/Gen3",ml:4,aa:"GM Dexron VI",al:11,fc:"Interno (apertura de caja)",fm:"W 7056 / C 27 004 / WK 55/3"},
-      {p:[],v:[],m:"Chevrolet",mo:"Onix / Tracker",a:2021,ve:"1.0 / 1.2 Turbo AT",mc:"CSS Prime",cj:"GM 6T30 / 6T35 (GF6)",ma:"5W-30 / 0W-20 dexos1 Gen2",ml:3.8,aa:"GM Dexron VI",al:10,fc:"Interno (apertura de caja)",fm:"W 7056 / C 22 052"},
-      {p:[],v:[],m:"Ford",mo:"Ranger",a:2019,ve:"3.2 TDCi 5 cil AT",mc:"Duratorq P5AT",cj:"Ford 6R80 (ZF 6HP26)",ma:"5W-30 Ford WSS-M2C913-D",ml:9.8,aa:"Motorcraft Mercon LV",al:13,fc:"Filtro interno cárter + junta",fm:"HU 7002 z / C 23 111 / PU 8028"},
-      {p:[],v:[],m:"Peugeot",mo:"208 / 308 / 3008",a:2018,ve:"1.6 VTi / THP AT6",mc:"EC5 / EP6FDT",cj:"Aisin EAT6",ma:"5W-30 / 0W-30 PSA B71 2290/2312",ml:4.2,aa:"AW-1 / JWS 3324 / Toyota WS",al:9,fc:"Interno (no sale por cárter)",fm:"HU 711/51 x / C 36 003"},
-      {p:[],v:[],m:"Citroën",mo:"C4 Cactus / C4 Lounge",a:2019,ve:"1.6 VTi / THP AT6",mc:"EC5 / EP6",cj:"Aisin EAT6",ma:"5W-30 PSA B71 2290",ml:4.2,aa:"AW-1 / JWS 3324",al:9,fc:"Interno (no sale por cárter)",fm:"HU 711/51 x / C 3585"},
-      {p:[],v:[],m:"Renault",mo:"Fluence / Koleos / Stepway",a:2018,ve:"1.6 / 2.0 CVT X-Tronic",mc:"H4M / M4R",cj:"Jatco JF011E / JF015E CVT",ma:"5W-30 / 5W-40 RN0710",ml:4.4,aa:"Nissan NS-2 / NS-3 CVT",al:10,fc:"Cartucho enfriador + malla",fm:"W 67/1 / C 25 040"},
-      {p:[],v:[],m:"Nissan",mo:"Kicks / Sentra / Versa",a:2019,ve:"1.6 / 1.8 CVT X-Tronic",mc:"HR16DE / MRA8DE",cj:"Jatco JF015E / JF016E CVT",ma:"5W-30 API SN / ILSAC GF-5",ml:4.1,aa:"Nissan NS-3 CVT",al:10,fc:"Cartucho enfriador + interno",fm:"W 67/1 / C 25 012"},
-      {p:[],v:[],m:"Honda",mo:"Civic / HR-V / Fit",a:2018,ve:"1.5 / 1.8 / 2.0 CVT",mc:"R18Z / L15B",cj:"Honda CVT (HCF-2)",ma:"0W-20 API SN / ILSAC GF-5",ml:3.7,aa:"Honda HCF-2 (Exclusivo)",al:9,fc:"Cartucho enfriador + interno",fm:"W 610/6 / C 22 020"},
-      {p:[],v:[],m:"Jeep",mo:"Renegade / Compass",a:2019,ve:"1.8 E.torQ / 2.4 AT6-AT9",mc:"E.torQ Evo / Tigershark",cj:"Aisin AT6 / ZF 9HP48",ma:"5W-30 / 0W-20 Chrysler MS-6395",ml:4.5,aa:"ATF WS (AT6) / ZF Lifeguard 9 (AT9)",al:10,fc:"Interno (AT6) / Integrado (ZF9)",fm:"HU 7019 z / C 22 037"},
-      {p:[],v:[],m:"BMW",mo:"Serie 1 / 3 / X1 / X3",a:2017,ve:"2.0 Turbo ZF 8HP",mc:"N20 / B48",cj:"ZF 8HP45 / 8HP50",ma:"5W-30 / 5W-40 BMW LL-01 / LL-04",ml:5.2,aa:"ZF LifeguardFluid 8",al:11,fc:"Cárter plástico con filtro integrado",fm:"HU 816 x / C 24 025"},
-      {p:[],v:[],m:"Mercedes-Benz",mo:"Clase C / GLC / E",a:2017,ve:"2.0 Turbo 7G / 9G-Tronic",mc:"M274",cj:"7G-Tronic Plus / 9G-Tronic",ma:"5W-30 / 5W-40 MB 229.5 / 229.51",ml:6.5,aa:"MB 236.15 (7G) / MB 236.17 (9G)",al:11,fc:"Cárter con filtro integrado (9G)",fm:"HU 711/6 z / C 28 004"},
-      {p:[],v:[],m:"Audi",mo:"A3 / A4 / Q3 / Q5",a:2017,ve:"1.4 / 2.0 TFSI S-Tronic",mc:"CZEA / CYMC",cj:"S-Tronic DL382 / DQ250 / ZF 8HP",ma:"5W-30 / 5W-40 VW 504/507 o 502",ml:5.2,aa:"G 052 529 (S-Tronic) / Lifeguard 8",al:9,fc:"Cartuchos internos + junta",fm:"HU 6013 z / C 27 009"},
-      {p:[],v:[],m:"Subaru",mo:"Forester / Outback / XV",a:2018,ve:"2.0 / 2.5 Boxer Lineartronic CVT",mc:"FB20 / FB25",cj:"Subaru Lineartronic TR580 / TR690",ma:"0W-20 API SN / ILSAC GF-5",ml:4.8,aa:"Subaru CVT Fluid Lineartronic II",al:11,fc:"Malla interna cárter + junta",fm:"W 610/6 / C 2201"},
-      {p:[],v:[],m:"Hyundai",mo:"Tucson / Santa Fe / Creta",a:2018,ve:"1.6 / 2.0 / 2.2 CRDi AT6-AT8",mc:"G4NA / D4HB",cj:"Hyundai A6MF1 / A8LF1",ma:"5W-30 ACEA A5/B5 o C3 (DPF)",ml:4.5,aa:"Hyundai ATF SP-IV / SP-IV-RR",al:10,fc:"Interno (apertura de caja)",fm:"W 811/80 / C 28 035"},
-      {p:[],v:[],m:"Kia",mo:"Sportage / Sorento / Cerato",a:2018,ve:"2.0 Nafta / 2.2 CRDi AT",mc:"G4NA / D4HB",cj:"Kia A6MF1 / A8LF1",ma:"5W-30 ACEA A5/B5 o C3 (DPF)",ml:4.5,aa:"Kia ATF SP-IV / SP-IV-RR",al:10,fc:"Interno (apertura de caja)",fm:"W 811/80 / C 28 035"}
-    ];
+      {p:[],v:[],m:"Toyota",mo:"Etios / Yaris / RAV4",a:2019,ve:"1.5 / 2.0 / 2.5 AT-CVT",mc:"2NR-FE / 3ZR / A25A",cj:"Aisin U440E / K114 CVT / UB80E",ma:"0W-20 / 5W-30 API SN",ml:4.2,aa:"ATF WS (AT) o CVT FE (CVT)",al:10,fc:"Filtro interno + junta",fm:"W 68/3 / C 25 024"},
 
-    let db = JSON.parse(localStorage.getItem('ldb_univ_v1')) || base;
+      // FIAT
+      {p:[],v:[],m:"Fiat",mo:"Cronos / Argo / Pulse",a:2020,ve:"1.8 E.torQ AT6 / 1.0 T200 CVT",mc:"E.torQ / GSE T200",cj:"Aisin TF-72SC (AT6) / Aisin CVT",ma:"5W-30 / 0W-30 Chrysler MS-6395",ml:4.5,aa:"ATF AW-1 (AT6) / CVT FE (Pulse)",al:9,fc:"Interno + junta",fm:"W 7019 z / C 22 037"},
+      {p:[],v:[],m:"Fiat",mo:"Toro",a:2019,ve:"1.8 AT6 / 2.0 Multijet AT9",mc:"E.torQ / 55263088",cj:"Aisin AT6 / ZF 9HP48 (9v)",ma:"5W-30 (Nafta) / 0W-30 C2 (Diesel)",ml:4.5,aa:"ATF WS (AT6) / ZF Lifeguard 9 (AT9)",al:10,fc:"Interno (no sale por cárter)",fm:"HU 7019 z / C 22 037"},
+
+      // CHEVROLET & FORD
+      {p:[],v:[],m:"Chevrolet",mo:"Cruze / Onix / Tracker",a:2019,ve:"1.0T / 1.2T / 1.4T AT6",mc:"LE2 / CSS Prime",cj:"GM 6T30 / 6T35 / 6T40 (GF6)",ma:"5W-30 / 0W-20 dexos1 Gen2/Gen3",ml:4,aa:"GM Dexron VI",al:11,fc:"Interno (apertura de caja)",fm:"W 7056 / C 27 004"},
+      {p:[],v:[],m:"Chevrolet",mo:"S10 / Trailblazer",a:2019,ve:"2.8 Duramax CTDI AT6",mc:"XLD28",cj:"GM 6L50 (6v)",ma:"5W-30 dexos2 (ACEA C3 DPF)",ml:6.2,aa:"GM Dexron VI",al:12,fc:"Filtro interno cárter + junta",fm:"HU 7010 z / C 30 014 / PU 9007 z"},
+      {p:[],v:[],m:"Ford",mo:"Ranger",a:2019,ve:"3.2 TDCi 5 cil AT / 2.0 BiTurbo",mc:"Duratorq P5AT / Panther",cj:"Ford 6R80 (6v) / 10R80 (10v)",ma:"5W-30 Ford WSS-M2C913-D",ml:9.8,aa:"Mercon LV (6v) / Mercon ULV (10v)",al:13,fc:"Filtro interno cárter + junta",fm:"HU 7002 z / C 23 111 / PU 8028"},
+      {p:[],v:[],m:"Ford",mo:"Focus / EcoSport / Kuga / Territory",a:2018,ve:"1.5T / 2.0 AT6 / Powershift / CVT",mc:"EcoBoost / Duratec",cj:"6F35 (AT6) / 6DCT250 / Punch CVT",ma:"5W-30 / 5W-20 WSS-M2C946-B1",ml:4.5,aa:"Mercon LV (6F35) / CVT Fluid",al:10,fc:"Interno según caja",fm:"W 7015 / C 16 134/1"},
+
+      // FRANCESES (PEUGEOT / CITROËN / RENAULT)
+      {p:[],v:[],m:"Peugeot",mo:"208 / 308 / 408 / 2008 / 3008",a:2018,ve:"1.6 VTi / THP AT6 (Aisin)",mc:"EC5 / EP6FDT",cj:"Aisin EAT6 (6v)",ma:"5W-30 / 0W-30 PSA B71 2290/2312",ml:4.2,aa:"AW-1 / JWS 3324 / Toyota WS",al:9,fc:"Interno (no sale por cárter)",fm:"HU 711/51 x / C 36 003"},
+      {p:[],v:[],m:"Citroën",mo:"C4 Cactus / C4 Lounge / C3",a:2019,ve:"1.6 VTi / THP AT6",mc:"EC5 / EP6",cj:"Aisin EAT6 (6v)",ma:"5W-30 PSA B71 2290",ml:4.2,aa:"AW-1 / JWS 3324",al:9,fc:"Interno (no sale por cárter)",fm:"HU 711/51 x / C 3585"},
+      {p:[],v:[],m:"Renault",mo:"Duster / Oroch / Fluence / Koleos / Stepway",a:2018,ve:"1.6 / 2.0 AT4 (DP2) o CVT",mc:"H4M / F4R / M4R",cj:"DP2/AL4 (4v) o Jatco JF011E/JF015E CVT",ma:"5W-30 / 5W-40 RN0710",ml:4.4,aa:"Dexron III (DP2) / Nissan NS-2 o NS-3 (CVT)",al:10,fc:"Cartucho enfriador (CVT)",fm:"W 67/1 / C 25 040"},
+      {p:[],v:[],m:"Nissan",mo:"Kicks / Sentra / Versa / Frontier",a:2019,ve:"1.6 / 1.8 CVT o 2.3 BiTurbo AT7",mc:"HR16DE / MRA8DE / YS23",cj:"Jatco CVT7/8 o Jatco JR710E (7v)",ma:"5W-30 API SN o ACEA C3 (Frontier)",ml:4.1,aa:"Nissan NS-3 (CVT) / Matic S (Frontier)",al:10,fc:"Cartucho enfriador + interno",fm:"W 67/1 / C 25 012"},
+      {p:[],v:[],m:"Honda",mo:"Civic / HR-V / CR-V / Fit",a:2018,ve:"1.5T / 1.8 / 2.0 CVT",mc:"R18Z / L15B / K20Z",cj:"Honda CVT (HCF-2)",ma:"0W-20 API SN / ILSAC GF-5/6",ml:3.7,aa:"Honda HCF-2 (Exclusivo)",al:9,fc:"Cartucho enfriador + interno",fm:"W 610/6 / C 22 020"},
+      {p:[],v:[],m:"Subaru",mo:"Forester / Outback / XV / Impreza",a:2018,ve:"2.0 / 2.5 Boxer Lineartronic CVT",mc:"FB20 / FB25",cj:"Subaru Lineartronic TR580 / TR690",ma:"0W-20 API SN / ILSAC GF-5",ml:4.8,aa:"Subaru CVT Fluid Lineartronic II",al:11,fc:"Malla interna cárter + junta",fm:"W 610/6 / C 2201"},
+      {p:[],v:[],m:"Hyundai",mo:"Tucson / Santa Fe / Creta / Kona",a:2018,ve:"1.6T / 2.0 / 2.2 CRDi AT6-AT8",mc:"G4NA / D4HB",cj:"Hyundai A6MF1 / A8LF1",ma:"5W-30 ACEA A5/B5 o C3 (DPF)",ml:4.5,aa:"Hyundai ATF SP-IV / SP-IV-RR",al:10,fc:"Interno (apertura de caja)",fm:"W 811/80 / C 28 035"},
+      {p:[],v:[],m:"Kia",mo:"Sportage / Sorento / Cerato / Carnival",a:2018,ve:"2.0 Nafta / 2.2 CRDi AT6-AT8",mc:"G4NA / D4HB",cj:"Kia A6MF1 / A8LF1",ma:"5W-30 ACEA A5/B5 o C3 (DPF)",ml:4.5,aa:"Kia ATF SP-IV / SP-IV-RR",al:10,fc:"Interno (apertura de caja)",fm:"W 811/80 / C 28 035"},
+      {p:[],v:[],m:"BMW",mo:"Serie 1 / 3 / 5 / X1 / X3 / X5",a:2017,ve:"2.0 / 3.0 Turbo ZF 8HP",mc:"N20 / B48 / B58",cj:"ZF 8HP45 / 8HP50 / 8HP70",ma:"5W-30 / 5W-40 BMW LL-01 / LL-04",ml:5.2,aa:"ZF LifeguardFluid 8",al:11,fc:"Cárter plástico con filtro integrado",fm:"HU 816 x / C 24 025"},
+      {p:[],v:[],m:"Mercedes-Benz",mo:"Clase A / C / E / GLA / GLC",a:2017,ve:"1.6 / 2.0 Turbo 7G / 9G-Tronic",mc:"M270 / M274",cj:"7G-DCT / 7G-Tronic / 9G-Tronic",ma:"5W-30 / 5W-40 MB 229.5 / 229.51",ml:6.5,aa:"MB 236.15 (7G) / MB 236.17 (9G)",al:11,fc:"Cárter con filtro integrado (9G)",fm:"HU 711/6 z / C 28 004"},
+      {p:[],v:[],m:"Audi",mo:"A1 / A3 / A4 / Q3 / Q5",a:2017,ve:"1.4 / 2.0 TFSI S-Tronic / ZF 8HP",mc:"CZEA / CYMC",cj:"S-Tronic DL382 / DQ250 / ZF 8HP",ma:"5W-30 / 5W-40 VW 504/507 o 502",ml:5.2,aa:"G 052 529 (S-Tronic) / Lifeguard 8",al:9,fc:"Cartuchos internos + junta",fm:"HU 6013 z / C 27 009"},
+      {p:[],v:[],m:"RAM",mo:"1500 / 2500",a:2018,ve:"5.7 V8 HEMI ZF 8HP / 6.7 Cummins",mc:"EZH HEMI / ISB",cj:"ZF 8HP70 (1500) / Aisin AS69RC (2500)",ma:"5W-20 MS-6395 (HEMI) / 15W-40 CK-4",ml:6.6,aa:"ZF Lifeguard 8 (1500) / ASRC (2500)",al:12,fc:"Cárter con filtro (ZF8) / Interno",fm:"W 7030 / C 30 019"}
+    ];
+    const guardados = JSON.parse(localStorage.getItem('ldb_custom_v2')) || [];
+    let db = [...base, ...guardados];
     let actual = null;
+
     const m = document.getElementById('m'), mo = document.getElementById('mo'), a = document.getElementById('a'), v = document.getElementById('v'), res = document.getElementById('res'), est = document.getElementById('est');
 
     function setEst(txt, tipo = 'ok') {
@@ -174,8 +197,8 @@
       if (c.length === 17) {
         const pref = c.substring(0, 3);
         const fab = WMI[pref] || `Fabricante código "${pref}"`;
-        const anioVin = ANIOS_VIN[c] || 'S/D';
-        const marcaBase = fab.split(' ');
+        const anioVin = ANIOS_VIN[c.charAt(9)] || 'S/D';
+        const marcaBase = fab.split(' ').at(0);
 
         const optMarca = [...m.options].find(o => o.value.toLowerCase() === marcaBase.toLowerCase());
         if (optMarca) { m.value = optMarca.value; m.onchange(); }
@@ -185,7 +208,7 @@
         try {
           const r = await fetch(`https://dot.gov{c}?format=json`);
           const d = await r.json();
-          const info = d.Results && d.Results;
+          const info = d.Results && d.Results.at(0);
           if (info && info.Model) {
             const detalle = `${info.Make} ${info.Model} (${info.ModelYear || anioVin}) ${info.DisplacementL ? info.DisplacementL + 'L' : ''}`.trim();
             setEst(`VIN Importado Decodificado: ${detalle}`, 'ok');
@@ -249,8 +272,8 @@
       if (codActual.length === 17) {
         document.getElementById('nv').value = codActual;
         const fab = WMI[codActual.substring(0, 3)];
-        if (fab) document.getElementById('nm').value = fab.split(' ');
-        if (ANIOS_VIN[codActual]) document.getElementById('na').value = ANIOS_VIN[codActual];
+        if (fab) document.getElementById('nm').value = fab.split(' ').at(0);
+        if (ANIOS_VIN[codActual.charAt(9)]) document.getElementById('na').value = ANIOS_VIN[codActual.charAt(9)];
       } else if (codActual.length >= 6) {
         document.getElementById('np').value = codActual;
       }
@@ -258,22 +281,23 @@
     }
 
     function exportarBase() {
-      const blob = new Blob([JSON.stringify(db, null, 2)], {type: 'application/json'});
+      const blob = new Blob([JSON.stringify(guardados, null, 2)], {type: 'application/json'});
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url; link.download = 'base_lubricentro.json'; link.click();
+      link.href = url; link.download = 'patentes_lubricentro.json'; link.click();
     }
 
     function importarBase(ev) {
-      const file = ev.target.files;
+      const file = ev.target.files && ev.target.files.at(0);
       if (!file) return;
       const reader = new FileReader();
       reader.onload = e => {
         try {
           const data = JSON.parse(e.target.result);
           if (Array.isArray(data)) {
-            db = data; localStorage.setItem('ldb_univ_v1', JSON.stringify(db));
-            init(); alert('¡Base de datos cargada con éxito!');
+            localStorage.setItem('ldb_custom_v2', JSON.stringify(data));
+            db = [...base, ...data];
+            init(); alert('¡Patentes y fichas cargadas con éxito!');
           }
         } catch { alert('Archivo inválido'); }
       };
@@ -293,7 +317,9 @@
         aa: document.getElementById('naa').value, al: +document.getElementById('nal').value || 0,
         fc: document.getElementById('nfc').value, fm: document.getElementById('nfm').value
       };
-      db.push(n); localStorage.setItem('ldb_univ_v1', JSON.stringify(db));
+      guardados.push(n);
+      localStorage.setItem('ldb_custom_v2', JSON.stringify(guardados));
+      db = [...base, ...guardados];
       init(); document.getElementById('mod').style.display = 'none'; show(n, p || v); e.target.reset();
     };
   </script>
