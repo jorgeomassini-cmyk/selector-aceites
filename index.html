@@ -437,7 +437,8 @@ init(); document.getElementById('mod').style.display = 'none'; show(n, p || v); 
  est.textContent = 'Consultando VIN...';
  try {
  const r = await fetch(`https://dot.gov{c}?format=json`);
- const d = await r.json();
+
+ const d = await r.json(0);
  const info = d.Results && d.Results;
  if (info && info.Make && info.Model) {
  est.textContent = '';
