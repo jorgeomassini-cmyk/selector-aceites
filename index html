@@ -1,434 +1,304 @@
-Sí, te paso el archivo completo para que reemplaces **todo** el contenido de `index.html`. Incluye la búsqueda por VIN; el servicio puede dar datos incompletos para algunos vehículos vendidos en Argentina y no confirma qué aceite lleva.
 
-```html
-<!DOCTYPE html>
+      <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ficha de aceites y filtros</title>
-
+  <title>Cotizador Técnico - Lubricentro</title>
   <style>
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
-      padding: 20px 14px;
-      background: #f1f5f9;
-      color: #172033;
-      font-family: Arial, sans-serif;
+      padding: 16px 12px;
+      background: #0f172a;
+      color: #1e293b;
+      font-family: system-ui, -apple-system, sans-serif;
     }
-
     main {
-      max-width: 760px;
-      margin: 20px auto;
-      padding: 22px;
-      background: white;
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #ffffff;
       border-radius: 14px;
-      box-shadow: 0 8px 24px #17203318;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
     }
-
-    h1, h2 { color: #14532d; }
-    h2 { margin-top: 24px; }
-    p { line-height: 1.5; }
-
-    label {
-      display: block;
-      margin: 15px 0 6px;
-      font-weight: bold;
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
     }
-
+    h1 { margin: 0; font-size: 1.35rem; color: #0f172a; }
+    h2 { margin: 20px 0 10px; font-size: 1.1rem; color: #1e3a8a; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+    label { display: block; margin: 12px 0 4px; font-weight: 700; font-size: 0.85rem; color: #334155; }
     input, select, button {
       width: 100%;
-      padding: 12px;
+      padding: 11px;
       border: 1px solid #cbd5e1;
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 15px;
     }
-
+    input.mayus { text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
     button {
-      margin-top: 14px;
+      margin-top: 12px;
       border: 0;
-      background: #15803d;
+      background: #1d4ed8;
       color: white;
-      font-weight: bold;
+      font-weight: 700;
       cursor: pointer;
     }
+    button:hover { background: #1e40af; }
+    button:disabled { background: #94a3b8; cursor: wait; }
+    .btn-sec { background: #475569; width: auto; padding: 8px 14px; margin-top: 0; font-size: 0.85rem; }
+    .btn-verde { background: #15803d; }
+    .btn-verde:hover { background: #166534; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: wait;
-    }
-
-    .vin-buscador {
-      margin: 20px 0;
-      padding: 16px;
+    .panel-busqueda {
       background: #f8fafc;
       border: 1px solid #cbd5e1;
+      padding: 14px;
       border-radius: 10px;
     }
-
-    #estadoVin {
-      margin-top: 12px;
-      line-height: 1.5;
+    .ayuda-txt {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 6px;
     }
-
-    .nota, .aviso {
-      margin-top: 18px;
-      padding: 12px;
+    #estado-busqueda {
+      margin-top: 10px;
+      padding: 10px;
       border-radius: 8px;
-      line-height: 1.5;
+      display: none;
+      font-size: 0.9rem;
     }
-
-    .nota { background: #eff6ff; }
-    .aviso { background: #fff7ed; }
+    .estado-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .estado-info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
 
     #resultado {
       display: none;
-      margin-top: 24px;
-      padding: 18px;
+      margin-top: 20px;
+      padding: 16px;
       background: #f0fdf4;
+      border: 1px solid #86efac;
       border-radius: 10px;
-      line-height: 1.6;
     }
-
-    .item { margin: 8px 0; }
-    .etiqueta { font-weight: bold; }
+    .bloque-tecnico {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .tag {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1e40af;
+      font-weight: 700;
+      font-size: 0.78rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+    .tag-atf { background: #fef3c7; color: #92400e; }
+    .dato { margin: 5px 0; font-size: 0.93rem; }
+    .cotizador {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 14px;
+      border-radius: 8px;
+      margin-top: 14px;
+    }
+    .total-box {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #14532d;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed #93c5fd;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      padding: 16px;
+      overflow-y: auto;
+      z-index: 50;
+    }
+    .modal-box {
+      background: #fff;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 12px;
+    }
   </style>
 </head>
-
 <body>
   <main>
-    <h1>🛢️ Ficha de aceites y filtros</h1>
-    <p>Buscá un vehículo por VIN o elegí una ficha cargada en la base.</p>
+    <header>
+      <h1>🛢️ Mostrador Técnico y Presupuestos</h1>
+      <button type="button" class="btn-sec" onclick="abrirModal()">+ Cargar Patente / Ficha</button>
+    </header>
 
-    <section class="vin-buscador">
-      <label for="vin">Buscar por número VIN</label>
-      <input
-        id="vin"
-        type="text"
-        maxlength="17"
-        placeholder="Ingresá los 17 caracteres del VIN"
-        autocomplete="off"
-        autocapitalize="characters"
-        spellcheck="false"
-      >
-      <button id="buscarVin" type="button">Buscar VIN</button>
-      <div id="estadoVin" aria-live="polite"></div>
-    </section>
-
-    <form id="formulario">
-      <label for="marca">Marca</label>
-      <select id="marca" required>
-        <option value="">Elegí una marca</option>
-      </select>
-
-      <label for="modelo">Modelo</label>
-      <select id="modelo" required disabled>
-        <option value="">Primero elegí una marca</option>
-      </select>
-
-      <label for="anio">Año</label>
-      <select id="anio" required disabled>
-        <option value="">Primero elegí un modelo</option>
-      </select>
-
-      <label for="version">Versión o motor</label>
-      <select id="version" required disabled>
-        <option value="">Primero elegí un año</option>
-      </select>
-
-      <button type="submit">Ver ficha</button>
+    <!-- BÚSQUEDA RÁPIDA POR PATENTE O VIN -->
+    <form id="form-codigo" class="panel-busqueda">
+      <label for="input-codigo">Buscar por VIN (17 dígitos) o Patente guardada</label>
+      <input type="text" id="input-codigo" class="mayus" placeholder="Ej: 8AFZZZ... (17 caracteres) o AB123CD" maxlength="17" required>
+      <div class="ayuda-txt">
+        * El <strong>VIN (17 caracteres)</strong> busca automáticamente marca, modelo, año y motor.<br>
+        * Las <strong>patentes</strong> funcionan una vez que las guardás en tu base con el botón de arriba.
+      </div>
+      <button type="submit" id="btn-codigo">Buscar Vehículo</button>
+      <div id="estado-busqueda"></div>
     </form>
 
+    <!-- BÚSQUEDA POR MARCA / MODELO -->
+    <form id="form-manual" style="margin-top: 14px;">
+      <div class="grid-2">
+        <div>
+          <label for="marca">Marca</label>
+          <select id="marca"><option value="">Seleccionar...</option></select>
+        </div>
+        <div>
+          <label for="modelo">Modelo</label>
+          <select id="modelo" disabled><option value="">Elegí marca...</option></select>
+        </div>
+        <div>
+          <label for="anio">Año</label>
+          <select id="anio" disabled><option value="">Elegí modelo...</option></select>
+        </div>
+        <div>
+          <label for="version">Versión / Motor / Caja</label>
+          <select id="version" disabled><option value="">Elegí año...</option></select>
+        </div>
+      </div>
+      <button type="submit" class="btn-verde">Consultar Ficha Técnica</button>
+    </form>
+
+    <!-- FICHA TÉCNICA Y COTIZADOR -->
     <div id="resultado" aria-live="polite"></div>
-
-    <div class="nota">
-      <strong>Importante:</strong> el decodificador VIN puede no reconocer todas las
-      versiones comercializadas en Argentina. El VIN por sí solo no confirma el
-      aceite ni las capacidades.
-    </div>
-
-    <div class="aviso">
-      Verificá los lubricantes y capacidades en el manual o en una fuente técnica
-      confiable. Esta página no debe adivinar esos datos.
-    </div>
   </main>
 
-  <script>
-    /*
-      BASE DE VEHÍCULOS
-      Agregá aquí fichas verificadas.
-      La búsqueda por VIN no agrega automáticamente fichas a esta base.
-    */
-    const vehiculos = [
-      /*
-      {
-        marca: "Marca",
-        modelo: "Modelo",
-        anio: 2020,
-        version: "Versión / motor",
-        motor: {
-          codigo: "Código",
-          descripcion: "Descripción del motor"
-        },
-        caja: {
-          tipo: "Manual, automática, CVT, etc.",
-          codigo: "Código"
-        },
-        aceites: [
-          {
-            componente: "Motor",
-            viscosidad: "Viscosidad",
-            norma: "Norma",
-            capacidad: "Cantidad en litros",
-            condicion: "Aclaración"
-          }
-        ],
-        filtros: [
-          { tipo: "Aceite", codigo: "Código" }
-        ],
-        fuente: "Manual o fuente consultada"
-      }
-      */
-    ];
-
-    const marca = document.getElementById("marca");
-    const modelo = document.getElementById("modelo");
-    const anio = document.getElementById("anio");
-    const version = document.getElementById("version");
-    const resultado = document.getElementById("resultado");
-
-    const campoVin = document.getElementById("vin");
-    const botonVin = document.getElementById("buscarVin");
-    const estadoVin = document.getElementById("estadoVin");
-
-    function llenarSelector(selector, valores, textoInicial) {
-      selector.innerHTML = "";
-
-      const inicial = document.createElement("option");
-      inicial.value = "";
-      inicial.textContent = textoInicial;
-      selector.appendChild(inicial);
-
-      [...new Set(valores)].forEach(valor => {
-        const opcion = document.createElement("option");
-        opcion.value = valor;
-        opcion.textContent = valor;
-        selector.appendChild(opcion);
-      });
-
-      selector.disabled = valores.length === 0;
-    }
-
-    function fichasFiltradas() {
-      return vehiculos.filter(auto =>
-        auto.marca === marca.value &&
-        auto.modelo === modelo.value &&
-        String(auto.anio) === anio.value
-      );
-    }
-
-    function textoSeguro(valor) {
-      const elemento = document.createElement("span");
-      elemento.textContent = valor || "Dato no cargado";
-      return elemento.innerHTML;
-    }
-
-    function mostrarMensaje(mensaje) {
-      resultado.innerHTML = `<p>${textoSeguro(mensaje)}</p>`;
-      resultado.style.display = "block";
-    }
-
-    llenarSelector(
-      marca,
-      vehiculos.map(auto => auto.marca),
-      vehiculos.length ? "Elegí una marca" : "Todavía no hay vehículos cargados"
-    );
-
-    marca.addEventListener("change", () => {
-      const autos = vehiculos.filter(auto => auto.marca === marca.value);
-      llenarSelector(modelo, autos.map(auto => auto.modelo), "Elegí un modelo");
-      llenarSelector(anio, [], "Primero elegí un modelo");
-      llenarSelector(version, [], "Primero elegí un año");
-      resultado.style.display = "none";
-    });
-
-    modelo.addEventListener("change", () => {
-      const autos = vehiculos.filter(auto =>
-        auto.marca === marca.value && auto.modelo === modelo.value
-      );
-      llenarSelector(anio, autos.map(auto => auto.anio), "Elegí un año");
-      llenarSelector(version, [], "Primero elegí un año");
-      resultado.style.display = "none";
-    });
-
-    anio.addEventListener("change", () => {
-      const autos = fichasFiltradas();
-      llenarSelector(
-        version,
-        autos.map(auto => auto.version),
-        "Elegí una versión o motor"
-      );
-      resultado.style.display = "none";
-    });
-
-    document.getElementById("formulario").addEventListener("submit", evento => {
-      evento.preventDefault();
-
-      const auto = vehiculos.find(item =>
-        item.marca === marca.value &&
-        item.modelo === modelo.value &&
-        String(item.anio) === anio.value &&
-        item.version === version.value
-      );
-
-      if (!auto) {
-        mostrarMensaje("No encontramos esa configuración en la base.");
-        return;
-      }
-
-      mostrarFicha(auto);
-    });
-
-    function mostrarFicha(auto) {
-      const aceites = (auto.aceites || []).map(item => `
-        <div class="item">
-          <span class="etiqueta">${textoSeguro(item.componente)}:</span>
-          ${textoSeguro(item.viscosidad)}; norma: ${textoSeguro(item.norma)};
-          capacidad: ${textoSeguro(item.capacidad)};
-          ${textoSeguro(item.condicion)}
-        </div>
-      `).join("");
-
-      const filtros = (auto.filtros || []).map(item => `
-        <div class="item">
-          <span class="etiqueta">${textoSeguro(item.tipo)}:</span>
-          ${textoSeguro(item.codigo)}
-        </div>
-      `).join("");
-
-      resultado.innerHTML = `
-        <h2>${textoSeguro(auto.marca)} ${textoSeguro(auto.modelo)} ${textoSeguro(auto.anio)}</h2>
-        <p><span class="etiqueta">Versión:</span> ${textoSeguro(auto.version)}</p>
-
-        <h2>Motor y caja</h2>
-        <p><span class="etiqueta">Motor:</span>
-          ${textoSeguro(auto.motor && auto.motor.descripcion)}
-          — código: ${textoSeguro(auto.motor && auto.motor.codigo)}
-        </p>
-        <p><span class="etiqueta">Caja:</span>
-          ${textoSeguro(auto.caja && auto.caja.tipo)}
-          — código: ${textoSeguro(auto.caja && auto.caja.codigo)}
-        </p>
-
-        <h2>Aceites y capacidades</h2>
-        ${aceites || "<p>Datos de lubricantes no cargados.</p>"}
-
-        <h2>Filtros</h2>
-        ${filtros || "<p>Datos de filtros no cargados.</p>"}
-
-        <p><span class="etiqueta">Fuente:</span> ${textoSeguro(auto.fuente)}</p>
-      `;
-
-      resultado.style.display = "block";
-      resultado.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
-    botonVin.addEventListener("click", buscarPorVin);
-
-    campoVin.addEventListener("keydown", evento => {
-      if (evento.key === "Enter") {
-        evento.preventDefault();
-        buscarPorVin();
-      }
-    });
-
-    async function buscarPorVin() {
-      const vin = campoVin.value.trim().toUpperCase();
-      campoVin.value = vin;
-
-      // Los VIN estándar tienen 17 caracteres y no incluyen I, O ni Q.
-      if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) {
-        estadoVin.textContent =
-          "Revisá el VIN: debe tener 17 caracteres y no incluir I, O ni Q.";
-        return;
-      }
-
-      botonVin.disabled = true;
-      estadoVin.textContent = "Buscando datos del vehículo…";
-      resultado.style.display = "none";
-
-      try {
-        const url =
-          "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/" +
-          encodeURIComponent(vin) +
-          "?format=json";
-
-        const respuesta = await fetch(url);
-
-        if (!respuesta.ok) {
-          throw new Error("No se pudo consultar el servicio.");
-        }
-
-        const datos = await respuesta.json();
-        const auto = datos.Results && datos.Results[0];
-
-        if (!auto) {
-          estadoVin.textContent =
-            "No se encontraron datos para ese VIN. Revisá que esté bien escrito.";
-          return;
-        }
-
-        const campos = [
-          ["Año", auto.ModelYear],
-          ["Marca", auto.Make],
-          ["Modelo", auto.Model],
-          ["Motor", auto.EngineModel || auto.DisplacementL],
-          ["Cilindros", auto.EngineCylinders],
-          ["Combustible", auto.FuelTypePrimary],
-          ["Carrocería", auto.BodyClass],
-          ["País de fabricación", auto.PlantCountry]
-        ];
-
-        const encontrados = campos.filter(([, valor]) =>
-          valor && String(valor).trim() !== ""
-        );
-
-        if (!encontrados.length) {
-          estadoVin.textContent =
-            "El servicio no pudo identificar datos. Puede ocurrir con algunos vehículos vendidos en Argentina.";
-          return;
-        }
-
-        resultado.innerHTML = `
-          <h2>Datos encontrados para el VIN</h2>
-          ${encontrados.map(([nombre, valor]) => `
-            <p>
-              <span class="etiqueta">${textoSeguro(nombre)}:</span>
-              ${textoSeguro(valor)}
-            </p>
-          `).join("")}
-          <div class="aviso">
-            Estos datos provienen del decodificador VIN de NHTSA y pueden ser
-            incompletos para vehículos comercializados en Argentina. No se obtuvo
-            una recomendación de aceite: confirmala con el manual del vehículo.
+  <!-- MODAL PARA GUARDAR CLIENTE O VEHÍCULO NUEVO -->
+  <div id="modal-nuevo" class="modal">
+    <div class="modal-box">
+      <h2>Guardar vehículo / patente en este dispositivo</h2>
+      <form id="form-guardar">
+        <div class="grid-2">
+          <div>
+            <label>Patente (opcional)</label>
+            <input type="text" id="n-patente" class="mayus" placeholder="AE123BC">
           </div>
-        `;
+          <div>
+            <label>VIN (opcional)</label>
+            <input type="text" id="n-vin" class="mayus" maxlength="17">
+          </div>
+          <div>
+            <label>Marca *</label>
+            <input type="text" id="n-marca" required placeholder="Ej: Volkswagen">
+          </div>
+          <div>
+            <label>Modelo *</label>
+            <input type="text" id="n-modelo" required placeholder="Ej: Amarok">
+          </div>
+          <div>
+            <label>Año *</label>
+            <input type="number" id="n-anio" required placeholder="2019">
+          </div>
+          <div>
+            <label>Versión / Motor *</label>
+            <input type="text" id="n-version" required placeholder="2.0 TDI 180cv ZF 8HP">
+          </div>
+          <div>
+            <label>Código Motor</label>
+            <input type="text" id="n-motor-cod" placeholder="CNEA / CSHA">
+          </div>
+          <div>
+            <label>Caja y Código</label>
+            <input type="text" id="n-caja" placeholder="Automática ZF 8HP45">
+          </div>
+        </div>
 
-        resultado.style.display = "block";
-        resultado.scrollIntoView({ behavior: "smooth", block: "start" });
-        estadoVin.textContent = "Búsqueda terminada.";
-      } catch (error) {
-        estadoVin.textContent =
-          "No se pudo consultar el VIN. Revisá tu conexión o probá más tarde.";
-      } finally {
-        botonVin.disabled = false;
-      }
-    }
-  </script>
-</body>
-</html>
-```
+        <h2>Datos Aceite Motor</h2>
+        <div class="grid-2">
+          <div>
+            <label>Viscosidad y Norma</label>
+            <input type="text" id="n-mot-aceite" placeholder="5W-30 • VW 507.00">
+          </div>
+          <div>
+            <label>Litros Motor (con filtro)</label>
+            <input type="number" step="0.1" id="n-mot-litros" placeholder="7.0">
+          </div>
+        </div>
 
-En GitHub, abrí `index.html`, tocá el lápiz, reemplazá todo el contenido por este código y guardá con **Commit changes**. La búsqueda por VIN aparecerá, pero la búsqueda por marca/modelo seguirá sin fichas hasta que cargues vehículos en la lista `vehiculos`.
+        <h2>Datos Caja Automática (Diálisis)</h2>
+        <div class="grid-2">
+          <div>
+            <label>Fluido ATF y Norma</label>
+            <input type="text" id="n-atf-norma" placeholder="ATF 8HP / Lifeguard 8">
+          </div>
+          <div>
+            <label>Litros para Diálisis (total + barrido)</label>
+            <input type="number" step="0.5" id="n-atf-litros" placeholder="12">
+          </div>
+          <div>
+            <label>Filtro de Caja (Interno / Cárter)</label>
+            <input type="text" id="n-filtro-caja" placeholder="Cárter plástico con filtro integrado">
+          </div>
+          <div>
+            <label>Filtros Motor (Aceite / Aire / Comb / Hab)</label>
+            <input type="text" id="n-filtros-mot" placeholder="HU 7008 z / C 32 130">
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 14px;">
+          <button type="button" class="btn-sec" style="width:100%" onclick="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn-verde" style="margin-top:0">Guardar Ficha</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const baseInicial = [
+      {
+        patentes: [],
+        vins: [],
+        marca: "Volkswagen",
+        modelo: "Amarok",
+        anio: 2019,
+        version: "2.0 TDI Biturbo 180cv ZF 8HP",
+        motor: { codigo: "CNEA / CSHA", descripcion: "2.0L TDI 16v (con DPF)" },
+        caja: { tipo: "Automática 8 marchas", codigo: "ZF 8HP45 / 8HP70" },
+        motorAceite: {
+          viscosidad: "5W-30 Sintético DPF",
+          norma: "VW 504.00 / 507.00",
+          litros: 7.0,
+          nota: "Con cambio de filtro"
+        },
+        cajaAceite: {
+          fluido: "ATF Sintético 8 velocidades",
+          norma: "ZF LifeguardFluid 8 / VW G 060 162 A2",
+          litrosLlenado: 8.5,
+          litrosDialisis: 12.0,
+          nota: "11 a 12L para diálisis completa y nivelación a 35-45°C"
+        },
+        filtros: {
+          aceite: "Mann HU 7008 z / Wega WOE-460",
+          aire: "Mann C 32 130 / Wega FAP-3277",
+          combustible: "Mann WK 8026 z / Wega FCD-0783",
+          habitaculo: "Mann CU 2842 / Wega AKX-35163",
+          caja: "Cárter completo con filtro integrado (ZF 1087.298.247)"
+        }
+      },
+      {
+        patentes: [],
+        vins: [],
+
