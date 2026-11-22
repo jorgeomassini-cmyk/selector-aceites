@@ -183,20 +183,6 @@ fc: document.getElementById('nfc').value, fm: document.getElementById('nfm').val
 db.push(n); localStorage.setItem('ldb3', JSON.stringify(db));
 init(); document.getElementById('mod').style.display = 'none'; show(n, p || v); e.target.reset();
 };
-
-
-
-<FollowUp>
-Avisame cuando lo pegues y verifiques que termina en `</html>` para confirmar que ya te despliega **Volkswagen, Toyota y Chevrolet**.
-</FollowUp>
-Probar sin personalización
-
-Acá te lo paso primero a vos a ver si está bien
-
-¡Perfecto! Pegalo acá en el chat tal como lo tenés en tu archivo y lo reviso al instante para confirmarte que no se haya cortado ni una sola línea antes de que lo guardes en GitHub.
-Pegá el código acá cuando quieras y te confirmo si está listo para subir.
-Probar sin personalización
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -463,9 +449,6 @@ Probar sin personalización
  } else est.textContent = 'Patente no agendada. Usá + Cargar Ficha.';
  };
 Hay dos problemas en ese fragmento: se cortó por la mitad (falta todo el cierre desde la función show hasta </html>) y en la línea del VIN quedó mal la dirección (https://dot.gov{c}...).
-Para que no se vuelva a cortar al copiarlo desde el celular, pegá solo este cierre inmediatamente debajo de la última línea que tenés (};), y corregí la línea del fetch para que quede exactamente así:
-javascript
-    // Reemplazá las 3 líneas de fetch/info que tenías arriba por estas:
     // const r = await fetch(`https://dot.gov{c}?format=json`);
     // const d = await r.json();
     // const info = d.Results && d.Results;
