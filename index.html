@@ -1,138 +1,110 @@
 
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Selector de aceite</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Selector de lubricantes</title>
   <style>
-    * { box-sizing: border-box; }
-
     body {
-      margin: 0;
-      padding: 24px 16px;
-      background: #f1f5f9;
-      color: #172033;
-      font-family: Arial, sans-serif;
+      font-family: system-ui, sans-serif;
+      max-width: 680px;
+      margin: 40px auto;
+      padding: 0 16px;
+      color: #202124;
     }
-
-    main {
-      width: 100%;
-      max-width: 520px;
-      margin: 30px auto;
-      padding: 24px;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px #17203318;
-    }
-
-    h1 { margin-top: 0; color: #14532d; }
-    p { line-height: 1.5; }
-
-    label {
-      display: block;
-      margin: 18px 0 7px;
-      font-weight: bold;
-    }
-
-    input, select, button {
-      width: 100%;
-      padding: 13px;
-      border: 1px solid #cbd5e1;
-      border-radius: 9px;
-      font-size: 16px;
-    }
-
-    button {
-      margin-top: 22px;
-      border: 0;
-      background: #15803d;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:hover { background: #166534; }
-
-    #resultado {
-      display: none;
-      margin-top: 22px;
-      padding: 16px;
-      border-radius: 10px;
-      background: #dcfce7;
-      line-height: 1.6;
-    }
-
-    .aviso {
-      margin-top: 20px;
+    input, button {
+      font: inherit;
       padding: 12px;
-      background: #fff7ed;
-      border-radius: 9px;
-      font-size: 14px;
+      border-radius: 8px;
     }
+    input { width: min(100%, 390px); border: 1px solid #aaa; }
+    button { border: 0; background: #1769aa; color: white; cursor: pointer; }
+    #resultado { margin-top: 24px; padding: 16px; background: #f3f6f8; border-radius: 10px; }
+    .aviso { color: #765500; }
   </style>
 </head>
 <body>
-  <main>
-    <h1>🛢️ Selector de aceite</h1>
-    <p>Ingresá las especificaciones que indica el manual de tu vehículo para saber qué buscar en el envase.</p>
+  <h1>Selector de lubricantes</h1>
+  <p>Ingresá el VIN para identificar el vehículo.</p>
 
-    <form id="formulario">
-      <label for="vehiculo">Vehículo (opcional)</label>
-      <input id="vehiculo" type="text" placeholder="Ej.: Fiat Cronos 1.3 2020">
+  <form id="formulario">
+    <input id="vin" placeholder="VIN de 17 caracteres" maxlength="17"
+           aria-label="VIN" required>
+    <button type="submit">Buscar vehículo</button>
+  </form>
 
-      <label for="viscosidad">Viscosidad indicada en el manual</label>
-      <select id="viscosidad" required>
-        <option value="">Elegí una opción</option>
-        <option>0W-20</option>
-        <option>0W-30</option>
-        <option>5W-30</option>
-        <option>5W-40</option>
-        <option>10W-40</option>
-        <option>15W-40</option>
-        <option>Otra: revisar manual</option>
-      </select>
-
-      <label for="norma">Norma o especificación del fabricante (opcional)</label>
-      <input id="norma" type="text" placeholder="Ej.: API, ACEA o norma de la marca">
-
-      <button type="submit">Ver qué aceite buscar</button>
-    </form>
-
-    <section id="resultado" aria-live="polite"></section>
-
-    <div class="aviso">
-      <strong>Importante:</strong> la viscosidad y las normas deben coincidir con el manual del vehículo. No elijas el aceite solo por el año o el kilometraje.
-    </div>
-  </main>
+  <div id="resultado" aria-live="polite">Los datos del vehículo aparecerán acá.</div>
 
   <script>
-    const formulario = document.getElementById("formulario");
-    const resultado = document.getElementById("resultado");
+    const formulario = document.querySelector("#formulario");
+    const campoVin = document.querySelector("#vin");
+    const resultado = document.querySelector("#resultado");
 
-    formulario.addEventListener("submit", function(evento) {
+    formulario.addEventListener("submit", async (evento) => {
       evento.preventDefault();
+      const vin = campoVin.value.trim().toUpperCase();
 
-      const vehiculo = document.getElementById("vehiculo").value.trim();
-      const viscosidad = document.getElementById("viscosidad").value;
-      const norma = document.getElementById("norma").value.trim();
+      if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) {
+        resultado.textContent = "Revisá el VIN: debe tener 17 caracteres.";
+        return;
+      }
 
-      resultado.style.display = "block";
-      resultado.innerHTML = `
-        <strong>Qué buscar:</strong><br>
-        Un aceite con viscosidad <strong>${viscosida
-        ${vehiculo ? `<br><br>Vehículo ingresado: <strong>${escaparHTML(vehiculo)}</strong>.` : ""}
-        <br><br>Antes de comprar, confirmá que el envase indique todas las especificaciones requeridas.
-      `;
+      resultado.textContent = "Buscando datos del vehículo…";
+
+      try {
+        const url =
+          `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${encodeURIComponent(vin)}?format=json`;
+        const respuesta = await fetch(url);
+        if (!respuesta.ok) throw new Error("No se pudo consultar el servicio.");
+
+        const datos = await respuesta.json();
+        const vehiculo = datos.Results?.[0];
+
+        if (!vehiculo || (!vehiculo.Make && !vehiculo.Model)) {
+          resultado.textContent =
+            "No encontramos datos para ese VIN. Verificá que esté bien escrito.";
+          return;
+        }
+
+        const campos = [
+          ["Marca", vehiculo.Make],
+          ["Modelo", vehiculo.Model],
+          ["Año", vehiculo.ModelYear],
+          ["Motor", vehiculo.DisplacementL
+            ? `${vehiculo.DisplacementL} L`
+            : vehiculo.EngineModel],
+          ["Combustible", vehiculo.FuelTypePrimary],
+          ["Transmisión", vehiculo.TransmissionStyle]
+        ];
+
+        resultado.replaceChildren();
+        const titulo = document.createElement("h2");
+        titulo.textContent = "Vehículo identificado";
+        resultado.append(titulo);
+
+        const lista = document.createElement("ul");
+        for (const [etiqueta, valor] of campos) {
+          if (valor) {
+            const item = document.createElement("li");
+            item.textContent = `${etiqueta}: ${valor}`;
+            lista.append(item);
+          }
+        }
+        resultado.append(lista);
+
+        const aviso = document.createElement("p");
+        aviso.className = "aviso";
+        aviso.textContent =
+          "Aceites: sin recomendación verificada todavía. Confirmá motor y transmisión con el manual del fabricante.";
+        resultado.append(aviso);
+      } catch (error) {
+        resultado.textContent =
+          "No pudimos consultar el servicio. Revisá tu conexión e intentá de nuevo.";
+      }
     });
-
-    function escaparHTML(texto) {
-      const elemento = document.createElement("div");
-      elemento.textContent = texto;
-      return elemento.innerHTML;
-    }
   </script>
 </body>
 </html>
