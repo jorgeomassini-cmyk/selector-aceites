@@ -448,11 +448,6 @@ init(); document.getElementById('mod').style.display = 'none'; show(n, p || v); 
  } catch { est.textContent = 'Error de conexión'; }
  } else est.textContent = 'Patente no agendada. Usá + Cargar Ficha.';
  };
-Hay dos problemas en ese fragmento: se cortó por la mitad (falta todo el cierre desde la función show hasta </html>) y en la línea del VIN quedó mal la dirección (https://dot.gov{c}...).
-    // const r = await fetch(`https://dot.gov{c}?format=json`);
-    // const d = await r.json();
-    // const info = d.Results && d.Results;
-
     function show(x, c = '') {
       actual = x;
       res.innerHTML = `
