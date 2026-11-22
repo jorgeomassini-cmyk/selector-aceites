@@ -1,0 +1,434 @@
+Sí, te paso el archivo completo para que reemplaces **todo** el contenido de `index.html`. Incluye la búsqueda por VIN; el servicio puede dar datos incompletos para algunos vehículos vendidos en Argentina y no confirma qué aceite lleva.
+
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ficha de aceites y filtros</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 20px 14px;
+      background: #f1f5f9;
+      color: #172033;
+      font-family: Arial, sans-serif;
+    }
+
+    main {
+      max-width: 760px;
+      margin: 20px auto;
+      padding: 22px;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px #17203318;
+    }
+
+    h1, h2 { color: #14532d; }
+    h2 { margin-top: 24px; }
+    p { line-height: 1.5; }
+
+    label {
+      display: block;
+      margin: 15px 0 6px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 14px;
+      border: 0;
+      background: #15803d;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .vin-buscador {
+      margin: 20px 0;
+      padding: 16px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+    }
+
+    #estadoVin {
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    .nota, .aviso {
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 8px;
+      line-height: 1.5;
+    }
+
+    .nota { background: #eff6ff; }
+    .aviso { background: #fff7ed; }
+
+    #resultado {
+      display: none;
+      margin-top: 24px;
+      padding: 18px;
+      background: #f0fdf4;
+      border-radius: 10px;
+      line-height: 1.6;
+    }
+
+    .item { margin: 8px 0; }
+    .etiqueta { font-weight: bold; }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>🛢️ Ficha de aceites y filtros</h1>
+    <p>Buscá un vehículo por VIN o elegí una ficha cargada en la base.</p>
+
+    <section class="vin-buscador">
+      <label for="vin">Buscar por número VIN</label>
+      <input
+        id="vin"
+        type="text"
+        maxlength="17"
+        placeholder="Ingresá los 17 caracteres del VIN"
+        autocomplete="off"
+        autocapitalize="characters"
+        spellcheck="false"
+      >
+      <button id="buscarVin" type="button">Buscar VIN</button>
+      <div id="estadoVin" aria-live="polite"></div>
+    </section>
+
+    <form id="formulario">
+      <label for="marca">Marca</label>
+      <select id="marca" required>
+        <option value="">Elegí una marca</option>
+      </select>
+
+      <label for="modelo">Modelo</label>
+      <select id="modelo" required disabled>
+        <option value="">Primero elegí una marca</option>
+      </select>
+
+      <label for="anio">Año</label>
+      <select id="anio" required disabled>
+        <option value="">Primero elegí un modelo</option>
+      </select>
+
+      <label for="version">Versión o motor</label>
+      <select id="version" required disabled>
+        <option value="">Primero elegí un año</option>
+      </select>
+
+      <button type="submit">Ver ficha</button>
+    </form>
+
+    <div id="resultado" aria-live="polite"></div>
+
+    <div class="nota">
+      <strong>Importante:</strong> el decodificador VIN puede no reconocer todas las
+      versiones comercializadas en Argentina. El VIN por sí solo no confirma el
+      aceite ni las capacidades.
+    </div>
+
+    <div class="aviso">
+      Verificá los lubricantes y capacidades en el manual o en una fuente técnica
+      confiable. Esta página no debe adivinar esos datos.
+    </div>
+  </main>
+
+  <script>
+    /*
+      BASE DE VEHÍCULOS
+      Agregá aquí fichas verificadas.
+      La búsqueda por VIN no agrega automáticamente fichas a esta base.
+    */
+    const vehiculos = [
+      /*
+      {
+        marca: "Marca",
+        modelo: "Modelo",
+        anio: 2020,
+        version: "Versión / motor",
+        motor: {
+          codigo: "Código",
+          descripcion: "Descripción del motor"
+        },
+        caja: {
+          tipo: "Manual, automática, CVT, etc.",
+          codigo: "Código"
+        },
+        aceites: [
+          {
+            componente: "Motor",
+            viscosidad: "Viscosidad",
+            norma: "Norma",
+            capacidad: "Cantidad en litros",
+            condicion: "Aclaración"
+          }
+        ],
+        filtros: [
+          { tipo: "Aceite", codigo: "Código" }
+        ],
+        fuente: "Manual o fuente consultada"
+      }
+      */
+    ];
+
+    const marca = document.getElementById("marca");
+    const modelo = document.getElementById("modelo");
+    const anio = document.getElementById("anio");
+    const version = document.getElementById("version");
+    const resultado = document.getElementById("resultado");
+
+    const campoVin = document.getElementById("vin");
+    const botonVin = document.getElementById("buscarVin");
+    const estadoVin = document.getElementById("estadoVin");
+
+    function llenarSelector(selector, valores, textoInicial) {
+      selector.innerHTML = "";
+
+      const inicial = document.createElement("option");
+      inicial.value = "";
+      inicial.textContent = textoInicial;
+      selector.appendChild(inicial);
+
+      [...new Set(valores)].forEach(valor => {
+        const opcion = document.createElement("option");
+        opcion.value = valor;
+        opcion.textContent = valor;
+        selector.appendChild(opcion);
+      });
+
+      selector.disabled = valores.length === 0;
+    }
+
+    function fichasFiltradas() {
+      return vehiculos.filter(auto =>
+        auto.marca === marca.value &&
+        auto.modelo === modelo.value &&
+        String(auto.anio) === anio.value
+      );
+    }
+
+    function textoSeguro(valor) {
+      const elemento = document.createElement("span");
+      elemento.textContent = valor || "Dato no cargado";
+      return elemento.innerHTML;
+    }
+
+    function mostrarMensaje(mensaje) {
+      resultado.innerHTML = `<p>${textoSeguro(mensaje)}</p>`;
+      resultado.style.display = "block";
+    }
+
+    llenarSelector(
+      marca,
+      vehiculos.map(auto => auto.marca),
+      vehiculos.length ? "Elegí una marca" : "Todavía no hay vehículos cargados"
+    );
+
+    marca.addEventListener("change", () => {
+      const autos = vehiculos.filter(auto => auto.marca === marca.value);
+      llenarSelector(modelo, autos.map(auto => auto.modelo), "Elegí un modelo");
+      llenarSelector(anio, [], "Primero elegí un modelo");
+      llenarSelector(version, [], "Primero elegí un año");
+      resultado.style.display = "none";
+    });
+
+    modelo.addEventListener("change", () => {
+      const autos = vehiculos.filter(auto =>
+        auto.marca === marca.value && auto.modelo === modelo.value
+      );
+      llenarSelector(anio, autos.map(auto => auto.anio), "Elegí un año");
+      llenarSelector(version, [], "Primero elegí un año");
+      resultado.style.display = "none";
+    });
+
+    anio.addEventListener("change", () => {
+      const autos = fichasFiltradas();
+      llenarSelector(
+        version,
+        autos.map(auto => auto.version),
+        "Elegí una versión o motor"
+      );
+      resultado.style.display = "none";
+    });
+
+    document.getElementById("formulario").addEventListener("submit", evento => {
+      evento.preventDefault();
+
+      const auto = vehiculos.find(item =>
+        item.marca === marca.value &&
+        item.modelo === modelo.value &&
+        String(item.anio) === anio.value &&
+        item.version === version.value
+      );
+
+      if (!auto) {
+        mostrarMensaje("No encontramos esa configuración en la base.");
+        return;
+      }
+
+      mostrarFicha(auto);
+    });
+
+    function mostrarFicha(auto) {
+      const aceites = (auto.aceites || []).map(item => `
+        <div class="item">
+          <span class="etiqueta">${textoSeguro(item.componente)}:</span>
+          ${textoSeguro(item.viscosidad)}; norma: ${textoSeguro(item.norma)};
+          capacidad: ${textoSeguro(item.capacidad)};
+          ${textoSeguro(item.condicion)}
+        </div>
+      `).join("");
+
+      const filtros = (auto.filtros || []).map(item => `
+        <div class="item">
+          <span class="etiqueta">${textoSeguro(item.tipo)}:</span>
+          ${textoSeguro(item.codigo)}
+        </div>
+      `).join("");
+
+      resultado.innerHTML = `
+        <h2>${textoSeguro(auto.marca)} ${textoSeguro(auto.modelo)} ${textoSeguro(auto.anio)}</h2>
+        <p><span class="etiqueta">Versión:</span> ${textoSeguro(auto.version)}</p>
+
+        <h2>Motor y caja</h2>
+        <p><span class="etiqueta">Motor:</span>
+          ${textoSeguro(auto.motor && auto.motor.descripcion)}
+          — código: ${textoSeguro(auto.motor && auto.motor.codigo)}
+        </p>
+        <p><span class="etiqueta">Caja:</span>
+          ${textoSeguro(auto.caja && auto.caja.tipo)}
+          — código: ${textoSeguro(auto.caja && auto.caja.codigo)}
+        </p>
+
+        <h2>Aceites y capacidades</h2>
+        ${aceites || "<p>Datos de lubricantes no cargados.</p>"}
+
+        <h2>Filtros</h2>
+        ${filtros || "<p>Datos de filtros no cargados.</p>"}
+
+        <p><span class="etiqueta">Fuente:</span> ${textoSeguro(auto.fuente)}</p>
+      `;
+
+      resultado.style.display = "block";
+      resultado.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    botonVin.addEventListener("click", buscarPorVin);
+
+    campoVin.addEventListener("keydown", evento => {
+      if (evento.key === "Enter") {
+        evento.preventDefault();
+        buscarPorVin();
+      }
+    });
+
+    async function buscarPorVin() {
+      const vin = campoVin.value.trim().toUpperCase();
+      campoVin.value = vin;
+
+      // Los VIN estándar tienen 17 caracteres y no incluyen I, O ni Q.
+      if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) {
+        estadoVin.textContent =
+          "Revisá el VIN: debe tener 17 caracteres y no incluir I, O ni Q.";
+        return;
+      }
+
+      botonVin.disabled = true;
+      estadoVin.textContent = "Buscando datos del vehículo…";
+      resultado.style.display = "none";
+
+      try {
+        const url =
+          "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/" +
+          encodeURIComponent(vin) +
+          "?format=json";
+
+        const respuesta = await fetch(url);
+
+        if (!respuesta.ok) {
+          throw new Error("No se pudo consultar el servicio.");
+        }
+
+        const datos = await respuesta.json();
+        const auto = datos.Results && datos.Results[0];
+
+        if (!auto) {
+          estadoVin.textContent =
+            "No se encontraron datos para ese VIN. Revisá que esté bien escrito.";
+          return;
+        }
+
+        const campos = [
+          ["Año", auto.ModelYear],
+          ["Marca", auto.Make],
+          ["Modelo", auto.Model],
+          ["Motor", auto.EngineModel || auto.DisplacementL],
+          ["Cilindros", auto.EngineCylinders],
+          ["Combustible", auto.FuelTypePrimary],
+          ["Carrocería", auto.BodyClass],
+          ["País de fabricación", auto.PlantCountry]
+        ];
+
+        const encontrados = campos.filter(([, valor]) =>
+          valor && String(valor).trim() !== ""
+        );
+
+        if (!encontrados.length) {
+          estadoVin.textContent =
+            "El servicio no pudo identificar datos. Puede ocurrir con algunos vehículos vendidos en Argentina.";
+          return;
+        }
+
+        resultado.innerHTML = `
+          <h2>Datos encontrados para el VIN</h2>
+          ${encontrados.map(([nombre, valor]) => `
+            <p>
+              <span class="etiqueta">${textoSeguro(nombre)}:</span>
+              ${textoSeguro(valor)}
+            </p>
+          `).join("")}
+          <div class="aviso">
+            Estos datos provienen del decodificador VIN de NHTSA y pueden ser
+            incompletos para vehículos comercializados en Argentina. No se obtuvo
+            una recomendación de aceite: confirmala con el manual del vehículo.
+          </div>
+        `;
+
+        resultado.style.display = "block";
+        resultado.scrollIntoView({ behavior: "smooth", block: "start" });
+        estadoVin.textContent = "Búsqueda terminada.";
+      } catch (error) {
+        estadoVin.textContent =
+          "No se pudo consultar el VIN. Revisá tu conexión o probá más tarde.";
+      } finally {
+        botonVin.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
+```
+
+En GitHub, abrí `index.html`, tocá el lápiz, reemplazá todo el contenido por este código y guardá con **Commit changes**. La búsqueda por VIN aparecerá, pero la búsqueda por marca/modelo seguirá sin fichas hasta que cargues vehículos en la lista `vehiculos`.
