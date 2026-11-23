@@ -703,4 +703,736 @@
       <textarea id="fAlerta" rows="2" placeholder="Ej: Verificar tipo y código de caja antes de aplicar fluido."></textarea>
     </div>
 
-    <div style="display:flex
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+      <button onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" onclick="guardarFichaModal()">💾 GUARDAR FICHA</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const BASE_INICIAL = [
+  {
+    id: "honda-civic-8gen-93hfa16808z501002",
+    cat: "auto",
+    dominio: "GRR030",
+    vin: "93HFA16808Z501002",
+    marca: "Honda",
+    modelo: "Civic EXS Sedan 4 Ptas A/T",
+    codigo: "FA1 - FA168",
+    anio: "2008 - Dígito 8",
+    origen: "Brasil - Sumare",
+    version: "R18A18501020 - R18A1 1.8 i-VTEC 16V",
+    potencia: "140 cv @ 6300",
+    torque: "17.7 kgm @ 4300",
+    caja: "S5A 5 velocidades - Automática secuencial",
+    traccion: "Delantera",
+    norma: "Honda ATF DW-1 (reemplaza ATF Z1) 08200-9002",
+    carter: "3.2 - 3.5 Lts",
+    dialisisLitros: "6.1 - 6.5 Lts Diálisis",
+    noUsar: "Dexron / CVT / ATF WS / Dual Clutch",
+    fisica: [
+      "1. Palanca: P-R-N-D-D3-2-1 con S y levas",
+      "2. Varilla: Amarilla - lado caja",
+      "3. Filtro: Interno no cambiable sin desarme",
+      "4. Tapón: 18x1.5"
+    ],
+    alerta: "IMPORTANTE: Civic 8va Gen 1.8 A/T = ATF DW-1 (Z1). No lleva CVT ni Dexron. Lleva Honda DW-1 específico. El Dexron hace que patine y patee.",
+    nishimoto: "Verificar norma exacta DW-1 / Z1 antes de aplicar",
+    valvoline: "Valvoline MaxLife ATF (verificar compatibilidad DW-1)",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol ATF DW-1",
+    motul: "Motul ATF VI"
+  },
+  {
+    id: "audi-a3-individual",
+    cat: "auto", dominio: "", vin: "",
+    marca: "Audi", modelo: "A3", codigo: "8V",
+    anio: "2013-2024", origen: "Europa / Mercosur",
+    version: "1.4 TFSI / 2.0 TFSI", potencia: "150 - 190 cv", torque: "25.5 - 32.6 kgm",
+    caja: "S-Tronic (DQ200 Seco / DQ250 / DQ381 Húmedo)", traccion: "Delantera / Quattro",
+    norma: "VW G 052 182 / G 055 529 (Húmedo) · G 052 512 (Seco)",
+    carter: "5.2 - 6.0 Lts (Húmedo)", dialisisLitros: "7.5 - 8.0 Lts Diálisis (Húmedo)",
+    noUsar: "Mezclar lubricante de embrague húmedo con seco sin confirmar código de caja",
+    fisica: [
+      "1. Selectora: Consola central con modo S",
+      "2. Varilla: Sin varilla superior",
+      "3. Filtro: Cartucho superior (en húmedo)",
+      "4. Tapón: Drenaje y control de nivel"
+    ],
+    alerta: "Confirmar siempre si es DQ200 (seco) o DQ250/DQ381 (húmedo) antes de cambiar aceite.",
+    nishimoto: "Nishimoto Multi ATF / DCTF 7",
+    valvoline: "Valvoline DCT / MaxLife ATF",
+    liquiMoly: "Liqui Moly Doppelkupplungsgetriebe-Öl 8100",
+    mannol: "Mannol DCT Fluid 8202",
+    motul: "Motul Multi DCTF"
+  },
+  {
+    id: "bmw-serie3-individual",
+    cat: "auto", dominio: "", vin: "",
+    marca: "BMW", modelo: "Serie 3", codigo: "F30 / G20",
+    anio: "2012-2024", origen: "Alemania / Sudáfrica",
+    version: "320i / 328i / 330i", potencia: "184 - 258 cv", torque: "27.5 - 40.8 kgm",
+    caja: "Steptronic 8M (ZF 8HP45 / 8HP50)", traccion: "Trasera / xDrive",
+    norma: "ZF LifeguardFluid 8 / BMW 83 22 2 289 720",
+    carter: "6.5 - 8.5 Lts", dialisisLitros: "10.0 - 11.5 Lts Diálisis",
+    noUsar: "Dexron III / Fluidos no baja viscosidad",
+    fisica: [
+      "1. Palanca: Joystick electrónico P-R-N-D + S/M",
+      "2. Varilla: No posee",
+      "3. Filtro: Integrado en cárter plástico ZF",
+      "4. Tapón: Control a 40°C-50°C"
+    ],
+    alerta: "Usar adaptador en intercambiador si se realiza diálisis.",
+    nishimoto: "Nishimoto Multi ATF",
+    valvoline: "Valvoline MaxLife ATF",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol AG60 8218",
+    motul: "Motul ATF VI"
+  }
+];
+
+const STORAGE_KEY = "lubricentro_ficha_vin_online_v1";
+
+let baseDatos = [];
+let categoriaActual = "auto";
+let fichaSeleccionadaId = null;
+let ultimoVinConsultado = "";
+let ultimosDatosOnline = null;
+let debounceTimer = null;
+
+function cargarEstado() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      baseDatos = (Array.isArray(parsed) && parsed.length > 0) ? parsed : JSON.parse(JSON.stringify(BASE_INICIAL));
+    } else {
+      baseDatos = JSON.parse(JSON.stringify(BASE_INICIAL));
+    }
+  } catch (e) {
+    baseDatos = JSON.parse(JSON.stringify(BASE_INICIAL));
+  }
+  actualizarContadores();
+}
+
+function guardarEstado() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(baseDatos));
+  actualizarContadores();
+}
+
+function actualizarContadores() {
+  document.getElementById("countAutos").textContent = baseDatos.filter(i => i.cat === "auto").length;
+  document.getElementById("countMotos").textContent = baseDatos.filter(i => i.cat === "moto").length;
+  document.getElementById("countGuardados").textContent = baseDatos.filter(i => (i.vin && i.vin.trim()) || (i.dominio && i.dominio.trim())).length;
+}
+
+function onInputBusqueda(valor) {
+  clearTimeout(debounceTimer);
+  const qAlnum = (valor || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (qAlnum.length === 17) {
+    debounceTimer = setTimeout(() => ejecutarBusquedaCompleta(), 350);
+  } else if (!qAlnum) {
+    ocultarPanelOnline();
+    ocultarCoincidencias();
+  }
+}
+
+async function ejecutarBusquedaCompleta() {
+  const qRaw = (document.getElementById("inputBusqueda").value || "").trim();
+  const qAlnum = qRaw.toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+  ultimosDatosOnline = null;
+  ultimoVinConsultado = "";
+
+  if (!qAlnum) {
+    ocultarPanelOnline();
+    ocultarCoincidencias();
+    return;
+  }
+
+  // 1) Buscar primero en base local por VIN o Dominio exacto
+  const exacta = baseDatos.find(item => {
+    const vClean = (item.vin || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    const dClean = (item.dominio || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    return (vClean && vClean === qAlnum) || (dClean && dClean === qAlnum);
+  });
+
+  if (exacta) {
+    ocultarPanelOnline();
+    if (categoriaActual !== exacta.cat) cambiarCategoria(exacta.cat, true);
+    mostrarCoincidencias([exacta], `Ficha registrada en tu base para "${qAlnum}"`);
+    seleccionarFicha(exacta.id);
+    return;
+  }
+
+  // 2) Si es VIN de 17 caracteres no cargado en base local: consultar API online
+  if (qAlnum.length === 17) {
+    ultimoVinConsultado = qAlnum;
+    await consultarYMostrarVinOnline(qAlnum);
+    return;
+  }
+
+  ocultarPanelOnline();
+
+  // 3) Búsqueda por texto (Marca, Modelo, Código, Motor o Caja)
+  const palabras = qRaw.toLowerCase().split(/\s+/).filter(Boolean);
+  const resultados = baseDatos.filter(item => {
+    const texto = `${item.marca} ${item.modelo} ${item.codigo} ${item.anio} ${item.version} ${item.caja} ${item.dominio} ${item.vin}`.toLowerCase();
+    return palabras.every(p => texto.includes(p));
+  });
+
+  if (resultados.length > 0) {
+    const primera = resultados[0];
+    if (categoriaActual !== primera.cat) cambiarCategoria(primera.cat, true);
+    mostrarCoincidencias(resultados, `${resultados.length} ficha(s) encontrada(s) para "${qRaw}"`);
+    seleccionarFicha(primera.id);
+  } else {
+    mostrarCoincidencias([], `No se encontró "${qRaw}" en el catálogo local.`);
+  }
+}
+
+async function consultarYMostrarVinOnline(vin) {
+  const box = document.getElementById("onlineBox");
+  const titulo = document.getElementById("onlineTitulo");
+  const detalle = document.getElementById("onlineDetalle");
+  const btnCargar = document.getElementById("btnUsarDatosOnline");
+
+  box.classList.remove("error");
+  box.classList.add("show");
+  btnCargar.style.display = "none";
+  titulo.textContent = `🌐 Consultando VIN ${vin} online...`;
+  detalle.innerHTML = `<p style="font-size:0.86rem; color:var(--muted);">Esperando respuesta del servicio de decodificación VIN...</p>`;
+
+  try {
+    const url = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${encodeURIComponent(vin)}?format=json`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error("Error de red o respuesta HTTP " + resp.status);
+    const data = await resp.json();
+    const r = data && data.Results && data.Results[0] ? data.Results[0] : {};
+
+    const marca = (r.Make || "").trim();
+    const modelo = (r.Model || "").trim();
+    const anio = (r.ModelYear || "").trim();
+    const origen = [r.PlantCity, r.PlantCountry].map(s => (s || "").trim()).filter(Boolean).join(" · ");
+    const motorPartes = [
+      (r.EngineModel || "").trim(),
+      (r.DisplacementL || "").trim() ? `${(r.DisplacementL || "").trim()}L` : "",
+      (r.EngineHP || "").trim() ? `${(r.EngineHP || "").trim()} HP` : ""
+    ].filter(Boolean);
+    const motor = motorPartes.join(" · ");
+    // Nunca inventar caja: se deja vacío si la API no informa transmisión
+    const caja = (r.TransmissionStyle || "").trim();
+
+    ultimosDatosOnline = {
+      vin,
+      marca,
+      modelo,
+      anio,
+      origen,
+      version: motor,
+      caja
+    };
+
+    const tieneAlgunDato = Boolean(marca || modelo || anio || origen || motor || caja);
+    if (!tieneAlgunDato) {
+      box.classList.add("error");
+      titulo.textContent = `⚠️ VIN ${vin}: sin datos devueltos por la consulta online`;
+      detalle.innerHTML = `<p style="font-size:0.86rem;">El servicio online no devolvió información para este VIN (frecuente en códigos regionales/Mercosur sin mapeo en esta API). No se asume ningún vehículo ni caja.</p>`;
+      btnCargar.style.display = "inline-flex";
+      return;
+    }
+
+    titulo.textContent = `🌐 Resultado Online para VIN ${vin} (solo datos devueltos por la API)`;
+    btnCargar.style.display = "inline-flex";
+
+    const renderCampo = (label, val, esCaja = false) => {
+      if (val) {
+        return `<div class="online-item"><div class="k">${label}</div><div class="v">${val}</div></div>`;
+      }
+      const msgVacio = esCaja
+        ? "No informada por la API (no se inventa caja)"
+        : "No devuelto por la API";
+      return `<div class="online-item"><div class="k">${label}</div><div class="v empty">${msgVacio}</div></div>`;
+    };
+
+    detalle.innerHTML = `
+      <div class="online-grid">
+        ${renderCampo("Marca", marca)}
+        ${renderCampo("Modelo", modelo)}
+        ${renderCampo("Año", anio)}
+        ${renderCampo("Motor", motor)}
+        ${renderCampo("Origen / Planta", origen)}
+        ${renderCampo("Caja / Transmisión", caja, true)}
+      </div>
+      ${!caja ? `<p style="font-size:0.82rem; color:#fca5a5; margin-top:10px; font-weight:700;">⚠️ Atención: la consulta online no devolvió tipo de caja. No se asigna ninguna caja ni fluido automáticamente.</p>` : ""}
+    `;
+  } catch (err) {
+    box.classList.add("error");
+    titulo.textContent = `⚠️ Error al consultar VIN ${vin} online`;
+    detalle.innerHTML = `<p style="font-size:0.86rem;">No se pudo completar la consulta (${err.message}). Verificá tu conexión a internet o cargá la ficha manualmente.</p>`;
+    btnCargar.style.display = "inline-flex";
+  }
+}
+
+function abrirModalConDatosOnline() {
+  abrirModalNuevo();
+  const d = ultimosDatosOnline || {};
+  document.getElementById("fVin").value = d.vin || ultimoVinConsultado || "";
+  document.getElementById("fMarca").value = d.marca || "";
+  document.getElementById("fModelo").value = d.modelo || "";
+  document.getElementById("fAnio").value = d.anio || "";
+  document.getElementById("fOrigen").value = d.origen || "";
+  document.getElementById("fVersion").value = d.version || "";
+  // Caja queda vacía si la API no devolvió ninguna
+  document.getElementById("fCaja").value = d.caja || "";
+}
+
+function ocultarPanelOnline() {
+  const box = document.getElementById("onlineBox");
+  box.classList.remove("show", "error");
+  document.getElementById("onlineDetalle").innerHTML = "";
+  document.getElementById("btnUsarDatosOnline").style.display = "none";
+}
+
+function mostrarCoincidencias(lista, titulo) {
+  const bar = document.getElementById("matchesBar");
+  const grid = document.getElementById("matchesGrid");
+  document.getElementById("matchesTitle").textContent = titulo;
+  bar.classList.add("show");
+
+  if (!lista.length) {
+    grid.innerHTML = "";
+    return;
+  }
+
+  grid.innerHTML = lista.map(item => `
+    <div class="match-card ${item.id === fichaSeleccionadaId ? "selected" : ""}" onclick="seleccionarFicha('${item.id}')">
+      <div class="m-title">${item.cat === "moto" ? "🏍️" : "🚗"} ${item.marca} — ${item.modelo}</div>
+      <div class="m-sub">${item.anio} · <strong>${item.caja || "Caja sin especificar"}</strong></div>
+    </div>
+  `).join("");
+}
+
+function ocultarCoincidencias() {
+  document.getElementById("matchesBar").classList.remove("show");
+  document.getElementById("matchesGrid").innerHTML = "";
+}
+
+function limpiarBusqueda() {
+  clearTimeout(debounceTimer);
+  document.getElementById("inputBusqueda").value = "";
+  ultimoVinConsultado = "";
+  ultimosDatosOnline = null;
+  ocultarPanelOnline();
+  ocultarCoincidencias();
+  poblarSelectores();
+}
+
+function cambiarCategoria(cat, mantenerBusqueda = false) {
+  categoriaActual = cat;
+  document.getElementById("tab-auto").classList.toggle("active", cat === "auto");
+  document.getElementById("tab-moto").classList.toggle("active", cat === "moto");
+  document.getElementById("tab-clientes").classList.toggle("active", cat === "clientes");
+
+  if (cat === "clientes") {
+    document.getElementById("selectoresManuales").style.display = "none";
+    document.getElementById("vistaFicha").style.display = "none";
+    document.getElementById("matchesBar").classList.remove("show");
+    document.getElementById("vistaClientes").style.display = "block";
+    renderizarTablaClientes();
+    return;
+  }
+
+  document.getElementById("selectoresManuales").style.display = "grid";
+  document.getElementById("vistaFicha").style.display = "block";
+  document.getElementById("vistaClientes").style.display = "none";
+  if (!mantenerBusqueda) ocultarCoincidencias();
+  poblarSelectores();
+}
+
+function poblarSelectores() {
+  const itemsCat = baseDatos.filter(i => i.cat === categoriaActual);
+  const marcas = [...new Set(itemsCat.map(i => i.marca))].sort();
+
+  document.getElementById("selMarca").innerHTML = `<option value="">-- Elegir Marca (${marcas.length}) --</option>` +
+    marcas.map(m => `<option value="${m}">${m}</option>`).join("");
+  document.getElementById("selModelo").innerHTML = `<option value="">-- Elegir Modelo --</option>`;
+  document.getElementById("selAnio").innerHTML = `<option value="">-- Elegir Año --</option>`;
+  document.getElementById("selVersion").innerHTML = `<option value="">-- Elegir Motor / Caja --</option>`;
+
+  if (itemsCat.length > 0 && !itemsCat.some(i => i.id === fichaSeleccionadaId)) {
+    seleccionarFicha(itemsCat[0].id);
+  } else if (fichaSeleccionadaId) {
+    seleccionarFicha(fichaSeleccionadaId);
+  }
+}
+
+function onSelectMarca() {
+  const marca = document.getElementById("selMarca").value;
+  const items = baseDatos.filter(i => i.cat === categoriaActual && (!marca || i.marca === marca));
+  const modelos = [...new Set(items.map(i => i.modelo))].sort();
+
+  document.getElementById("selModelo").innerHTML = `<option value="">-- Elegir Modelo (${modelos.length}) --</option>` +
+    modelos.map(m => `<option value="${m}">${m}</option>`).join("");
+  document.getElementById("selAnio").innerHTML = `<option value="">-- Elegir Año --</option>`;
+  document.getElementById("selVersion").innerHTML = `<option value="">-- Elegir Motor / Caja --</option>`;
+
+  if (marca && items.length > 0) {
+    mostrarCoincidencias(items, `Modelos de ${marca}`);
+    seleccionarFicha(items[0].id);
+  }
+}
+
+function onSelectModelo() {
+  const marca = document.getElementById("selMarca").value;
+  const modelo = document.getElementById("selModelo").value;
+  const items = baseDatos.filter(i =>
+    i.cat === categoriaActual &&
+    (!marca || i.marca === marca) &&
+    (!modelo || i.modelo === modelo)
+  );
+
+  const anios = [...new Set(items.map(i => i.anio))];
+  document.getElementById("selAnio").innerHTML = `<option value="">-- Elegir Año (${anios.length}) --</option>` +
+    anios.map(a => `<option value="${a}">${a}</option>`).join("");
+  document.getElementById("selVersion").innerHTML = `<option value="">-- Elegir Motor / Caja --</option>`;
+
+  if (items.length > 0) {
+    mostrarCoincidencias(items, `Versiones de ${marca} ${modelo}`);
+    seleccionarFicha(items[0].id);
+  }
+}
+
+function onSelectAnio() {
+  const marca = document.getElementById("selMarca").value;
+  const modelo = document.getElementById("selModelo").value;
+  const anio = document.getElementById("selAnio").value;
+  const items = baseDatos.filter(i =>
+    i.cat === categoriaActual &&
+    (!marca || i.marca === marca) &&
+    (!modelo || i.modelo === modelo) &&
+    (!anio || i.anio === anio)
+  );
+
+  const selVersion = document.getElementById("selVersion");
+  selVersion.innerHTML = `<option value="">-- Elegir Motor / Caja (${items.length}) --</option>` +
+    items.map(v => `<option value="${v.id}">${v.version} — ${v.caja || "Caja sin especificar"}</option>`).join("");
+
+  if (items.length > 0) {
+    selVersion.value = items[0].id;
+    seleccionarFicha(items[0].id);
+  }
+}
+
+function onSelectVersion() {
+  const id = document.getElementById("selVersion").value;
+  if (id) seleccionarFicha(id);
+}
+
+function seleccionarFicha(id) {
+  const item = baseDatos.find(i => i.id === id);
+  if (!item) return;
+
+  fichaSeleccionadaId = id;
+  document.querySelectorAll(".match-card").forEach(el => {
+    el.classList.toggle("selected", el.getAttribute("onclick")?.includes(id));
+  });
+
+  const fisicaHtml = (item.fisica || []).map(line => `<li>${line}</li>`).join("");
+
+  document.getElementById("vistaFicha").innerHTML = `
+    <div class="ficha-banner-top">
+      <h2>FICHA TÉCNICA ${item.marca.toUpperCase()} - VIN</h2>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-sm" onclick="abrirModalEditar('${item.id}')">✏️ Editar Ficha</button>
+      </div>
+    </div>
+    <div class="ficha-body">
+      <div class="dominio-bar">
+        ${item.dominio ? `Dominio: <strong>${item.dominio}</strong> — ` : ""}Consulta Taller
+      </div>
+
+      <div class="meta-two-col">
+        <div>
+          <div class="meta-line">
+            <div class="meta-label">VIN / Chasis:</div>
+            <div class="meta-val" style="font-family:monospace;">${item.vin || "No cargado"}</div>
+          </div>
+          <div class="meta-line">
+            <div class="meta-label">Motor:</div>
+            <div class="meta-val">${item.version || "-"}</div>
+          </div>
+          <div class="meta-line">
+            <div class="meta-label">Modelo:</div>
+            <div class="meta-val">${item.modelo || "-"}</div>
+          </div>
+          <div class="meta-line">
+            <div class="meta-label">Código:</div>
+            <div class="meta-val">${item.codigo || "-"}</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="meta-line">
+            <div class="meta-label">Año:</div>
+            <div class="meta-val">${item.anio || "-"}</div>
+          </div>
+          <div class="meta-line">
+            <div class="meta-label">Origen:</div>
+            <div class="meta-val">${item.origen || "-"}</div>
+          </div>
+          <div class="meta-line">
+            <div class="meta-label">Potencia:</div>
+            <div class="meta-val">${item.potencia || "-"}</div>
+          </div>
+          <div class="meta-line">
+            <div class="meta-label">Torque:</div>
+            <div class="meta-val">${item.torque || "-"}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub-card">
+        <div class="sub-card-title">Transmisión</div>
+        <div class="kv-row"><div class="kv-key">Caja:</div><div class="kv-val">${item.caja || "No especificada"}</div></div>
+        <div class="kv-row"><div class="kv-key">Tracción:</div><div class="kv-val">${item.traccion || "-"}</div></div>
+        <div class="kv-row"><div class="kv-key">Fluido:</div><div class="kv-val" style="color:var(--green);">${item.norma || "-"}</div></div>
+        <div class="kv-row"><div class="kv-key">Cárter:</div><div class="kv-val">${item.carter || "-"}</div></div>
+        <div class="kv-row"><div class="kv-key">Total:</div><div class="kv-val" style="color:var(--accent);">${item.dialisisLitros || "-"}</div></div>
+        <div class="kv-row"><div class="kv-key">No usar:</div><div class="kv-val no-usar">${item.noUsar || "-"}</div></div>
+      </div>
+
+      <div class="sub-card">
+        <div class="sub-card-title">Identificación Física</div>
+        <ul class="fisica-list">${fisicaHtml || "<li>Sin datos de identificación física cargados.</li>"}</ul>
+      </div>
+
+      <div class="sub-card">
+        <div class="sub-card-title">Equivalencias en Marcas Trabajadas</div>
+        <div class="brands-list">
+          <div class="brand-row nishimoto"><div class="brand-name">⭐ NISHIMOTO</div><div class="brand-prod">${item.nishimoto || "-"}</div></div>
+          <div class="brand-row"><div class="brand-name">Valvoline</div><div class="brand-prod">${item.valvoline || "-"}</div></div>
+          <div class="brand-row"><div class="brand-name">Liqui Moly</div><div class="brand-prod">${item.liquiMoly || "-"}</div></div>
+          <div class="brand-row"><div class="brand-name">Mannol</div><div class="brand-prod">${item.mannol || "-"}</div></div>
+          <div class="brand-row"><div class="brand-name">Motul</div><div class="brand-prod">${item.motul || "-"}</div></div>
+        </div>
+      </div>
+
+      ${item.alerta ? `<div class="alerta-roja"><strong>⚠️ IMPORTANTE</strong>${item.alerta}</div>` : ""}
+    </div>
+  `;
+}
+
+function renderizarTablaClientes() {
+  const guardados = baseDatos.filter(i => (i.vin && i.vin.trim()) || (i.dominio && i.dominio.trim()));
+  const tbody = document.getElementById("tablaClientesBody");
+
+  if (!guardados.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="color:var(--muted); text-align:center; padding:20px;">No hay VINs o dominios registrados.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = guardados.map(i => `
+    <tr>
+      <td><strong>${i.marca} ${i.modelo}</strong><br><small style="color:var(--muted);">${i.caja || "Caja sin especificar"}</small></td>
+      <td>${i.dominio || "-"}</td>
+      <td style="font-family:monospace;">${i.vin || "-"}</td>
+      <td><small>${i.norma || "-"}<br><strong>${i.dialisisLitros || ""}</strong></small></td>
+      <td><button class="btn-sm btn-primary" onclick="irAFichaDesdeTabla('${i.id}')">Ver Ficha</button></td>
+    </tr>
+  `).join("");
+}
+
+function irAFichaDesdeTabla(id) {
+  const item = baseDatos.find(i => i.id === id);
+  if (!item) return;
+  cambiarCategoria(item.cat);
+  seleccionarFicha(id);
+}
+
+function abrirModalNuevo() {
+  document.getElementById("modalTitulo").textContent = "Nueva Ficha Técnica por VIN";
+  document.getElementById("editId").value = "";
+  document.getElementById("fCat").value = categoriaActual === "moto" ? "moto" : "auto";
+  document.getElementById("fDominio").value = "";
+  document.getElementById("fVin").value = "";
+  document.getElementById("fMarca").value = "";
+  document.getElementById("fModelo").value = "";
+  document.getElementById("fCodigo").value = "";
+  document.getElementById("fAnio").value = "";
+  document.getElementById("fOrigen").value = "";
+  document.getElementById("fVersion").value = "";
+  document.getElementById("fPotencia").value = "";
+  document.getElementById("fTorque").value = "";
+  document.getElementById("fCaja").value = "";
+  document.getElementById("fTraccion").value = "";
+  document.getElementById("fNorma").value = "";
+  document.getElementById("fCarcter").value = "";
+  document.getElementById("fDialisisLitros").value = "";
+  document.getElementById("fNoUsar").value = "";
+  document.getElementById("fFis1").value = "";
+  document.getElementById("fFis2").value = "";
+  document.getElementById("fFis3").value = "";
+  document.getElementById("fFis4").value = "";
+  document.getElementById("fNishimoto").value = "";
+  document.getElementById("fValvoline").value = "";
+  document.getElementById("fLiquiMoly").value = "";
+  document.getElementById("fMannol").value = "";
+  document.getElementById("fMotul").value = "";
+  document.getElementById("fAlerta").value = "";
+  document.getElementById("modalFicha").classList.add("open");
+}
+
+function abrirModalEditar(id) {
+  const item = baseDatos.find(i => i.id === id);
+  if (!item) return;
+
+  document.getElementById("modalTitulo").textContent = `Editar Ficha: ${item.marca} ${item.modelo}`;
+  document.getElementById("editId").value = item.id;
+  document.getElementById("fCat").value = item.cat || "auto";
+  document.getElementById("fDominio").value = item.dominio || "";
+  document.getElementById("fVin").value = item.vin || "";
+  document.getElementById("fMarca").value = item.marca || "";
+  document.getElementById("fModelo").value = item.modelo || "";
+  document.getElementById("fCodigo").value = item.codigo || "";
+  document.getElementById("fAnio").value = item.anio || "";
+  document.getElementById("fOrigen").value = item.origen || "";
+  document.getElementById("fVersion").value = item.version || "";
+  document.getElementById("fPotencia").value = item.potencia || "";
+  document.getElementById("fTorque").value = item.torque || "";
+  document.getElementById("fCaja").value = item.caja || "";
+  document.getElementById("fTraccion").value = item.traccion || "";
+  document.getElementById("fNorma").value = item.norma || "";
+  document.getElementById("fCarcter").value = item.carter || "";
+  document.getElementById("fDialisisLitros").value = item.dialisisLitros || "";
+  document.getElementById("fNoUsar").value = item.noUsar || "";
+  const f = item.fisica || [];
+  document.getElementById("fFis1").value = f[0] || "";
+  document.getElementById("fFis2").value = f[1] || "";
+  document.getElementById("fFis3").value = f[2] || "";
+  document.getElementById("fFis4").value = f[3] || "";
+  document.getElementById("fNishimoto").value = item.nishimoto || "";
+  document.getElementById("fValvoline").value = item.valvoline || "";
+  document.getElementById("fLiquiMoly").value = item.liquiMoly || "";
+  document.getElementById("fMannol").value = item.mannol || "";
+  document.getElementById("fMotul").value = item.motul || "";
+  document.getElementById("fAlerta").value = item.alerta || "";
+  document.getElementById("modalFicha").classList.add("open");
+}
+
+function cerrarModal() {
+  document.getElementById("modalFicha").classList.remove("open");
+}
+
+function guardarFichaModal() {
+  const editId = document.getElementById("editId").value;
+  const marca = document.getElementById("fMarca").value.trim();
+  const modelo = document.getElementById("fModelo").value.trim();
+
+  if (!marca || !modelo) {
+    alert("Completá al menos Marca y Modelo.");
+    return;
+  }
+
+  const fisica = [
+    document.getElementById("fFis1").value.trim(),
+    document.getElementById("fFis2").value.trim(),
+    document.getElementById("fFis3").value.trim(),
+    document.getElementById("fFis4").value.trim()
+  ].filter(Boolean);
+
+  const obj = {
+    id: editId || ("ficha-" + Date.now()),
+    cat: document.getElementById("fCat").value,
+    dominio: document.getElementById("fDominio").value.trim().toUpperCase(),
+    vin: document.getElementById("fVin").value.trim().toUpperCase(),
+    marca,
+    modelo,
+    codigo: document.getElementById("fCodigo").value.trim(),
+    anio: document.getElementById("fAnio").value.trim() || "Consultar",
+    origen: document.getElementById("fOrigen").value.trim(),
+    version: document.getElementById("fVersion").value.trim() || "Estándar",
+    potencia: document.getElementById("fPotencia").value.trim(),
+    torque: document.getElementById("fTorque").value.trim(),
+    // Nunca inventar caja: queda vacía si el usuario no la completó
+    caja: document.getElementById("fCaja").value.trim(),
+    traccion: document.getElementById("fTraccion").value.trim(),
+    norma: document.getElementById("fNorma").value.trim() || "Consultar manual",
+    carter: document.getElementById("fCarcter").value.trim(),
+    dialisisLitros: document.getElementById("fDialisisLitros").value.trim(),
+    noUsar: document.getElementById("fNoUsar").value.trim(),
+    fisica,
+    nishimoto: document.getElementById("fNishimoto").value.trim(),
+    valvoline: document.getElementById("fValvoline").value.trim(),
+    liquiMoly: document.getElementById("fLiquiMoly").value.trim(),
+    mannol: document.getElementById("fMannol").value.trim(),
+    motul: document.getElementById("fMotul").value.trim(),
+    alerta: document.getElementById("fAlerta").value.trim()
+  };
+
+  if (editId) {
+    const idx = baseDatos.findIndex(i => i.id === editId);
+    if (idx !== -1) baseDatos[idx] = obj;
+  } else {
+    baseDatos.unshift(obj);
+  }
+
+  guardarEstado();
+  cerrarModal();
+  ocultarPanelOnline();
+  cambiarCategoria(obj.cat);
+  seleccionarFicha(obj.id);
+  mostrarToast("✅ Ficha guardada");
+}
+
+function exportarBase() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(baseDatos, null, 2));
+  const a = document.createElement("a");
+  a.setAttribute("href", dataStr);
+  a.setAttribute("download", `fichas-vin-lubricentro-${new Date().toISOString().slice(0,10)}.json`);
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  mostrarToast("⬇ Respaldo JSON descargado");
+}
+
+function importarBase(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const json = JSON.parse(e.target.result);
+      if (Array.isArray(json) && json.length > 0) {
+        baseDatos = json;
+        guardarEstado();
+        cambiarCategoria("auto");
+        mostrarToast(`✅ Base importada (${json.length} fichas)`);
+      } else {
+        alert("El archivo JSON no tiene un formato válido.");
+      }
+    } catch (err) {
+      alert("Error al leer el archivo JSON.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function mostrarToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3200);
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  cargarEstado();
+  cambiarCategoria("auto");
+});
+</script>
+
+</body>
+</html>
