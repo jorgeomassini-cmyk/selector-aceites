@@ -1,337 +1,2433 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cotizador Técnico Universal - Lubricentro</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cotizador Técnico Lubricentro — Cajas AT, Diálisis & Motos</title>
   <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 12px 10px; background: #0f172a; color: #1e293b; font-family: system-ui, sans-serif; }
-    main { max-width: 860px; margin: 0 auto; padding: 16px; background: #fff; border-radius: 14px; }
-    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 14px; gap: 6px; flex-wrap: wrap; }
-    h1 { margin: 0; font-size: 1.2rem; }
-    .top-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-    label { display: block; margin: 10px 0 4px; font-weight: 700; font-size: .85rem; }
-    input, select, button { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; }
-    input.mayus { text-transform: uppercase; font-weight: 700; }
-    button { margin-top: 10px; border: 0; background: #1d4ed8; color: #fff; font-weight: 700; cursor: pointer; }
-    .btn-sec { background: #475569; width: auto; padding: 8px 11px; margin: 0; font-size: .8rem; }
-    .btn-verde { background: #15803d; }
-    .btn-wsp { background: #16a34a; margin-top: 10px; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    @media(max-width:600px) { .grid-2 { grid-template-columns: 1fr; } }
-    .panel { background: #f8fafc; border: 1px solid #cbd5e1; padding: 14px; border-radius: 10px; }
-    #est { margin-top: 10px; padding: 10px; border-radius: 8px; display: none; font-size: .9rem; font-weight: 600; }
-    .est-ok { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
-    .est-warn { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-    #res { display: none; margin-top: 18px; padding: 16px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; }
-    .box { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 10px; }
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); padding: 14px; overflow-y: auto; z-index: 50; }
-    .modal-box { background: #fff; max-width: 600px; margin: 16px auto; padding: 18px; border-radius: 12px; }
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-alt: #263349;
+      --border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #f59e0b;
+      --accent-hover: #d97706;
+      --green: #10b981;
+      --green-bg: rgba(16, 185, 129, 0.14);
+      --yellow: #f59e0b;
+      --yellow-bg: rgba(245, 158, 11, 0.14);
+      --red: #ef4444;
+      --red-bg: rgba(239, 68, 68, 0.14);
+      --blue: #38bdf8;
+      --blue-bg: rgba(56, 189, 248, 0.14);
+      --nishimoto: #fbbf24;
+      --nishimoto-bg: rgba(251, 191, 36, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      padding-bottom: 60px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0b1120 0%, #1e293b 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .header-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      background: var(--accent);
+      color: #0f172a;
+      font-weight: 900;
+      padding: 8px 11px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      letter-spacing: 0.5px;
+    }
+
+    .brand h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+
+    .brand p {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button, .btn {
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--card-alt);
+      color: var(--text);
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    button:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .btn-primary { background: var(--accent); color: #0f172a; border-color: var(--accent); font-weight: 800; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-green { background: var(--green); color: #06281e; border-color: var(--green); font-weight: 800; }
+    .btn-green:hover { filter: brightness(1.08); }
+    .btn-blue { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+    .btn-danger { background: var(--red-bg); border-color: var(--red); color: #fca5a5; }
+    .btn-sm { padding: 6px 10px; font-size: 0.78rem; }
+
+    .container {
+      max-width: 1180px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #0f172a;
+      border-color: var(--accent);
+    }
+
+    /* Search & Selectors Panel */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+
+    .panel-title {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent);
+      font-weight: 800;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .vin-box {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .vin-input {
+      flex: 1;
+      min-width: 240px;
+      background: #0b1120;
+      border: 2px solid var(--border);
+      color: var(--text);
+      padding: 12px 15px;
+      border-radius: 10px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .vin-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .vin-banner {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: var(--blue-bg);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      display: none;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .vin-banner.show { display: flex; }
+
+    .vin-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .chip {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .chip strong { color: var(--blue); }
+
+    .selectors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    select, input[type="text"], input[type="number"], textarea {
+      width: 100%;
+      background: #0b1120;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* Quick Match List */
+    .matches-bar {
+      display: none;
+      margin-bottom: 18px;
+    }
+
+    .matches-bar.show { display: block; }
+
+    .matches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .match-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .match-card:hover, .match-card.selected {
+      border-color: var(--accent);
+      background: var(--card-alt);
+    }
+
+    .match-card .m-title { font-weight: 800; font-size: 0.92rem; }
+    .match-card .m-sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    /* Result Sheet */
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 900px) {
+      .result-grid { grid-template-columns: 1fr; }
+    }
+
+    .vehicle-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+
+    .vehicle-title {
+      font-size: 1.35rem;
+      font-weight: 900;
+    }
+
+    .vehicle-sub {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-top: 2px;
+    }
+
+    .status-badge {
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+
+    .status-ok { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+    .status-warn { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow); }
+    .status-no { background: var(--red-bg); color: #fca5a5; border: 1px solid var(--red); }
+
+    .specs-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .spec-box {
+      background: #0b1120;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 13px;
+    }
+
+    .spec-box .lbl {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .spec-box .val {
+      font-size: 1.02rem;
+      font-weight: 800;
+      margin-top: 3px;
+      color: var(--text);
+    }
+
+    .spec-box.highlight {
+      border-color: var(--accent);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .spec-box.highlight .val { color: var(--accent); font-size: 1.15rem; }
+
+    .section-block {
+      background: #0b1120;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 15px;
+      margin-bottom: 14px;
+    }
+
+    .section-block h3 {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--blue);
+      margin-bottom: 8px;
+    }
+
+    .brands-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .brand-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      font-size: 0.88rem;
+    }
+
+    .brand-row.nishimoto {
+      background: var(--nishimoto-bg);
+      border: 1.5px solid var(--nishimoto);
+    }
+
+    .brand-name {
+      font-weight: 800;
+      min-width: 125px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-row.nishimoto .brand-name { color: var(--nishimoto); }
+
+    .brand-prod {
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .note-box {
+      background: rgba(245, 158, 11, 0.09);
+      border-left: 4px solid var(--accent);
+      padding: 10px 13px;
+      border-radius: 6px;
+      font-size: 0.86rem;
+      margin-top: 10px;
+    }
+
+    /* Quote Calculator */
+    .quote-card {
+      background: var(--card);
+      border: 1px solid var(--accent);
+      border-radius: 14px;
+      padding: 18px;
+      position: sticky;
+      top: 86px;
+    }
+
+    .quote-row {
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .quote-row label {
+      font-size: 0.84rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .quote-row small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 400;
+    }
+
+    .quote-total {
+      background: #0b1120;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin: 14px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .quote-total span { font-size: 0.9rem; color: var(--muted); font-weight: 700; }
+    .quote-total strong { font-size: 1.5rem; color: var(--green); font-weight: 900; }
+
+    .wa-preview {
+      width: 100%;
+      background: #0b1120;
+      border: 1px solid var(--border);
+      color: #cbd5e1;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.8rem;
+      font-family: monospace;
+      min-height: 155px;
+      resize: vertical;
+      margin-top: 10px;
+    }
+
+    /* Saved plates/vins chips */
+    .saved-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .tag-pill {
+      background: #1e293b;
+      border: 1px solid var(--border);
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.82);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      max-width: 760px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--green);
+      color: #052e16;
+      font-weight: 800;
+      padding: 12px 18px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.25s ease;
+      z-index: 200;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    .saved-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+
+    .saved-table th, .saved-table td {
+      padding: 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .saved-table th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; }
   </style>
 </head>
 <body>
-  <main>
-    <header>
-      <h1>🛢️ Mostrador Técnico Universal</h1>
-      <div class="top-btns">
-        <button type="button" class="btn-sec" onclick="abrirModal()">+ Cargar Ficha</button>
-        <button type="button" class="btn-sec" onclick="exportarBase()">⬇ Respaldo</button>
-        <button type="button" class="btn-sec" onclick="document.getElementById('imp-file').click()">⬆ Cargar Respaldo</button>
-        <input type="file" id="imp-file" accept=".json" style="display:none" onchange="importarBase(event)">
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-badge">ATF / 4T</div>
+      <div>
+        <h1>COTIZADOR TÉCNICO — LUBRICENTRO</h1>
+        <p>Diálisis Cajas Automáticas · Service Motos · Línea NISHIMOTO & Equivalencias</p>
       </div>
-    </header>
-
-    <form id="fc" class="panel">
-      <label>VIN (17 dígitos nacional o importado) o Patente guardada</label>
-      <input id="cod" class="mayus" maxlength="17" placeholder="Ej: 9BWCB05W26T176579 o AB123CD" required>
-      <button type="submit">Decodificar VIN / Buscar Patente</button>
-      <div id="est"></div>
-    </form>
-
-    <form id="fm" style="margin-top:14px">
-      <div class="grid-2">
-        <div><label>Marca</label><select id="m"></select></div>
-        <div><label>Modelo</label><select id="mo" disabled></select></div>
-        <div><label>Año</label><select id="a" disabled></select></div>
-        <div><label>Versión / Caja</label><select id="v" disabled></select></div>
-      </div>
-      <button type="submit" class="btn-verde">Ver Ficha Técnica</button>
-    </form>
-
-    <div id="res"></div>
-  </main>
-
-  <div id="mod" class="modal">
-    <div class="modal-box">
-      <h2>Agendar Patente / Vehículo Nuevo</h2>
-      <form id="fg">
-        <div class="grid-2">
-          <input id="np" class="mayus" placeholder="Patente (ej: AE123BC)">
-          <input id="nv" class="mayus" maxlength="17" placeholder="VIN (17 caracteres)">
-          <input id="nm" required placeholder="Marca *">
-          <input id="nmo" required placeholder="Modelo *">
-          <input id="na" type="number" required placeholder="Año *">
-          <input id="nve" required placeholder="Versión / Motor *">
-          <input id="nmc" placeholder="Cód. Motor">
-          <input id="ncj" placeholder="Caja AT (ej: ZF 8HP / CVT)">
-          <input id="nma" placeholder="Aceite Motor y Norma">
-          <input id="nml" type="number" step="0.1" placeholder="Litros Motor">
-          <input id="naa" placeholder="Norma ATF / CVT Caja">
-          <input id="nal" type="number" step="0.5" placeholder="Litros Diálisis">
-          <input id="nfc" placeholder="Filtro Caja">
-          <input id="nfm" placeholder="Filtros Motor">
-        </div>
-        <button type="submit" class="btn-verde">Guardar Ficha</button>
-        <button type="button" class="btn-sec" style="width:100%;margin-top:8px" onclick="document.getElementById('mod').style.display='none'">Cerrar</button>
-      </form>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" onclick="abrirModalNuevo()">+ AGENDAR / CARGAR FICHA</button>
+      <button onclick="exportarBase()">⬇ Exportar JSON</button>
+      <button onclick="document.getElementById('fileImport').click()">⬆ Importar JSON</button>
+      <input type="file" id="fileImport" accept=".json" style="display:none" onchange="importarBase(event)" />
     </div>
   </div>
-  <script>
-    const WMI = {
-      "8AW":"Volkswagen (Argentina)","9BW":"Volkswagen (Brasil)","3VW":"Volkswagen (México)","WVW":"Volkswagen (Alemania)","WV1":"Volkswagen Comerciales","WV2":"Volkswagen (Alemania)","1VW":"Volkswagen (EE.UU.)",
-      "8AJ":"Toyota (Argentina)","9BR":"Toyota (Brasil)","JTD":"Toyota (Japón)","JTE":"Toyota (Japón)","JTM":"Toyota (Japón)","JTN":"Toyota (Japón)","5TF":"Toyota (EE.UU.)","4T1":"Toyota (EE.UU.)","MR0":"Toyota (Tailandia)","SB1":"Toyota (Reino Unido)",
-      "8AG":"Chevrolet (Argentina)","9BG":"Chevrolet (Brasil)","3G1":"Chevrolet (México)","1G1":"Chevrolet (EE.UU.)","KL1":"Chevrolet (Corea)",
-      "8AF":"Ford (Argentina)","9BF":"Ford (Brasil)","3FA":"Ford (México)","1FA":"Ford (EE.UU.)","1FT":"Ford Pickups (EE.UU.)","1FM":"Ford SUV (EE.UU.)","WF0":"Ford (Europa)","MAJ":"Ford (India)",
-      "8AP":"Fiat (Argentina)","9BD":"Fiat (Brasil)","ZFA":"Fiat (Italia)","3C4":"Fiat/Chrysler (México)","ZAR":"Alfa Romeo (Italia)","ZAM":"Maserati (Italia)",
-      "8AD":"Peugeot (Argentina)","936":"Peugeot (Brasil)","VF3":"Peugeot (Francia)",
-      "8BC":"Citroën (Argentina)","935":"Citroën (Brasil)","VF7":"Citroën (Francia)","VR7":"Citroën/DS (Francia)",
-      "8A1":"Renault (Argentina)","93Y":"Renault (Brasil)","VF1":"Renault (Francia)","UU1":"Dacia/Renault (Rumania)",
-      "3N1":"Nissan (México)","94D":"Nissan (Brasil)","8AN":"Nissan (Argentina)","JN1":"Nissan (Japón)","JN8":"Nissan SUV (Japón)","VSK":"Nissan (España)",
-      "8A3":"Mercedes-Benz (Argentina)","9BM":"Mercedes-Benz (Brasil)","WDB":"Mercedes-Benz (Alemania)","WDD":"Mercedes-Benz (Alemania)","WDC":"Mercedes-Benz SUV","W1K":"Mercedes-Benz (Alemania)","4JG":"Mercedes-Benz (EE.UU.)",
-      "93H":"Honda (Brasil)","1HG":"Honda (EE.UU.)","JHM":"Honda (Japón)","3HG":"Honda (México)","2HG":"Honda (Canadá)","SHH":"Honda (Reino Unido)",
-      "9BH":"Hyundai (Brasil)","KMH":"Hyundai (Corea)","KM8":"Hyundai SUV (Corea)","5NP":"Hyundai (EE.UU.)","NLH":"Hyundai (Turquía)",
-      "KNA":"Kia (Corea)","KND":"Kia SUV (Corea)","KNE":"Kia (Corea)","3KP":"Kia (México)","U5Y":"Kia (Eslovaquia)",
-      "WAU":"Audi (Alemania)","TRU":"Audi (Hungría)","WA1":"Audi SUV (Alemania)","WBA":"BMW (Alemania)","WBS":"BMW M","WBY":"BMW i","5UX":"BMW SUV (EE.UU.)","98M":"BMW (Brasil)","WMW":"MINI (Reino Unido)",
-      "988":"Jeep (Brasil)","1C4":"Jeep (EE.UU.)","1J4":"Jeep (EE.UU.)","ZAC":"Jeep (Italia)","1C6":"RAM (EE.UU.)","3C6":"RAM (México)","1C3":"Chrysler/Dodge","2C3":"Chrysler/Dodge (Canadá)",
-      "YV1":"Volvo (Suecia)","YV4":"Volvo SUV (Suecia)","LVY":"Volvo (China)","SAL":"Land Rover (Reino Unido)","SAJ":"Jaguar (Reino Unido)","WP0":"Porsche (Alemania)","WP1":"Porsche SUV (Alemania)",
-      "JF1":"Subaru (Japón)","JF2":"Subaru SUV (Japón)","4S3":"Subaru (EE.UU.)","JMZ":"Mazda (Japón)","JM1":"Mazda (Japón)","3MZ":"Mazda (México)","JSA":"Suzuki (Japón)","JS3":"Suzuki SUV (Japón)","MA3":"Suzuki (India)","JA3":"Mitsubishi (Japón)","JA4":"Mitsubishi SUV (Japón)","MMB":"Mitsubishi (Tailandia)",
-      "LVS":"Ford/Changan (China)","LGW":"Great Wall / Haval (China)","LVV":"Chery (China)","8AE":"Chery (Mercosur)","LFV":"FAW/VW (China)","LDC":"Dongfeng/PSA (China)","LSG":"SAIC/GM (China)","LZW":"SGMW (China)","L6T":"Geely (China)","LB3":"Geely (China)","LNB":"BAIC (China)","LPA":"Changan/PSA (China)"
-    };
-    const ANIOS_VIN = {A:2010,B:2011,C:2012,D:2013,E:2014,F:2015,G:2016,H:2017,J:2018,K:2019,L:2020,M:2021,N:2022,P:2023,R:2024,S:2025,T:2026,V:2027,W:2028,X:2029,Y:2030,1:2001,2:2002,3:2003,4:2004,5:2005,6:2006,7:2007,8:2008,9:2009};
+</header>
 
-    const base = [
-      // JEEP (Toda la línea en Argentina)
-      {p:[],v:[],m:"Jeep",mo:"Renegade",a:2019,ve:"1.8 E.torQ AT6",mc:"E.torQ Evo",cj:"Aisin TF-72SC (AT6)",ma:"5W-30 / 0W-20 Chrysler MS-6395",ml:4.5,aa:"ATF AW-1 / Toyota WS",al:9,fc:"Interno (no sale por cárter)",fm:"HU 7019 z / C 22 037"},
-      {p:[],v:[],m:"Jeep",mo:"Renegade",a:2022,ve:"1.3 Turbo T270 AT6",mc:"GSE T270",cj:"Aisin TF-72SC (AT6)",ma:"0W-30 ACEA C2 / Fiat 9.55535-GS1",ml:4.5,aa:"ATF AW-1 / Toyota WS",al:9,fc:"Interno (no sale por cárter)",fm:"WOE-628 / C 22 037"},
-      {p:[],v:[],m:"Jeep",mo:"Compass",a:2019,ve:"2.4 Tigershark AT6 / AT9",mc:"ED6 Tigershark",cj:"Aisin AT6 (4x2) / ZF 9HP48 (4x4)",ma:"0W-20 Chrysler MS-6395",ml:5.2,aa:"ATF WS (AT6) / ZF Lifeguard 9 (AT9)",al:10,fc:"Interno (no sale por cárter)",fm:"W 7030 / C 25 028"},
-      {p:[],v:[],m:"Jeep",mo:"Commander",a:2022,ve:"1.3 T270 AT6 / 2.0 TD380 AT9",mc:"T270 / Multijet",cj:"Aisin AT6 / ZF 9HP48",ma:"0W-30 ACEA C2 (DPF)",ml:4.8,aa:"ATF WS (AT6) / ZF Lifeguard 9 (AT9)",al:10,fc:"Interno (no sale por cárter)",fm:"HU 7019 z / C 25 028"},
-      {p:[],v:[],m:"Jeep",mo:"Grand Cherokee",a:2016,ve:"3.6 V6 Pentastar ZF 8HP",mc:"ERB Pentastar",cj:"ZF 8HP45 / 8HP70 (8v)",ma:"5W-20 / 5W-30 Chrysler MS-6395",ml:5.6,aa:"ZF LifeguardFluid 8",al:12,fc:"Cárter plástico con filtro integrado",fm:"HU 7026 z / C 24 024"},
-      {p:[],v:[],m:"Jeep",mo:"Grand Cherokee",a:2015,ve:"3.0 V6 CRD Diesel ZF 8HP",mc:"EXF VM Motori",cj:"ZF 8HP70 (8v)",ma:"5W-30 / 5W-40 ACEA C3 / MB 229.51",ml:7.7,aa:"ZF LifeguardFluid 8",al:12,fc:"Cárter plástico con filtro integrado",fm:"HU 7018 z / C 24 024"},
-      {p:[],v:[],m:"Jeep",mo:"Wrangler",a:2018,ve:"3.6 V6 / 2.0 Turbo AT5-AT8",mc:"Pentastar / GME",cj:"W5A580 (NAG1) / ZF 8HP50",ma:"5W-20 / 5W-30 MS-6395",ml:5.6,aa:"ATF+4 (5v) / ZF Lifeguard 8 (8v)",al:11,fc:"Filtro interno cárter + junta",fm:"HU 7026 z / C 28 043"},
-      {p:[],v:[],m:"Jeep",mo:"Patriot / Cherokee",a:2014,ve:"2.4 / 3.2 V6 CVT / ZF 9HP",mc:"ED3 / EHB",cj:"Jatco JF011E CVT / ZF 9HP48",ma:"5W-20 / 0W-20 MS-6395",ml:4.3,aa:"CVTF+4 / NS-2 (CVT) o Lifeguard 9",al:10,fc:"Cartucho enfriador + malla",fm:"W 7030 / C 25 010"},
+<div class="container">
 
-      // VOLKSWAGEN
-      {p:[],v:[],m:"Volkswagen",mo:"Amarok",a:2019,ve:"2.0 TDI Biturbo ZF 8HP",mc:"CNEA / CSHA",cj:"ZF 8HP45 / 8HP70",ma:"5W-30 VW 504/507 (DPF)",ml:7,aa:"ZF Lifeguard 8 / G 060 162",al:12,fc:"Cárter completo con filtro",fm:"HU 7008 z / C 32 130 / WK 8026 z"},
-      {p:[],v:[],m:"Volkswagen",mo:"Amarok",a:2021,ve:"3.0 V6 TDI ZF 8HP",mc:"DDXC / DDXE",cj:"ZF 8HP70",ma:"5W-30 VW 504/507 (DPF)",ml:8,aa:"ZF Lifeguard 8 / G 060 162",al:12,fc:"Cárter completo con filtro",fm:"HU 7012 z / C 32 130 / WK 8026 z"},
-      {p:[],v:[],m:"Volkswagen",mo:"Gol / Voyage / Saveiro",a:2016,ve:"1.6 8v / 16v Manual o I-Motion",mc:"CFZA / CWSA",cj:"Manual MQ200 / Robotizada ASG",ma:"5W-40 / 10W-40 VW 502.00",ml:4,aa:"Engranajes 75W-90 GL-4 (1.9L) + Actuador Pentosin CHF 11S",al:2,fc:"No lleva diálisis",fm:"W 712/52 o W 712/95 / C 2295/2"},
-      {p:[],v:[],m:"Volkswagen",mo:"Polo / Virtus / T-Cross / Nivus",a:2019,ve:"1.6 MSI / 1.0 TSI Tiptronic",mc:"EA211",cj:"Aisin 09G / AQ160",ma:"5W-40 VW 502.00",ml:4,aa:"VW G 055 540 A2 / Toyota WS",al:10,fc:"Filtro interno cárter + junta",fm:"W 712/95 / C 27 009"},
-      {p:[],v:[],m:"Volkswagen",mo:"Vento / Golf / Tiguan",a:2017,ve:"1.4 TSI DSG7 / 2.0 TSI DSG6",mc:"CZCA / CULC",cj:"DSG DQ200 (Seca) / DQ250 (Húmeda)",ma:"5W-40 VW 502.00",ml:4.7,aa:"G 052 182 A2 (DQ250 - 8L diálisis)",al:8,fc:"Cartucho superior (DQ250)",fm:"HU 6002 z / C 35 154"},
+  <!-- PESTAÑAS -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-auto" onclick="cambiarCategoria('auto')">🚗 Autos & Camionetas (Cajas AT / Motor)</button>
+    <button class="tab-btn" id="tab-moto" onclick="cambiarCategoria('moto')">🏍️ Motos (Service 4T / Filtros)</button>
+    <button class="tab-btn" id="tab-clientes" onclick="cambiarCategoria('clientes')">📋 Patentes & VINs Guardados (<span id="countGuardados">0</span>)</button>
+  </div>
 
-      // TOYOTA
-      {p:[],v:[],m:"Toyota",mo:"Hilux / SW4",a:2020,ve:"2.8 TDI 4x4 AT",mc:"1GD-FTV",cj:"Aisin AC60F (6v)",ma:"5W-30 ACEA C2 (DPF)",ml:7.5,aa:"Toyota Genuine ATF WS",al:12,fc:"Malla interna + junta cárter",fm:"W 712/83 / C 23 007 / PU 8021"},
-      {p:[],v:[],m:"Toyota",mo:"Corolla / Corolla Cross",a:2019,ve:"1.8 / 2.0 CVT",mc:"2ZR-FE / M20A",cj:"Aisin K311 / Direct Shift CVT",ma:"0W-20 / 5W-30 ILSAC GF-5/6",ml:4.2,aa:"Toyota CVT Fluid FE",al:10,fc:"Filtro interno cárter + junta",fm:"W 610/9 / C 24 005"},
-      {p:[],v:[],m:"Toyota",mo:"Etios / Yaris / RAV4",a:2019,ve:"1.5 / 2.0 / 2.5 AT-CVT",mc:"2NR-FE / 3ZR / A25A",cj:"Aisin U440E / K114 CVT / UB80E",ma:"0W-20 / 5W-30 API SN",ml:4.2,aa:"ATF WS (AT) o CVT FE (CVT)",al:10,fc:"Filtro interno + junta",fm:"W 68/3 / C 25 024"},
+  <!-- PANEL BUSCADOR VIN / PATENTE / MANUAL -->
+  <div class="panel" id="panelBuscador">
+    <div class="panel-title">
+      <span>🔍 Búsqueda Rápida por VIN (17 dígitos), Patente o Modelo</span>
+      <button class="btn-sm" onclick="limpiarBusqueda()">Limpiar filtros</button>
+    </div>
 
-      // FIAT
-      {p:[],v:[],m:"Fiat",mo:"Cronos / Argo / Pulse",a:2020,ve:"1.8 E.torQ AT6 / 1.0 T200 CVT",mc:"E.torQ / GSE T200",cj:"Aisin TF-72SC (AT6) / Aisin CVT",ma:"5W-30 / 0W-30 Chrysler MS-6395",ml:4.5,aa:"ATF AW-1 (AT6) / CVT FE (Pulse)",al:9,fc:"Interno + junta",fm:"W 7019 z / C 22 037"},
-      {p:[],v:[],m:"Fiat",mo:"Toro",a:2019,ve:"1.8 AT6 / 2.0 Multijet AT9",mc:"E.torQ / 55263088",cj:"Aisin AT6 / ZF 9HP48 (9v)",ma:"5W-30 (Nafta) / 0W-30 C2 (Diesel)",ml:4.5,aa:"ATF WS (AT6) / ZF Lifeguard 9 (AT9)",al:10,fc:"Interno (no sale por cárter)",fm:"HU 7019 z / C 22 037"},
+    <div class="vin-box">
+      <input
+        type="text"
+        id="inputBusqueda"
+        class="vin-input"
+        placeholder="Pegá el VIN de la cédula (ej: 8AWZZZ2HZHA012345), Patente o Modelo (ej: BMW 320, Mercedes, Toro, Tornado)..."
+        oninput="procesarBusqueda(this.value)"
+      />
+      <button class="btn-primary" onclick="procesarBusqueda(document.getElementById('inputBusqueda').value)">BUSCAR</button>
+    </div>
 
-      // CHEVROLET & FORD
-      {p:[],v:[],m:"Chevrolet",mo:"Cruze / Onix / Tracker",a:2019,ve:"1.0T / 1.2T / 1.4T AT6",mc:"LE2 / CSS Prime",cj:"GM 6T30 / 6T35 / 6T40 (GF6)",ma:"5W-30 / 0W-20 dexos1 Gen2/Gen3",ml:4,aa:"GM Dexron VI",al:11,fc:"Interno (apertura de caja)",fm:"W 7056 / C 27 004"},
-      {p:[],v:[],m:"Chevrolet",mo:"S10 / Trailblazer",a:2019,ve:"2.8 Duramax CTDI AT6",mc:"XLD28",cj:"GM 6L50 (6v)",ma:"5W-30 dexos2 (ACEA C3 DPF)",ml:6.2,aa:"GM Dexron VI",al:12,fc:"Filtro interno cárter + junta",fm:"HU 7010 z / C 30 014 / PU 9007 z"},
-      {p:[],v:[],m:"Ford",mo:"Ranger",a:2019,ve:"3.2 TDCi 5 cil AT / 2.0 BiTurbo",mc:"Duratorq P5AT / Panther",cj:"Ford 6R80 (6v) / 10R80 (10v)",ma:"5W-30 Ford WSS-M2C913-D",ml:9.8,aa:"Mercon LV (6v) / Mercon ULV (10v)",al:13,fc:"Filtro interno cárter + junta",fm:"HU 7002 z / C 23 111 / PU 8028"},
-      {p:[],v:[],m:"Ford",mo:"Focus / EcoSport / Kuga / Territory",a:2018,ve:"1.5T / 2.0 AT6 / Powershift / CVT",mc:"EcoBoost / Duratec",cj:"6F35 (AT6) / 6DCT250 / Punch CVT",ma:"5W-30 / 5W-20 WSS-M2C946-B1",ml:4.5,aa:"Mercon LV (6F35) / CVT Fluid",al:10,fc:"Interno según caja",fm:"W 7015 / C 16 134/1"},
+    <!-- BANNER DECODIFICADOR VIN -->
+    <div class="vin-banner" id="vinBanner">
+      <div class="vin-chips" id="vinChips"></div>
+      <button class="btn-sm btn-blue" id="btnGuardarVinEnFicha" onclick="vincularVinActual()">📌 Asociar este VIN/Patente a la ficha abierta</button>
+    </div>
 
-      // FRANCESES (PEUGEOT / CITROËN / RENAULT)
-      {p:[],v:[],m:"Peugeot",mo:"208 / 308 / 408 / 2008 / 3008",a:2018,ve:"1.6 VTi / THP AT6 (Aisin)",mc:"EC5 / EP6FDT",cj:"Aisin EAT6 (6v)",ma:"5W-30 / 0W-30 PSA B71 2290/2312",ml:4.2,aa:"AW-1 / JWS 3324 / Toyota WS",al:9,fc:"Interno (no sale por cárter)",fm:"HU 711/51 x / C 36 003"},
-      {p:[],v:[],m:"Citroën",mo:"C4 Cactus / C4 Lounge / C3",a:2019,ve:"1.6 VTi / THP AT6",mc:"EC5 / EP6",cj:"Aisin EAT6 (6v)",ma:"5W-30 PSA B71 2290",ml:4.2,aa:"AW-1 / JWS 3324",al:9,fc:"Interno (no sale por cárter)",fm:"HU 711/51 x / C 3585"},
-      {p:[],v:[],m:"Renault",mo:"Duster / Oroch / Fluence / Koleos / Stepway",a:2018,ve:"1.6 / 2.0 AT4 (DP2) o CVT",mc:"H4M / F4R / M4R",cj:"DP2/AL4 (4v) o Jatco JF011E/JF015E CVT",ma:"5W-30 / 5W-40 RN0710",ml:4.4,aa:"Dexron III (DP2) / Nissan NS-2 o NS-3 (CVT)",al:10,fc:"Cartucho enfriador (CVT)",fm:"W 67/1 / C 25 040"},
-      {p:[],v:[],m:"Nissan",mo:"Kicks / Sentra / Versa / Frontier",a:2019,ve:"1.6 / 1.8 CVT o 2.3 BiTurbo AT7",mc:"HR16DE / MRA8DE / YS23",cj:"Jatco CVT7/8 o Jatco JR710E (7v)",ma:"5W-30 API SN o ACEA C3 (Frontier)",ml:4.1,aa:"Nissan NS-3 (CVT) / Matic S (Frontier)",al:10,fc:"Cartucho enfriador + interno",fm:"W 67/1 / C 25 012"},
-      {p:[],v:[],m:"Honda",mo:"Civic / HR-V / CR-V / Fit",a:2018,ve:"1.5T / 1.8 / 2.0 CVT",mc:"R18Z / L15B / K20Z",cj:"Honda CVT (HCF-2)",ma:"0W-20 API SN / ILSAC GF-5/6",ml:3.7,aa:"Honda HCF-2 (Exclusivo)",al:9,fc:"Cartucho enfriador + interno",fm:"W 610/6 / C 22 020"},
-      {p:[],v:[],m:"Subaru",mo:"Forester / Outback / XV / Impreza",a:2018,ve:"2.0 / 2.5 Boxer Lineartronic CVT",mc:"FB20 / FB25",cj:"Subaru Lineartronic TR580 / TR690",ma:"0W-20 API SN / ILSAC GF-5",ml:4.8,aa:"Subaru CVT Fluid Lineartronic II",al:11,fc:"Malla interna cárter + junta",fm:"W 610/6 / C 2201"},
-      {p:[],v:[],m:"Hyundai",mo:"Tucson / Santa Fe / Creta / Kona",a:2018,ve:"1.6T / 2.0 / 2.2 CRDi AT6-AT8",mc:"G4NA / D4HB",cj:"Hyundai A6MF1 / A8LF1",ma:"5W-30 ACEA A5/B5 o C3 (DPF)",ml:4.5,aa:"Hyundai ATF SP-IV / SP-IV-RR",al:10,fc:"Interno (apertura de caja)",fm:"W 811/80 / C 28 035"},
-      {p:[],v:[],m:"Kia",mo:"Sportage / Sorento / Cerato / Carnival",a:2018,ve:"2.0 Nafta / 2.2 CRDi AT6-AT8",mc:"G4NA / D4HB",cj:"Kia A6MF1 / A8LF1",ma:"5W-30 ACEA A5/B5 o C3 (DPF)",ml:4.5,aa:"Kia ATF SP-IV / SP-IV-RR",al:10,fc:"Interno (apertura de caja)",fm:"W 811/80 / C 28 035"},
-      {p:[],v:[],m:"BMW",mo:"Serie 1 / 3 / 5 / X1 / X3 / X5",a:2017,ve:"2.0 / 3.0 Turbo ZF 8HP",mc:"N20 / B48 / B58",cj:"ZF 8HP45 / 8HP50 / 8HP70",ma:"5W-30 / 5W-40 BMW LL-01 / LL-04",ml:5.2,aa:"ZF LifeguardFluid 8",al:11,fc:"Cárter plástico con filtro integrado",fm:"HU 816 x / C 24 025"},
-      {p:[],v:[],m:"Mercedes-Benz",mo:"Clase A / C / E / GLA / GLC",a:2017,ve:"1.6 / 2.0 Turbo 7G / 9G-Tronic",mc:"M270 / M274",cj:"7G-DCT / 7G-Tronic / 9G-Tronic",ma:"5W-30 / 5W-40 MB 229.5 / 229.51",ml:6.5,aa:"MB 236.15 (7G) / MB 236.17 (9G)",al:11,fc:"Cárter con filtro integrado (9G)",fm:"HU 711/6 z / C 28 004"},
-      {p:[],v:[],m:"Audi",mo:"A1 / A3 / A4 / Q3 / Q5",a:2017,ve:"1.4 / 2.0 TFSI S-Tronic / ZF 8HP",mc:"CZEA / CYMC",cj:"S-Tronic DL382 / DQ250 / ZF 8HP",ma:"5W-30 / 5W-40 VW 504/507 o 502",ml:5.2,aa:"G 052 529 (S-Tronic) / Lifeguard 8",al:9,fc:"Cartuchos internos + junta",fm:"HU 6013 z / C 27 009"},
-      {p:[],v:[],m:"RAM",mo:"1500 / 2500",a:2018,ve:"5.7 V8 HEMI ZF 8HP / 6.7 Cummins",mc:"EZH HEMI / ISB",cj:"ZF 8HP70 (1500) / Aisin AS69RC (2500)",ma:"5W-20 MS-6395 (HEMI) / 15W-40 CK-4",ml:6.6,aa:"ZF Lifeguard 8 (1500) / ASRC (2500)",al:12,fc:"Cárter con filtro (ZF8) / Interno",fm:"W 7030 / C 30 019"}
-    ];
-    let guardados =[];
-    try {
-      const datosGuardados = json.parse(localStorage.getIten(`ldb_custom_v2') || '[]');
-          guardados = 
-      Array.isArray (datosGuardados) ? datosGuardados : [];  
-      } catch {
-      guardados = [];
-      }
-    let db = [...base, ...guardados];
-    let actual = null;
+    <!-- SELECTORES MANUALES ENCADENADOS -->
+    <div class="selectors-grid" id="selectoresManuales">
+      <div class="field">
+        <label>1. Marca</label>
+        <select id="selMarca" onchange="onSelectMarca()">
+          <option value="">-- Todas las marcas --</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>2. Modelo</label>
+        <select id="selModelo" onchange="onSelectModelo()">
+          <option value="">-- Seleccionar modelo --</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>3. Año / Generación</label>
+        <select id="selAnio" onchange="onSelectAnio()">
+          <option value="">-- Seleccionar año --</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>4. Versión / Motor / Caja</label>
+        <select id="selVersion" onchange="onSelectVersion()">
+          <option value="">-- Seleccionar versión --</option>
+        </select>
+      </div>
+    </div>
+  </div>
 
-    const m = document.getElementById('m'), mo = document.getElementById('mo'), a = document.getElementById('a'), v = document.getElementById('v'), res = document.getElementById('res'), est = document.getElementById('est');
+  <!-- COINCIDENCIAS RÁPIDAS -->
+  <div class="matches-bar" id="matchesBar">
+    <div class="panel-title">
+      <span id="matchesTitle">Vehículos coincidentes</span>
+    </div>
+    <div class="matches-grid" id="matchesGrid"></div>
+  </div>
 
-    function setEst(txt, tipo = 'ok') {
-      if (!txt) { est.style.display = 'none'; return; }
-      est.textContent = txt;
-      est.className = tipo === 'warn' ? 'est-warn' : 'est-ok';
-      est.style.display = 'block';
-    }
+  <!-- VISTA PRINCIPAL DE FICHA + COTIZADOR WHATSAPP -->
+  <div id="vistaFicha"></div>
 
-    function fill(el, arr, txt) {
-      el.innerHTML = `<option value="">${txt}</option>`;
-      [...new Set(arr)].sort().forEach(x => { const o = document.createElement('option'); o.value = o.textContent = x; el.appendChild(o); });
-      el.disabled = !arr.length;
-    }
-    function init() { fill(m, db.map(x => x.m), 'Seleccionar marca (' + [...new Set(db.map(x=>x.m))].length + ' marcas)...'); }
-    init();
+  <!-- VISTA DE CLIENTES / PATENTES / VINS GUARDADOS -->
+  <div id="vistaClientes" style="display:none;">
+    <div class="panel">
+      <div class="panel-title">
+        <span>📋 Vehículos Agendados con Patente / VIN / Notas de Taller</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="saved-table">
+          <thead>
+            <tr>
+              <th>Vehículo / Caja</th>
+              <th>Patentes Guardadas</th>
+              <th>VINs Guardados</th>
+              <th>Notas</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaClientesBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-    m.onchange = () => { fill(mo, db.filter(x => x.m === m.value).map(x => x.mo), 'Modelo...'); fill(a, [], 'Año...'); fill(v, [], 'Versión...'); };
-    mo.onchange = () => { fill(a, db.filter(x => x.m === m.value && x.mo === mo.value).map(x => x.a), 'Año...'); fill(v, [], 'Versión...'); };
-    a.onchange = () => { fill(v, db.filter(x => x.m === m.value && x.mo === mo.value && String(x.a) === a.value).map(x => x.ve), 'Versión...'); };
+</div>
 
-    document.getElementById('fm').onsubmit = e => {
-      e.preventDefault(); setEst('');
-      const x = db.find(i => i.m === m.value && i.mo === mo.value && String(i.a) === a.value && i.ve === v.value);
-      if (x) show(x);
-    };
+<!-- MODAL AGENDAR / EDITAR FICHA -->
+<div class="modal-backdrop" id="modalFicha">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitulo" style="font-size:1.1rem;">Nueva Ficha Técnica / Agendar Vehículo</h2>
+      <button class="btn-sm" onclick="cerrarModal()">✕ Cerrar</button>
+    </div>
 
-    document.getElementById('fc').onsubmit = async e => {
-      e.preventDefault(); setEst('');
-      const c = document.getElementById('cod').value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-      const loc = db.find(i => (i.p && i.p.includes(c)) || (i.v && i.v.includes(c)));
-      if (loc) { show(loc, c); return; }
+    <input type="hidden" id="editId" />
 
-      if (c.length === 17) {
-        const pref = c.substring(0, 3);
-        const fab = WMI[pref] || `Fabricante código "${pref}"`;
-        const anioVin = ANIOS_VIN[c.charAt(9)] || 'S/D';
-        const marcaBase = fab.split(' ').at(0);
+    <div class="form-grid">
+      <div class="field">
+        <label>Categoría</label>
+        <select id="fCat">
+          <option value="auto">Auto / Camioneta</option>
+          <option value="moto">Moto 4T</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Marca *</label>
+        <input type="text" id="fMarca" placeholder="Ej: Mercedes-Benz, BMW, Honda" />
+      </div>
+      <div class="field">
+        <label>Modelo *</label>
+        <input type="text" id="fModelo" placeholder="Ej: C250 W205, 320i F30, Tornado 250" />
+      </div>
+      <div class="field">
+        <label>Años *</label>
+        <input type="text" id="fAnio" placeholder="Ej: 2015-2021" />
+      </div>
+      <div class="field">
+        <label>Versión / Motor *</label>
+        <input type="text" id="fVersion" placeholder="Ej: 2.0 Turbo 211cv" />
+      </div>
+      <div class="field">
+        <label>Caja / Transmisión</label>
+        <input type="text" id="fCaja" placeholder="Ej: 7G-Tronic Plus (722.9) / ZF 8HP50 / 6 Vel" />
+      </div>
+      <div class="field">
+        <label>Aptitud Diálisis</label>
+        <select id="fDialisis">
+          <option value="ok">✅ APTA DIÁLISIS CON MÁQUINA</option>
+          <option value="warn">⚠️ DIÁLISIS CON ADAPTADOR (Intercambiador)</option>
+          <option value="no">🛑 NO DIALIZAR — SOLO GRAVEDAD (Embrague Seco / Moto)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Norma Fluido Caja / Moto *</label>
+        <input type="text" id="fNorma" placeholder="Ej: MB 236.15 / ZF Lifeguard 8 / JASO MA2" />
+      </div>
+      <div class="field">
+        <label>Capacidad Total / Seco (Litros)</label>
+        <input type="number" step="0.1" id="fLitrosTotal" placeholder="Ej: 8.5" />
+      </div>
+      <div class="field">
+        <label>Litros Reales Diálisis / Service *</label>
+        <input type="number" step="0.1" id="fLitrosDialisis" placeholder="Ej: 11" />
+      </div>
+      <div class="field">
+        <label>⭐ Aceite NISHIMOTO Recomendado</label>
+        <input type="text" id="fNishimoto" placeholder="Ej: Nishimoto ATF 8HP / ATF M9G / Ultima Racing 10W-40" />
+      </div>
+      <div class="field">
+        <label>Equivalencia Valvoline</label>
+        <input type="text" id="fValvoline" placeholder="Ej: Valvoline MaxLife ATF" />
+      </div>
+      <div class="field">
+        <label>Equivalencia Liqui Moly</label>
+        <input type="text" id="fLiquiMoly" placeholder="Ej: Top Tec ATF 1800" />
+      </div>
+      <div class="field">
+        <label>Equivalencia Mannol</label>
+        <input type="text" id="fMannol" placeholder="Ej: Mannol AG60 8218" />
+      </div>
+      <div class="field">
+        <label>Equivalencia Motul</label>
+        <input type="text" id="fMotul" placeholder="Ej: Motul ATF VI" />
+      </div>
+      <div class="field">
+        <label>Filtro de Caja & Junta (Códigos / Tipo)</label>
+        <input type="text" id="fFiltroCaja" placeholder="Ej: Cárter plástico ZF c/filtro integrado" />
+      </div>
+      <div class="field">
+        <label>Aceite Motor (Viscosidad + Litros)</label>
+        <input type="text" id="fMotorAceite" placeholder="Ej: 5W-30 Nishimoto N5 (6.5 L)" />
+      </div>
+      <div class="field">
+        <label>Filtro de Aceite Motor</label>
+        <input type="text" id="fFiltroMotor" placeholder="Ej: Mann HU 711/51 / Wega WOE-450" />
+      </div>
+      <div class="field">
+        <label>Patentes asociadas (separadas por coma)</label>
+        <input type="text" id="fPatentes" placeholder="Ej: AD123BC, AF998ZZ" />
+      </div>
+      <div class="field">
+        <label>VINs asociados (separados por coma)</label>
+        <input type="text" id="fVins" placeholder="Ej: WBA8E5109GK123456" />
+      </div>
+    </div>
 
-        const optMarca = [...m.options].find(o => o.value.toLowerCase() === marcaBase.toLowerCase());
-        if (optMarca) { m.value = optMarca.value; m.onchange(); }
+    <div class="field" style="margin-top:12px;">
+      <label>Notas técnicas del lubricentro (adaptadores, torque, advertencias)</label>
+      <textarea id="fNotas" rows="2" placeholder="Ej: Usar adaptador enfriador #14. Controlar nivel a 40°C con motor en marcha."></textarea>
+    </div>
 
-        setEst(`VIN: ${fab} • Año: ${anioVin}. Consultando base internacional...`, 'ok');
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+      <button onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" onclick="guardarFichaModal()">💾 GUARDAR FICHA</button>
+    </div>
+  </div>
+</div>
 
-        try {
-          const url = `https://vpic.nhtsa.dot.gov/apu/vehicles/DecodeVinvalues/${encoreURICompomnent(c)}?format=json`;
-          const r = await fetch(url); if (!r.ok) throw new Error(`Error HTTP $ {r.satatus}`);
-          const d = await r.json();
-          const info = d.Results && d.Results[0];
-          if (info && info.Model) {
-            const detalle = `${info.Make} ${info.Model} (${info.ModelYear || anioVin}) ${info.DisplacementL ? info.DisplacementL + 'L' : ''}`.trim();
-            setEst(`VIN Importado Decodificado: ${detalle}`, 'ok');
-            const mt = db.find(i => i.m.toLowerCase() === info.Make.trim().toLowerCase() && i.mo.toLowerCase().includes(info.Model.trim().toLowerCase()));
-            if (mt) { show(mt, c); return; }
-            show({
-              m: info.Make.trim(), mo: info.Model.trim(), a: info.ModelYear || anioVin,
-              ve: `${info.Trim || ''} ${info.DisplacementL ? info.DisplacementL + 'L' : ''}`.trim() || 'Importado (Confirmar versión)',
-              mc: info.EngineModel || `${info.EngineCylinders || ''} cil. ${info.FuelTypePrimary || ''}`.trim() || 'S/D',
-              cj: info.TransmissionStyle || 'Confirmar caja',
-              ma: 'Confirmar norma en catálogo', ml: 5, aa: 'Confirmar norma ATF/CVT', al: 10, fc: 'Confirmar', fm: 'Confirmar'
-            }, c);
-          } else {
-            setEst(`Chasis identificado: ${fab} — Año ${anioVin}. Elegí el modelo de ${marcaBase} abajo o agéndalo con "+ Cargar Ficha".`, 'warn');
-          }
-        } catch {
-          setEst(`Chasis identificado offline: ${fab} — Año ${anioVin}. Elegí el modelo de ${marcaBase} en el selector de abajo.`, 'warn');
-        }
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================================
+// 1. TABLAS DE DECODIFICACIÓN VIN (WMI MERCOSUR + MUNDIAL Y AÑOS)
+// ============================================================================
+const WMI = {
+  // Argentina
+  "8AW": { marca: "Volkswagen", pais: "Argentina (Pacheco)" },
+  "8AJ": { marca: "Toyota", pais: "Argentina (Zárate)" },
+  "8AG": { marca: "Chevrolet", pais: "Argentina (Alvear)" },
+  "8AF": { marca: "Ford", pais: "Argentina (Pacheco)" },
+  "8AP": { marca: "Fiat", pais: "Argentina (Ferreyra)" },
+  "8AD": { marca: "Peugeot", pais: "Argentina (El Palomar)" },
+  "8BC": { marca: "Citroën", pais: "Argentina (El Palomar)" },
+  "8A1": { marca: "Renault", pais: "Argentina (Santa Isabel)" },
+  "8AN": { marca: "Nissan", pais: "Argentina (Santa Isabel)" },
+  "8AE": { marca: "Mercedes-Benz", pais: "Argentina (Virrey del Pino)" },
+  // Brasil
+  "9BW": { marca: "Volkswagen", pais: "Brasil" },
+  "93H": { marca: "Honda", pais: "Brasil" },
+  "9BH": { marca: "Hyundai", pais: "Brasil" },
+  "988": { marca: "Jeep", pais: "Brasil (Goiana)" },
+  "9BD": { marca: "Fiat", pais: "Brasil" },
+  "9BG": { marca: "Chevrolet", pais: "Brasil" },
+  "9BF": { marca: "Ford", pais: "Brasil" },
+  "93Y": { marca: "Renault", pais: "Brasil" },
+  "935": { marca: "Citroën", pais: "Brasil" },
+  "936": { marca: "Peugeot", pais: "Brasil" },
+  "9BR": { marca: "Toyota", pais: "Brasil" },
+  "94D": { marca: "Nissan", pais: "Brasil" },
+  "9BM": { marca: "Mercedes-Benz", pais: "Brasil" },
+  "9C2": { marca: "Honda", pais: "Brasil (Motos)" },
+  "9C6": { marca: "Yamaha", pais: "Brasil (Motos)" },
+  // Alemania / Europa
+  "WBA": { marca: "BMW", pais: "Alemania" },
+  "WBS": { marca: "BMW", pais: "Alemania (M)" },
+  "WBY": { marca: "BMW", pais: "Alemania" },
+  "WBX": { marca: "BMW", pais: "Alemania (X)" },
+  "WMW": { marca: "MINI", pais: "Reino Unido / Alemania" },
+  "WDD": { marca: "Mercedes-Benz", pais: "Alemania" },
+  "WDC": { marca: "Mercedes-Benz", pais: "Alemania (SUV)" },
+  "W1K": { marca: "Mercedes-Benz", pais: "Alemania" },
+  "W1N": { marca: "Mercedes-Benz", pais: "Alemania (SUV)" },
+  "WDB": { marca: "Mercedes-Benz", pais: "Alemania" },
+  "WDF": { marca: "Mercedes-Benz", pais: "Alemania / España" },
+  "4JG": { marca: "Mercedes-Benz", pais: "EE. UU. (SUV)" },
+  "55S": { marca: "Mercedes-Benz", pais: "EE. UU." },
+  "WVW": { marca: "Volkswagen", pais: "Alemania" },
+  "WV1": { marca: "Volkswagen", pais: "Alemania (Comercial)" },
+  "WV2": { marca: "Volkswagen", pais: "Alemania" },
+  "WAU": { marca: "Audi", pais: "Alemania" },
+  "TRU": { marca: "Audi", pais: "Hungría" },
+  "VF1": { marca: "Renault", pais: "Francia" },
+  "VF3": { marca: "Peugeot", pais: "Francia" },
+  "VF7": { marca: "Citroën", pais: "Francia" },
+  "ZFA": { marca: "Fiat", pais: "Italia" },
+  "ZAR": { marca: "Alfa Romeo", pais: "Italia" },
+  "YV1": { marca: "Volvo", pais: "Suecia" },
+  "SAL": { marca: "Land Rover", pais: "Reino Unido" },
+  "VBK": { marca: "KTM", pais: "Austria (Motos)" },
+  "ZBN": { marca: "Benelli", pais: "Italia (Motos)" },
+  // Japón / Corea / India / China
+  "JTD": { marca: "Toyota", pais: "Japón" },
+  "JTE": { marca: "Toyota", pais: "Japón" },
+  "JTM": { marca: "Toyota", pais: "Japón" },
+  "JHM": { marca: "Honda", pais: "Japón" },
+  "JH2": { marca: "Honda", pais: "Japón (Motos)" },
+  "JYA": { marca: "Yamaha", pais: "Japón (Motos)" },
+  "JN1": { marca: "Nissan", pais: "Japón" },
+  "JS2": { marca: "Suzuki", pais: "Japón" },
+  "JMZ": { marca: "Mazda", pais: "Japón" },
+  "JF1": { marca: "Subaru", pais: "Japón" },
+  "KMH": { marca: "Hyundai", pais: "Corea del Sur" },
+  "KNA": { marca: "Kia", pais: "Corea del Sur" },
+  "MD2": { marca: "Bajaj", pais: "India (Motos)" },
+  "ME3": { marca: "Royal Enfield", pais: "India (Motos)" },
+  "LBB": { marca: "Benelli", pais: "China (Motos)" },
+  // Norteamérica (México / EE.UU.)
+  "3VW": { marca: "Volkswagen", pais: "México" },
+  "3FA": { marca: "Ford", pais: "México" },
+  "3N1": { marca: "Nissan", pais: "México" },
+  "3G1": { marca: "Chevrolet", pais: "México" },
+  "3C4": { marca: "Jeep", pais: "México" },
+  "1FA": { marca: "Ford", pais: "EE. UU." },
+  "1FT": { marca: "Ford", pais: "EE. UU." },
+  "1G1": { marca: "Chevrolet", pais: "EE. UU." },
+  "1C4": { marca: "Jeep", pais: "EE. UU." },
+  "5UX": { marca: "BMW", pais: "EE. UU. (X3/X5)" }
+};
+
+const ANIOS_VIN = {
+  "1": 2001, "2": 2002, "3": 2003, "4": 2004, "5": 2005,
+  "6": 2006, "7": 2007, "8": 2008, "9": 2009, "A": 2010,
+  "B": 2011, "C": 2012, "D": 2013, "E": 2014, "F": 2015,
+  "G": 2016, "H": 2017, "J": 2018, "K": 2019, "L": 2020,
+  "M": 2021, "N": 2022, "P": 2023, "R": 2024, "S": 2025,
+  "T": 2026, "V": 2027, "W": 2028, "X": 2029, "Y": 2030
+};
+
+// ============================================================================
+// 2. BASE DE DATOS TÉCNICA INICIAL (AUTOS, CAMIONETAS & MOTOS)
+// ============================================================================
+const BASE_INICIAL = [
+  // --- MERCEDES-BENZ ---
+  {
+    id: "mb-c200-w205-7g",
+    cat: "auto",
+    marca: "Mercedes-Benz",
+    modelo: "Clase C (W204 / W205) C200 / C250",
+    anio: "2011-2018",
+    version: "1.8 / 2.0 Turbo (Caja 7G-Tronic Plus)",
+    caja: "7G-Tronic Plus (722.9 FE — Convertidor de par)",
+    dialisis: "warn",
+    norma: "MB 236.15 (ATF 134 FE — Fluido Azul Baja Viscosidad)",
+    litrosTotal: 9.0,
+    litrosDialisis: 12.0,
+    nishimoto: "Nishimoto ATF Dexron VI / ATF WS (Verificar MB 236.15)",
+    valvoline: "Valvoline ATF Pro 236.15 / MaxLife ATF",
+    liquiMoly: "Liqui Moly Top Tec ATF 1900 (Color Azul MB 236.15)",
+    mannol: "Mannol ATF AG60 / 8222 (MB 236.15)",
+    motul: "Motul ATF VI / Multi ATF",
+    filtroCaja: "Filtro interno 722.9 + Junta de cárter + 6 tornillos aluminio (Mann H 182 KIT)",
+    motorAceite: "5W-40 / 5W-30 Nishimoto N5 (MB 229.5) — 6.5 L",
+    filtroMotor: "Mann HU 711/51 / Mahle OX 380D",
+    notas: "ATENCIÓN: Caja 722.9 post-06/2010 lleva fluido AZUL MB 236.15 (NO mezclar con rojo 236.14). Drenar también convertidor si tiene tapón y medir nivel a 45°C.",
+    p: [],
+    v: []
+  },
+  {
+    id: "mb-c300-glc-9g",
+    cat: "auto",
+    marca: "Mercedes-Benz",
+    modelo: "Clase C (W205) / GLC 250 / GLC 300 / GLE",
+    anio: "2016-2024",
+    version: "2.0 Turbo (Caja 9G-Tronic)",
+    caja: "9G-Tronic (725.0 — 9 Velocidades)",
+    dialisis: "warn",
+    norma: "MB 236.17 (ATF D971)",
+    litrosTotal: 10.0,
+    litrosDialisis: 13.0,
+    nishimoto: "Nishimoto ATF M9G (Específico MB 236.17)",
+    valvoline: "Valvoline ATF Pro 236.17",
+    liquiMoly: "Liqui Moly Top Tec ATF 1950 (MB 236.17)",
+    mannol: "Mannol ATF 8218 / MB 236.17",
+    motul: "Motul ATF 236.17",
+    filtroCaja: "Tapa de cárter plástica con 2 filtros integrados + tubo rebalse (Kit OEM A7252703707)",
+    motorAceite: "5W-30 / 0W-30 Nishimoto N5 (MB 229.51 / 229.52) — 6.5 L",
+    filtroMotor: "Mann HU 7044 z",
+    notas: "Requiere adaptador de llenado/diálisis específico para cárter 725.0 y protocolo de nivel con escáner a 40°C.",
+    p: [],
+    v: []
+  },
+  {
+    id: "mb-a200-7gdct",
+    cat: "auto",
+    marca: "Mercedes-Benz",
+    modelo: "Clase A / CLA / GLA (W176 / W177)",
+    anio: "2013-2023",
+    version: "A200 / A250 (Caja 7G-DCT)",
+    caja: "7G-DCT (724.0 — Doble Embrague Húmedo)",
+    dialisis: "ok",
+    norma: "MB 236.21 / MB 236.25",
+    litrosTotal: 6.0,
+    litrosDialisis: 8.0,
+    nishimoto: "Nishimoto DCTF 7 (Doble Embrague Húmedo)",
+    valvoline: "Valvoline DCT",
+    liquiMoly: "Liqui Moly Doppelkupplungsgetriebe-Öl 8100",
+    mannol: "Mannol DCT Fluid 8202",
+    motul: "Motul Multi DCTF",
+    filtroCaja: "Filtro cartucho externo + Filtro interno de succión (Kit 724.0)",
+    motorAceite: "5W-40 / 5W-30 Nishimoto N5 (MB 229.5) — 5.8 L",
+    filtroMotor: "Mann HU 7044 z / Wega WOE-455",
+    notas: "Caja de doble embrague húmedo. Cambiar ambos filtros (cartucho exterior e interior).",
+    p: [],
+    v: []
+  },
+
+  // --- BMW ---
+  {
+    id: "bmw-320-330-zf8hp",
+    cat: "auto",
+    marca: "BMW",
+    modelo: "Serie 1 (F20) / Serie 3 (F30 / G20) / X3 / X5",
+    anio: "2012-2024",
+    version: "118i / 120i / 320i / 328i / 330i / X3 20i-30i",
+    caja: "ZF 8HP45 / 8HP50 / 8HP70 (8 Velocidades)",
+    dialisis: "warn",
+    norma: "ZF LifeguardFluid 8 / BMW 83 22 2 289 720 (ATF 3+)",
+    litrosTotal: 8.5,
+    litrosDialisis: 11.5,
+    nishimoto: "Nishimoto ATF 8HP (Full Sintético ZF 8HP)",
+    valvoline: "Valvoline MaxLife ATF / ATF Pro 8HP",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol AG60 8218 (ZF 8HP)",
+    motul: "Motul ATF VI",
+    filtroCaja: "Cárter plástico ZF con filtro integrado + junta + tapón (ZF 1087.298.247)",
+    motorAceite: "5W-30 / 0W-30 Nishimoto N5 (BMW LL-01 / LL-04) — 5.2 L",
+    filtroMotor: "Mann HU 816 x (N20) / HU 6014 z (B48)",
+    notas: "En F30/G20 se conecta la máquina de diálisis mediante adaptador en el intercambiador de calor lateral o líneas al radiador. Nivel final entre 40°C y 50°C.",
+    p: [],
+    v: []
+  },
+  {
+    id: "bmw-x1-f48-aisin",
+    cat: "auto",
+    marca: "BMW",
+    modelo: "X1 (F48) / X2 (F39) / MINI Cooper",
+    anio: "2016-2023",
+    version: "sDrive18i / sDrive20i / xDrive25i (Motor Transversal)",
+    caja: "Aisin AWF8F35 (AT8 — Convertidor de par)",
+    dialisis: "warn",
+    norma: "BMW ATF 6 / Aisin AW-1 / JWS 3324",
+    litrosTotal: 7.0,
+    litrosDialisis: 10.0,
+    nishimoto: "Nishimoto ATF WS (Aisin AW-1 / JWS 3324)",
+    valvoline: "Valvoline MaxLife ATF",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol ATF WS 8217",
+    motul: "Motul ATF VI",
+    filtroCaja: "Filtro interno (no desmontable sin abrir carcasa — realizar barrido completo por diálisis)",
+    motorAceite: "5W-30 / 0W-30 Nishimoto N5 (BMW LL-04) — 5.25 L",
+    filtroMotor: "Mann HU 6014 z",
+    notas: "Motor transversal con caja Aisin de 8 marchas. Requiere placa adaptadora para intercambiador agua-aceite.",
+    p: [],
+    v: []
+  },
+
+  // --- VOLKSWAGEN ---
+  {
+    id: "vw-amarok-zf8",
+    cat: "auto",
+    marca: "Volkswagen",
+    modelo: "Amarok",
+    anio: "2012-2025",
+    version: "2.0 TDI (180cv) / V6 3.0 TDI (224 / 258cv)",
+    caja: "ZF 8HP45 / 8HP70 (8 Velocidades)",
+    dialisis: "warn",
+    norma: "VW G 060 162 A2 / ZF LifeguardFluid 8",
+    litrosTotal: 9.0,
+    litrosDialisis: 12.0,
+    nishimoto: "Nishimoto ATF 8HP (Full Sintético ZF 8HP)",
+    valvoline: "Valvoline MaxLife ATF",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol AG60 8218",
+    motul: "Motul ATF VI",
+    filtroCaja: "Cárter plástico ZF con filtro integrado (ZF 1087.298.247 / Wega WFC-905)",
+    motorAceite: "5W-30 Nishimoto N5 (VW 504.00/507.00) — 7.0 L (2.0) / 8.0 L (V6)",
+    filtroMotor: "Mann HU 7008 z (2.0) / HU 7012 z (V6)",
+    notas: "Conectar máquina de diálisis en las líneas de refrigeración del lado derecho del radiador. Nivel entre 40°C y 45°C.",
+    p: [],
+    v: []
+  },
+  {
+    id: "vw-vento-tiguan-dq250",
+    cat: "auto",
+    marca: "Volkswagen",
+    modelo: "Vento / Golf GTI / Tiguan / Passat",
+    anio: "2010-2022",
+    version: "2.0 TSI (Caja DSG 6 Marchas)",
+    caja: "DSG DQ250 (02E — Doble Embrague Húmedo)",
+    dialisis: "ok",
+    norma: "VW G 052 182 A2 (TL 052 182)",
+    litrosTotal: 6.0,
+    litrosDialisis: 7.5,
+    nishimoto: "Nishimoto DCTF 7 (Doble Embrague Húmedo)",
+    valvoline: "Valvoline DCT",
+    liquiMoly: "Liqui Moly Doppelkupplungsgetriebe-Öl 8100",
+    mannol: "Mannol DCT Fluid 8202",
+    motul: "Motul Multi DCTF",
+    filtroCaja: "Filtro cartucho superior bajo batería/admisión (Mann H 6003 z / Wega WOE-456)",
+    motorAceite: "5W-40 Nishimoto N1 Pro / N5 (VW 502.00) — 5.7 L",
+    filtroMotor: "Mann W 719/45 (Gen2) / HU 6002 z (Gen3)",
+    notas: "Embrague húmedo (6 marchas). Cambiar filtro cartucho superior y junta de carcasa.",
+    p: [],
+    v: []
+  },
+  {
+    id: "vw-golf-vento-dq200",
+    cat: "auto",
+    marca: "Volkswagen",
+    modelo: "Golf VII / Vento / Polo GTS",
+    anio: "2013-2021",
+    version: "1.4 TSI (Caja DSG 7 Marchas Seco)",
+    caja: "DSG DQ200 (0AM / 0CW — Doble Embrague Seco)",
+    dialisis: "no",
+    norma: "Caja: VW G 052 512 (75W GL-4) | Mecatrónica: G 004 000 M2",
+    litrosTotal: 1.7,
+    litrosDialisis: 2.0,
+    nishimoto: "Nishimoto GL-4 75W (Caja mecánica) — NO usar ATF",
+    valvoline: "Valvoline Gear Oil 75W",
+    liquiMoly: "Liqui Moly Top Tec MTF 5100 75W",
+    mannol: "Mannol MTF-4 75W-80",
+    motul: "Motul Multi DCTF / Gear 300 75W",
+    filtroCaja: "Sin filtro externo (circuito hidráulico mecatrónica sellado)",
+    motorAceite: "5W-40 / 5W-30 Nishimoto N5 (VW 502.00/504.00) — 4.0 L",
+    filtroMotor: "Mann W 712/95 / Wega WO-153",
+    notas: "🛑 NO CONECTAR MÁQUINA DE DIÁLISIS. Caja de embrague seco: lleva 1.7 L de aceite de engranajes 75W por gravedad y 1.0 L aparte en mecatrónica.",
+    p: [],
+    v: []
+  },
+  {
+    id: "vw-taos-tcross-aq250",
+    cat: "auto",
+    marca: "Volkswagen",
+    modelo: "Taos / T-Cross / Nivus / Polo / Virtus",
+    anio: "2018-2025",
+    version: "1.0 TSI (200 TSI) / 1.4 TSI (250 TSI) / 1.6 MSI",
+    caja: "Aisin AQ160 / AQ250 (09G — Tiptronic 6 Marchas)",
+    dialisis: "warn",
+    norma: "VW G 055 540 A2 / Toyota WS / JWS 3324",
+    litrosTotal: 7.0,
+    litrosDialisis: 10.0,
+    nishimoto: "Nishimoto ATF WS (Aisin JWS 3324)",
+    valvoline: "Valvoline MaxLife ATF",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol ATF WS 8217",
+    motul: "Motul ATF VI",
+    filtroCaja: "Filtro interno metálico/malla + junta cárter (09G 325 429)",
+    motorAceite: "0W-20 / 5W-30 Nishimoto N5 (VW 508.00 / 504.00) — 4.3 L",
+    filtroMotor: "Mann W 712/95",
+    notas: "Requiere placa adaptadora en el intercambiador de calor montado sobre la caja.",
+    p: [],
+    v: []
+  },
+
+  // --- TOYOTA ---
+  {
+    id: "toyota-hilux-sw4-at6",
+    cat: "auto",
+    marca: "Toyota",
+    modelo: "Hilux / SW4",
+    anio: "2016-2025",
+    version: "2.8 TDI / 2.4 TDI (Caja Automática 6 Marchas)",
+    caja: "Aisin AC60F / AC60E (AT6 — Convertidor de par)",
+    dialisis: "ok",
+    norma: "Toyota ATF WS (JWS 3324)",
+    litrosTotal: 9.7,
+    litrosDialisis: 12.0,
+    nishimoto: "Nishimoto ATF WS (Full Sintético Toyota WS)",
+    valvoline: "Valvoline MaxLife ATF",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol ATF WS 8217",
+    motul: "Motul ATF VI",
+    filtroCaja: "Filtro interno malla/fieltro + junta de cárter (OEM 35330-71010 / Wega WFC-930)",
+    motorAceite: "5W-30 Nishimoto N5 (ACEA C2 / API SN-SP) — 7.5 L",
+    filtroMotor: "Mann W 712/83 / Wega JFO-0211",
+    notas: "Conexión directa por mangueras al radiador delantero. Dejar en modo detección de temperatura (35°C–45°C) para nivel final.",
+    p: [],
+    v: []
+  },
+  {
+    id: "toyota-corolla-cvt",
+    cat: "auto",
+    marca: "Toyota",
+    modelo: "Corolla / Corolla Cross",
+    anio: "2014-2025",
+    version: "1.8 Dual VVT-i / 2.0 Dynamic Force (Caja CVT)",
+    caja: "Toyota CVT K313 / Direct-Shift K120",
+    dialisis: "ok",
+    norma: "Toyota CVTF-FE",
+    litrosTotal: 7.5,
+    litrosDialisis: 10.0,
+    nishimoto: "Nishimoto CVTF (Full Sintético CVT-FE)",
+    valvoline: "Valvoline CVT Fluid",
+    liquiMoly: "Liqui Moly Top Tec ATF 1400",
+    mannol: "Mannol CVT Variator Fluid 8216",
+    motul: "Motul Multi CVTF",
+    filtroCaja: "Filtro interno de cárter + junta cárter (OEM 35330-12050)",
+    motorAceite: "0W-20 / 5W-30 Nishimoto N5 (API SP / ILSAC GF-6) — 4.2 L",
+    filtroMotor: "Mann HU 6006 z (1.8) / W 68/3 (2.0)",
+    notas: "Usar exclusivamente fluido CVT (NO ATF tradicional). Verificar nivel a 35°C–45°C.",
+    p: [],
+    v: []
+  },
+
+  // --- FIAT / JEEP ---
+  {
+    id: "fiat-toro-18-at6",
+    cat: "auto",
+    marca: "Fiat",
+    modelo: "Toro / Cronos / Argo / Pulse",
+    anio: "2016-2024",
+    version: "1.8 16V E.torQ (Caja Automática 6 Marchas)",
+    caja: "Aisin AW60T (TF-72SC — AT6 Convertidor de par)",
+    dialisis: "warn",
+    norma: "Toyota WS / JWS 3324 / AW-1 / Fiat 9.55550-AV2",
+    litrosTotal: 6.5,
+    litrosDialisis: 9.5,
+    nishimoto: "Nishimoto ATF WS (Aisin JWS 3324 / AW-1)",
+    valvoline: "Valvoline MaxLife ATF",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol ATF WS 8217",
+    motul: "Motul ATF VI",
+    filtroCaja: "Filtro interno (no cambiable sin desarmar carcasa — se realiza barrido completo con diálisis)",
+    motorAceite: "5W-30 Nishimoto N5 (API SP / ACEA A5-B5) — 4.3 L",
+    filtroMotor: "Mann HU 7024 z / Wega WOE-220",
+    notas: "⚠️ IMPORTANTE: NO lleva Multi ATF Dexron III; requiere fluido de baja viscosidad norma Toyota WS / JWS 3324. Requiere adaptador de intercambiador.",
+    p: [],
+    v: []
+  },
+  {
+    id: "jeep-toro-zf9hp",
+    cat: "auto",
+    marca: "Jeep",
+    modelo: "Renegade / Compass / Commander / Fiat Toro 2.0",
+    anio: "2016-2025",
+    version: "2.0 Multijet Diesel / 1.3 Turbo T270 (Caja AT9)",
+    caja: "ZF 9HP48 (9 Velocidades)",
+    dialisis: "warn",
+    norma: "Mopar 8&9 Speed ATF (68218925AA) / ZF Lifeguard 9 / Fiat 9.55550-AV5",
+    litrosTotal: 7.5,
+    litrosDialisis: 10.5,
+    nishimoto: "Nishimoto ATF 8HP (Compatible ZF 8HP / 9HP AV5)",
+    valvoline: "Valvoline MaxLife ATF",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol AG60 8218",
+    motul: "Motul ATF VI",
+    filtroCaja: "Filtro interno (no desmontable sin abrir caja — barrido completo por diálisis)",
+    motorAceite: "5W-30 / 0W-30 Nishimoto N5 (ACEA C2 / C3) — 4.5 L",
+    filtroMotor: "Mann HU 7025 z (2.0) / W 712/95 (1.3T)",
+    notas: "Requiere placa adaptadora en el intercambiador superior de la caja ZF 9HP.",
+    p: [],
+    v: []
+  },
+
+  // --- FORD ---
+  {
+    id: "ford-ranger-6r80",
+    cat: "auto",
+    marca: "Ford",
+    modelo: "Ranger (T6)",
+    anio: "2012-2023",
+    version: "3.2 Puma 5 Cil / 2.2 TDCi (Caja AT6)",
+    caja: "Ford 6R80 (Licencia ZF 6HP26 — Convertidor de par)",
+    dialisis: "ok",
+    norma: "Ford Mercon LV (WSS-M2C938-A)",
+    litrosTotal: 10.5,
+    litrosDialisis: 13.5,
+    nishimoto: "Nishimoto ATF Dexron VI (Compatible Mercon LV)",
+    valvoline: "Valvoline MaxLife ATF / Mercon LV",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol Dexron VI 8207",
+    motul: "Motul ATF VI",
+    filtroCaja: "Filtro interno cárter + junta reutilizable (OEM BL3Z-7A098-A / Wega WFC-912)",
+    motorAceite: "5W-30 Nishimoto N5 (Ford WSS-M2C913-D) — 9.8 L (3.2) / 8.6 L (2.2)",
+    filtroMotor: "Mann HU 7002 z / Wega WOE-312",
+    notas: "Medir nivel con varilla corta roscada ubicada debajo del tapón lateral derecho del cárter a 85°C–95°C.",
+    p: [],
+    v: []
+  },
+  {
+    id: "ford-fiesta-focus-powershift",
+    cat: "auto",
+    marca: "Ford",
+    modelo: "Fiesta KD / Focus III / EcoSport",
+    anio: "2012-2019",
+    version: "1.6 Sigma / 2.0 Duratec (Caja PowerShift Seca)",
+    caja: "Getrag PowerShift 6DCT250 (DPS6 — Embrague Seco)",
+    dialisis: "no",
+    norma: "Ford WSS-M2C200-D2 (75W FE API GL-4)",
+    litrosTotal: 1.7,
+    litrosDialisis: 2.0,
+    nishimoto: "Nishimoto GL-4 75W (Engranajes Baja Viscosidad)",
+    valvoline: "Valvoline Gear Oil 75W",
+    liquiMoly: "Liqui Moly Top Tec MTF 5100 75W",
+    mannol: "Mannol MTF-4 75W-80",
+    motul: "Motul Multi DCTF / Gear 300 75W",
+    filtroCaja: "Sin filtro cambiable (caja mecánica robotizada seca)",
+    motorAceite: "5W-30 Nishimoto N5 (Ford WSS-M2C913-D) — 4.1 L",
+    filtroMotor: "Mann W 7008 / Wega WO-130",
+    notas: "🛑 NO DIALIZAR — SOLO CAMBIO POR GRAVEDAD (1.7 L). Es caja de doble embrague en seco; nunca usar aceite ATF común.",
+    p: [],
+    v: []
+  },
+
+  // --- CHEVROLET ---
+  {
+    id: "chev-cruze-tracker-6t40",
+    cat: "auto",
+    marca: "Chevrolet",
+    modelo: "Cruze II / Tracker / Onix Turbo / Spin",
+    anio: "2016-2025",
+    version: "1.4 Turbo / 1.2 Turbo / 1.0 Turbo (Caja AT6)",
+    caja: "GM Hydra-Matic 6T30 / 6T35 / 6T40 (AT6)",
+    dialisis: "ok",
+    norma: "GM Dexron VI",
+    litrosTotal: 8.0,
+    litrosDialisis: 11.0,
+    nishimoto: "Nishimoto ATF Dexron VI (Full Sintético)",
+    valvoline: "Valvoline Dexron VI ATF / MaxLife ATF",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol Dexron VI 8207",
+    motul: "Motul ATF VI",
+    filtroCaja: "Filtro interno no cambiable sin desarmar transmisión (ideal diálisis completa 11 L)",
+    motorAceite: "5W-30 / 0W-20 Nishimoto N5 (GM Dexos1 Gen2/Gen3) — 4.0 L",
+    filtroMotor: "Mann HU 6019 z / Wega WO-133",
+    notas: "Conexión directa por mangueras al radiador. Nivel por tapón de rebalse lateral a 85°C.",
+    p: [],
+    v: []
+  },
+
+  // --- PEUGEOT / CITROËN ---
+  {
+    id: "psa-308-3008-at6",
+    cat: "auto",
+    marca: "Peugeot",
+    modelo: "308 / 408 / 3008 / Citroën C4 Lounge",
+    anio: "2014-2023",
+    version: "1.6 THP / 2.0 HDi (Caja Aisin AT6)",
+    caja: "Aisin TF-70SC / TF-80SC (AT6 III — 6 Marchas)",
+    dialisis: "warn",
+    norma: "PSA 9734.R7 / Toyota WS / JWS 3324 / AW-1",
+    litrosTotal: 7.0,
+    litrosDialisis: 10.0,
+    nishimoto: "Nishimoto ATF WS (Aisin JWS 3324 / AW-1)",
+    valvoline: "Valvoline MaxLife ATF",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol ATF WS 8217",
+    motul: "Motul ATF VI",
+    filtroCaja: "Filtro interno (no accesible por cárter — barrido completo por diálisis)",
+    motorAceite: "5W-30 Nishimoto N5 (PSA B71 2290 / ACEA C2-C3) — 4.25 L",
+    filtroMotor: "Mann HU 711/51 x / Wega WOE-710",
+    notas: "Requiere placa adaptadora en el intercambiador superior de la caja. Resetear contador de desgaste de aceite con escáner.",
+    p: [],
+    v: []
+  },
+
+  // --- RENAULT / NISSAN / HONDA (CVT) ---
+  {
+    id: "nissan-renault-cvt",
+    cat: "auto",
+    marca: "Nissan",
+    modelo: "Kicks / Sentra / Versa / Renault Duster / Fluence CVT",
+    anio: "2014-2025",
+    version: "1.6 / 2.0 (Caja CVT X-Tronic)",
+    caja: "Jatco CVT8 / JF015E / JF016E",
+    dialisis: "ok",
+    norma: "Nissan NS-3",
+    litrosTotal: 7.5,
+    litrosDialisis: 10.0,
+    nishimoto: "Nishimoto CVTF (Full Sintético NS-2 / NS-3)",
+    valvoline: "Valvoline CVT Fluid",
+    liquiMoly: "Liqui Moly Top Tec ATF 1400",
+    mannol: "Mannol CVT Variator Fluid 8216",
+    motul: "Motul Multi CVTF",
+    filtroCaja: "Filtro cartucho lateral (en intercambiador) + Filtro interno metálico en cárter",
+    motorAceite: "5W-30 / 10W-40 Nishimoto N5 / N6 — 4.3 L",
+    filtroMotor: "Mann W 67/1 / Wega JFO-0101",
+    notas: "Cambiar siempre el filtro cartucho externo del intercambiador y limpiar imanes del cárter.",
+    p: [],
+    v: []
+  },
+  {
+    id: "honda-hrv-civic-cvt",
+    cat: "auto",
+    marca: "Honda",
+    modelo: "HR-V / Civic / CR-V / Fit",
+    anio: "2015-2024",
+    version: "1.8 / 2.0 / 1.5 Turbo (Caja CVT)",
+    caja: "Honda CVT G-Design Shift",
+    dialisis: "warn",
+    norma: "Honda HCF-2",
+    litrosTotal: 6.5,
+    litrosDialisis: 9.0,
+    nishimoto: "Nishimoto CVTF (Compatible Honda HCF-2)",
+    valvoline: "Valvoline CVT Fluid",
+    liquiMoly: "Liqui Moly Top Tec ATF 1400",
+    mannol: "Mannol CVT Variator Fluid 8216",
+    motul: "Motul Multi CVTF",
+    filtroCaja: "Filtro cartucho externo en intercambiador + Filtro interno cárter (OEM 25420-5T0-003)",
+    motorAceite: "0W-20 / 5W-30 Nishimoto N5 (API SP) — 3.7 a 4.2 L",
+    filtroMotor: "Mann W 610/6 / Wega JFO-0404",
+    notas: "Usar exclusivamente norma HCF-2 (NO ATF Z1/DW1). Requiere adaptador de intercambiador.",
+    p: [],
+    v: []
+  },
+
+  // ============================================================================
+  // MOTOS 4T (SERVICE COMPLETO)
+  // ============================================================================
+  {
+    id: "moto-honda-tornado-250",
+    cat: "moto",
+    marca: "Honda",
+    modelo: "XR 250 Tornado / CBX 250 Twister / CB 250 New Twister",
+    anio: "2006-2025",
+    version: "250cc Monocilíndrico 4T",
+    caja: "6 Velocidades (Embrague húmedo integrado)",
+    dialisis: "no",
+    norma: "SAE 10W-30 / 10W-40 API SN · JASO MA2",
+    litrosTotal: 1.5,
+    litrosDialisis: 2.0,
+    nishimoto: "Nishimoto Ultima Racing 10W-40 (100% Sintético Éster JASO MA2)",
+    valvoline: "Valvoline 4T Full Synthetic 10W-40",
+    liquiMoly: "Liqui Moly Motorbike 4T Synth 10W-40 Street Race",
+    mannol: "Mannol 4-Takt Plus 10W-40 (7812)",
+    motul: "Motul 7100 10W-40 / 5100 10W-40",
+    filtroCaja: "Filtro de aceite cartucho (Hiflofiltro HF112 / Wega JFO-0H01) + O-ring tapa",
+    motorAceite: "1.5 L (con cambio de filtro) / 1.4 L (sin filtro)",
+    filtroMotor: "HF112 / Wega JFO-0H01",
+    notas: "Limpiar tamiz metálico inferior en cada cambio. Presupuesto incluye 2 envases de 1L (sobra 0.5L para reposición).",
+    p: [],
+    v: []
+  },
+  {
+    id: "moto-honda-150-190",
+    cat: "moto",
+    marca: "Honda",
+    modelo: "CB 190R / XR 150L / XR 190L / GLH 150 Gaucha",
+    anio: "2015-2025",
+    version: "150cc / 190cc 4T",
+    caja: "5 Velocidades (Embrague húmedo)",
+    dialisis: "no",
+    norma: "SAE 10W-30 / 10W-40 JASO MA2",
+    litrosTotal: 1.0,
+    litrosDialisis: 1.0,
+    nishimoto: "Nishimoto Ultima Racing 10W-40 / M8 Sport 10W-40",
+    valvoline: "Valvoline 4T 10W-40",
+    liquiMoly: "Liqui Moly Motorbike 4T 10W-40",
+    mannol: "Mannol 4-Takt Plus 10W-40",
+    motul: "Motul 5100 / 7100 10W-40",
+    filtroCaja: "Sin filtro descartable (solo filtro centrífugo y malla metálica lavable)",
+    motorAceite: "1.0 L exacto",
+    filtroMotor: "Tamiz lavable (sin cartucho)",
+    notas: "Service rápido de 1 litro. Limpiar malla filtrante lateral.",
+    p: [],
+    v: []
+  },
+  {
+    id: "moto-yamaha-fz-xtz250",
+    cat: "moto",
+    marca: "Yamaha",
+    modelo: "FZ25 / XTZ 250 Lander / Fazer 250",
+    anio: "2010-2025",
+    version: "250cc BlueFlex / Inyección 4T",
+    caja: "5 Velocidades (Embrague húmedo)",
+    dialisis: "no",
+    norma: "SAE 10W-40 / 20W-50 JASO MA2",
+    litrosTotal: 1.4,
+    litrosDialisis: 2.0,
+    nishimoto: "Nishimoto Ultima Racing 10W-40 / M8 Sport 20W-50",
+    valvoline: "Valvoline 4T 10W-40 / 20W-50",
+    liquiMoly: "Liqui Moly Motorbike 4T 10W-40",
+    mannol: "Mannol 4-Takt Plus 10W-40",
+    motul: "Motul 5100 / 7100 10W-40",
+    filtroCaja: "Filtro cartucho (Hiflofiltro HF140 / Wega JFO-0Y02)",
+    motorAceite: "1.4 L (con filtro) / 1.35 L (sin filtro)",
+    filtroMotor: "HF140 / Wega JFO-0Y02",
+    notas: "Purgar tornillo sangrador de tapa de filtro al poner en marcha para verificar presión de aceite.",
+    p: [],
+    v: []
+  },
+  {
+    id: "moto-yamaha-mt03-r3",
+    cat: "moto",
+    marca: "Yamaha",
+    modelo: "MT-03 / YZF-R3",
+    anio: "2016-2025",
+    version: "321cc Bicilíndrico 4T",
+    caja: "6 Velocidades (Embrague húmedo)",
+    dialisis: "no",
+    norma: "SAE 10W-40 API SN · JASO MA2",
+    litrosTotal: 2.1,
+    litrosDialisis: 3.0,
+    nishimoto: "Nishimoto Ultima Racing 10W-40 (100% Sintético Éster)",
+    valvoline: "Valvoline 4T Full Synthetic 10W-40",
+    liquiMoly: "Liqui Moly Motorbike 4T Synth 10W-40 Street Race",
+    mannol: "Mannol 4-Takt Powerbike 15W-50 / Plus 10W-40",
+    motul: "Motul 7100 10W-40",
+    filtroCaja: "Filtro blindado (Hiflofiltro HF204 / Mann MW 64)",
+    motorAceite: "2.1 L (con filtro) / 1.8 L (sin filtro)",
+    filtroMotor: "HF204 / Mann MW 64",
+    notas: "Motor de altas RPM: recomendar siempre aceite 100% sintético Éster (Nishimoto Ultima Racing 10W-40).",
+    p: [],
+    v: []
+  },
+  {
+    id: "moto-bajaj-rouser-dominar",
+    cat: "moto",
+    marca: "Bajaj",
+    modelo: "Rouser NS 200 / Dominar 400 (UG / Tourer)",
+    anio: "2015-2025",
+    version: "200cc / 373cc Triple Bujía 4T",
+    caja: "6 Velocidades (Embrague húmedo)",
+    dialisis: "no",
+    norma: "SAE 20W-50 (NS200) / 10W-50 (Dominar 400) JASO MA2",
+    litrosTotal: 1.7,
+    litrosDialisis: 2.0,
+    nishimoto: "Nishimoto Ultima Racing 10W-50 (Dominar) / M8 Sport 20W-50 (NS200)",
+    valvoline: "Valvoline 4T 20W-50 / 10W-50",
+    liquiMoly: "Liqui Moly Motorbike 4T Synth 10W-50 Street Race",
+    mannol: "Mannol 4-Takt Powerbike 15W-50",
+    motul: "Motul 7100 10W-50 / 5100 15W-50",
+    filtroCaja: "Filtro cartucho (Hiflofiltro HF155 / OEM JG571014)",
+    motorAceite: "1.2 L (NS 200) / 1.7 L (Dominar 400 con filtro)",
+    filtroMotor: "HF155 + limpieza de 2 tamices laterales",
+    notas: "En Dominar 400 limpiar ambos tamices magnéticos inferiores además del filtro cartucho.",
+    p: [],
+    v: []
+  },
+  {
+    id: "moto-benelli-trk502-tnt300",
+    cat: "moto",
+    marca: "Benelli",
+    modelo: "TRK 502 / TRK 502X / TNT 300 / 302S",
+    anio: "2017-2025",
+    version: "300cc / 500cc Bicilíndrico 4T",
+    caja: "6 Velocidades (Embrague húmedo)",
+    dialisis: "no",
+    norma: "SAE 10W-50 / 15W-50 API SN · JASO MA2",
+    litrosTotal: 3.2,
+    litrosDialisis: 4.0,
+    nishimoto: "Nishimoto Ultima Racing 10W-50 / 15W-50 (100% Sintético Éster)",
+    valvoline: "Valvoline 4T Full Synthetic 10W-50",
+    liquiMoly: "Liqui Moly Motorbike 4T Synth 10W-50 Street Race",
+    mannol: "Mannol 4-Takt Powerbike 15W-50",
+    motul: "Motul 7100 10W-50 / 15W-50",
+    filtroCaja: "Filtro blindado (Hiflofiltro HF160 / HF112 según año — verificar rosca)",
+    motorAceite: "3.0 L (TNT 300) / 3.2 L (TRK 502 con filtro)",
+    filtroMotor: "HF160 (rosca M20x1.5)",
+    notas: "Verificar si el filtro es blindado externo (HF160) o interno (primeras series).",
+    p: [],
+    v: []
+  },
+  {
+    id: "moto-ktm-duke-390",
+    cat: "moto",
+    marca: "KTM",
+    modelo: "Duke 200 / Duke 390 / Adventure 390",
+    anio: "2015-2025",
+    version: "200cc / 373cc Monocilíndrico 4T",
+    caja: "6 Velocidades (Embrague húmedo)",
+    dialisis: "no",
+    norma: "SAE 15W-50 API SN · JASO MA2",
+    litrosTotal: 1.7,
+    litrosDialisis: 2.0,
+    nishimoto: "Nishimoto Ultima Racing 15W-50 (100% Sintético Éster)",
+    valvoline: "Valvoline 4T Full Synthetic 15W-50",
+    liquiMoly: "Liqui Moly Motorbike 4T Synth 15W-50 Street Race",
+    mannol: "Mannol 4-Takt Powerbike 15W-50 (7830)",
+    motul: "Motul 7100 15W-50",
+    filtroCaja: "Filtro cartucho (Hiflofiltro HF155) + 2 tamices largos",
+    motorAceite: "1.4 L (Duke 200) / 1.7 L (Duke/Adv 390)",
+    filtroMotor: "HF155",
+    notas: "Usar exclusivamente 15W-50 100% sintético Éster JASO MA2.",
+    p: [],
+    v: []
+  },
+  {
+    id: "moto-royal-enfield",
+    cat: "moto",
+    marca: "Royal Enfield",
+    modelo: "Himalayan 411 / Interceptor 650 / Continental GT 650",
+    anio: "2018-2025",
+    version: "411cc Monocilíndrico / 650cc Bicilíndrico",
+    caja: "5 / 6 Velocidades (Embrague húmedo)",
+    dialisis: "no",
+    norma: "SAE 15W-50 (411) / 10W-50 (650) API SN · JASO MA2",
+    litrosTotal: 3.1,
+    litrosDialisis: 4.0,
+    nishimoto: "Nishimoto Ultima Racing 15W-50 / 10W-50 (100% Sintético Éster)",
+    valvoline: "Valvoline 4T 15W-50 / 10W-50",
+    liquiMoly: "Liqui Moly Motorbike 4T Synth 15W-50",
+    mannol: "Mannol 4-Takt Powerbike 15W-50",
+    motul: "Motul 7100 15W-50 / 10W-50",
+    filtroCaja: "Filtro cartucho HF112 (Himalayan 411) / Filtro blindado HF204 (650 Twin)",
+    motorAceite: "2.0 L (Himalayan 411) / 3.1 L (Interceptor 650)",
+    filtroMotor: "HF112 (411) / HF204 (650)",
+    notas: "En Interceptor/Continental 650 lleva 3.1 L con cambio de filtro blindado.",
+    p: [],
+    v: []
+  }
+];
+
+// ============================================================================
+// 3. ESTADO DE LA APLICACIÓN Y ALMACENAMIENTO LOCAL
+// ============================================================================
+const STORAGE_KEY = "lubricentro_db_v2";
+const PRICES_KEY = "lubricentro_precios_v2";
+
+let baseDatos = [];
+let categoriaActual = "auto"; // "auto" | "moto" | "clientes"
+let fichaSeleccionadaId = null;
+let vinDecodificadoActual = null;
+let preciosGuardados = {
+  precioLitro: 32000,
+  precioFiltroCaja: 65000,
+  precioManoObra: 95000,
+  precioMotorLitro: 22000,
+  precioFiltroMotor: 18000,
+  marcaPresupuesto: "NISHIMOTO"
+};
+
+function cargarEstado() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        baseDatos = parsed;
       } else {
-        setEst(`Patente "${c}" no agendada aún. Tocá "+ Cargar Ficha" arriba para guardarla.`, 'warn');
+        baseDatos = JSON.parse(JSON.stringify(BASE_INICIAL));
       }
-    };
+    } else {
+      baseDatos = JSON.parse(JSON.stringify(BASE_INICIAL));
+    }
+  } catch (e) {
+    baseDatos = JSON.parse(JSON.stringify(BASE_INICIAL));
+  }
 
-    function show(x, c = '') {
-      actual = x;
-      res.innerHTML = `
-        <h2>${x.m} ${x.mo} (${x.a}) ${c}</h2>
-        <div><b>Versión:</b> ${x.ve} | <b>Motor:</b> ${x.mc} | <b>Caja:</b> ${x.cj}</div>
-        <div class="box"><b>Aceite Motor:</b> ${x.ma} (${x.ml}L)<br><b>Filtros Motor:</b> ${x.fm}</div>
-        <div class="box"><b>Diálisis Caja AT:</b> ${x.aa} (${x.al}L)<br><b>Filtro Caja:</b> ${x.fc}</div>
-        <div class="box">
-          <b>Cotizador Rápido</b>
-          <div class="grid-2" style="margin-top:8px">
-            <input type="number" id="pm" placeholder="$ Litro Motor" oninput="calc(${x.ml},${x.al})">
-            <input type="number" id="em" placeholder="$ Filtros + MO Motor" oninput="calc(${x.ml},${x.al})">
-            <input type="number" id="pa" placeholder="$ Litro ATF Caja" oninput="calc(${x.ml},${x.al})">
-            <input type="number" id="ea" placeholder="$ Filtro + Diálisis" oninput="calc(${x.ml},${x.al})">
+  try {
+    const rawP = localStorage.getItem(PRICES_KEY);
+    if (rawP) {
+      preciosGuardados = { ...preciosGuardados, ...JSON.parse(rawP) };
+    }
+  } catch (e) {}
+
+  guardarEstado();
+}
+
+function guardarEstado() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(baseDatos));
+  actualizarContadorGuardados();
+}
+
+function guardarPrecios() {
+  localStorage.setItem(PRICES_KEY, JSON.stringify(preciosGuardados));
+}
+
+function actualizarContadorGuardados() {
+  const total = baseDatos.filter(item => (item.p && item.p.length > 0) || (item.v && item.v.length > 0)).length;
+  document.getElementById("countGuardados").textContent = total;
+}
+
+// ============================================================================
+// 4. DECODIFICADOR DE VIN & BÚSQUEDA INTELIGENTE
+// ============================================================================
+function decodificarVIN(texto) {
+  const limpio = texto.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (limpio.length !== 17) return null;
+  // Validar que no tenga I, O, Q
+  if (/[IOQ]/.test(limpio)) return null;
+
+  const wmi3 = limpio.substring(0, 3);
+  const wmiInfo = WMI[wmi3] || null;
+  const charAnio = limpio.charAt(9); // 10mo dígito
+  const anio = ANIOS_VIN[charAnio] || null;
+  const vds = limpio.substring(3, 8);
+
+  return {
+    vin: limpio,
+    wmi: wmi3,
+    marca: wmiInfo ? wmiInfo.marca : "Marca no identificada en WMI",
+    marcaDetectada: wmiInfo ? wmiInfo.marca : "",
+    pais: wmiInfo ? wmiInfo.pais : "Origen desconocido",
+    anio: anio,
+    vds: vds
+  };
+}
+
+function procesarBusqueda(valor) {
+  const qRaw = (valor || "").trim();
+  const q = qRaw.toUpperCase();
+  const banner = document.getElementById("vinBanner");
+  const chips = document.getElementById("vinChips");
+
+  // 1. Verificar si es VIN de 17 dígitos
+  const infoVin = decodificarVIN(q);
+  vinDecodificadoActual = infoVin;
+
+  if (infoVin) {
+    banner.classList.add("show");
+    chips.innerHTML = `
+      <span class="chip">VIN: <strong>${infoVin.vin}</strong></span>
+      <span class="chip">Marca: <strong>${infoVin.marca}</strong></span>
+      <span class="chip">Origen: <strong>${infoVin.pais}</strong></span>
+      <span class="chip">Año: <strong>${infoVin.anio || "N/D"}</strong></span>
+      <span class="chip">Cód. VDS: <strong>${infoVin.vds}</strong></span>
+    `;
+  } else {
+    banner.classList.remove("show");
+  }
+
+  if (!q) {
+    ocultarCoincidencias();
+    return;
+  }
+
+  // 2. Buscar coincidencia exacta por VIN o Patente guardada
+  const qAlnum = q.replace(/[^A-Z0-9]/g, "");
+  const exacta = baseDatos.find(item =>
+    (item.v || []).some(v => v.toUpperCase().replace(/[^A-Z0-9]/g, "") === qAlnum) ||
+    (item.p || []).some(p => p.toUpperCase().replace(/[^A-Z0-9]/g, "") === qAlnum)
+  );
+
+  if (exacta) {
+    if (categoriaActual !== exacta.cat) {
+      cambiarCategoria(exacta.cat, true);
+    }
+    mostrarCoincidencias([exacta], `✅ Coincidencia exacta encontrada por Patente / VIN`);
+    seleccionarFicha(exacta.id);
+    return;
+  }
+
+  // 3. Si es un VIN válido pero aún no guardado, filtrar por Marca y Año decodificados
+  if (infoVin && infoVin.marcaDetectada) {
+    const porMarca = baseDatos.filter(item =>
+      item.marca.toLowerCase().includes(infoVin.marcaDetectada.toLowerCase()) ||
+      (infoVin.marcaDetectada === "Fiat" && item.marca === "Jeep") ||
+      (infoVin.marcaDetectada === "Jeep" && item.marca === "Fiat")
+    );
+
+    if (porMarca.length > 0) {
+      const catSugerida = porMarca[0].cat;
+      if (categoriaActual !== catSugerida) {
+        cambiarCategoria(catSugerida, true);
+      }
+      mostrarCoincidencias(
+        porMarca,
+        `🔎 VIN decodificado (${infoVin.marca} ${infoVin.anio || ""}) — Elegí la motorización/caja:`
+      );
+      seleccionarFicha(porMarca[0].id);
+      return;
+    }
+  }
+
+  // 4. Búsqueda libre por palabras clave (Marca, Modelo, Caja, Norma, Patente parcial)
+  const palabras = q.toLowerCase().split(/\s+/).filter(Boolean);
+  const resultados = baseDatos.filter(item => {
+    const textoBuscable = [
+      item.marca,
+      item.modelo,
+      item.anio,
+      item.version,
+      item.caja,
+      item.norma,
+      item.nishimoto,
+      ...(item.p || []),
+      ...(item.v || [])
+    ].join(" ").toLowerCase();
+
+    return palabras.every(pal => textoBuscable.includes(pal));
+  });
+
+  if (resultados.length > 0) {
+    mostrarCoincidencias(resultados, `🔎 ${resultados.length} ficha(s) encontrada(s) para "${qRaw}"`);
+    seleccionarFicha(resultados[0].id);
+  } else {
+    mostrarCoincidencias([], `⚠️ No hay fichas cargadas para "${qRaw}". Podés crearla con "+ AGENDAR / CARGAR FICHA".`);
+  }
+}
+
+function mostrarCoincidencias(lista, titulo) {
+  const bar = document.getElementById("matchesBar");
+  const grid = document.getElementById("matchesGrid");
+  document.getElementById("matchesTitle").textContent = titulo;
+  bar.classList.add("show");
+
+  if (!lista.length) {
+    grid.innerHTML = "";
+    return;
+  }
+
+  grid.innerHTML = lista.map(item => `
+    <div class="match-card ${item.id === fichaSeleccionadaId ? "selected" : ""}" onclick="seleccionarFicha('${item.id}')">
+      <div class="m-title">${item.cat === "moto" ? "🏍️" : "🚗"} ${item.marca} ${item.modelo} (${item.anio})</div>
+      <div class="m-sub">${item.version} · <strong>${item.caja}</strong></div>
+    </div>
+  `).join("");
+}
+
+function ocultarCoincidencias() {
+  document.getElementById("matchesBar").classList.remove("show");
+  document.getElementById("matchesGrid").innerHTML = "";
+}
+
+function limpiarBusqueda() {
+  document.getElementById("inputBusqueda").value = "";
+  vinDecodificadoActual = null;
+  document.getElementById("vinBanner").classList.remove("show");
+  ocultarCoincidencias();
+  poblarSelectores();
+}
+
+// ============================================================================
+// 5. SELECTORES MANUALES ENCADENADOS
+// ============================================================================
+function cambiarCategoria(cat, mantenerBusqueda = false) {
+  categoriaActual = cat;
+
+  document.getElementById("tab-auto").classList.toggle("active", cat === "auto");
+  document.getElementById("tab-moto").classList.toggle("active", cat === "moto");
+  document.getElementById("tab-clientes").classList.toggle("active", cat === "clientes");
+
+  if (cat === "clientes") {
+    document.getElementById("selectoresManuales").style.display = "none";
+    document.getElementById("vistaFicha").style.display = "none";
+    document.getElementById("matchesBar").classList.remove("show");
+    document.getElementById("vistaClientes").style.display = "block";
+    renderizarTablaClientes();
+    return;
+  }
+
+  document.getElementById("selectoresManuales").style.display = "grid";
+  document.getElementById("vistaFicha").style.display = "block";
+  document.getElementById("vistaClientes").style.display = "none";
+
+  if (!mantenerBusqueda) {
+    ocultarCoincidencias();
+  }
+  poblarSelectores();
+}
+
+function poblarSelectores() {
+  const itemsCat = baseDatos.filter(i => i.cat === categoriaActual);
+  const marcas = [...new Set(itemsCat.map(i => i.marca))].sort();
+
+  const selMarca = document.getElementById("selMarca");
+  selMarca.innerHTML = `<option value="">-- Elegir Marca (${marcas.length}) --</option>` +
+    marcas.map(m => `<option value="${m}">${m}</option>`).join("");
+
+  document.getElementById("selModelo").innerHTML = `<option value="">-- Elegir Modelo --</option>`;
+  document.getElementById("selAnio").innerHTML = `<option value="">-- Elegir Año --</option>`;
+  document.getElementById("selVersion").innerHTML = `<option value="">-- Elegir Versión / Caja --</option>`;
+
+  if (itemsCat.length > 0) {
+    seleccionarFicha(itemsCat[0].id, false);
+  } else {
+    document.getElementById("vistaFicha").innerHTML = "";
+  }
+}
+
+function onSelectMarca() {
+  const marca = document.getElementById("selMarca").value;
+  const items = baseDatos.filter(i => i.cat === categoriaActual && (!marca || i.marca === marca));
+  const modelos = [...new Set(items.map(i => i.modelo))];
+
+  const selModelo = document.getElementById("selModelo");
+  selModelo.innerHTML = `<option value="">-- Elegir Modelo (${modelos.length}) --</option>` +
+    modelos.map(m => `<option value="${m}">${m}</option>`).join("");
+
+  document.getElementById("selAnio").innerHTML = `<option value="">-- Elegir Año --</option>`;
+  document.getElementById("selVersion").innerHTML = `<option value="">-- Elegir Versión / Caja --</option>`;
+
+  if (items.length > 0) {
+    seleccionarFicha(items[0].id, false);
+    if (marca) {
+      mostrarCoincidencias(items, `Modelos disponibles de ${marca}`);
+    }
+  }
+}
+
+function onSelectModelo() {
+  const marca = document.getElementById("selMarca").value;
+  const modelo = document.getElementById("selModelo").value;
+  const items = baseDatos.filter(i =>
+    i.cat === categoriaActual &&
+    (!marca || i.marca === marca) &&
+    (!modelo || i.modelo === modelo)
+  );
+
+  const anios = [...new Set(items.map(i => i.anio))];
+  const selAnio = document.getElementById("selAnio");
+  selAnio.innerHTML = `<option value="">-- Elegir Año --</option>` +
+    anios.map(a => `<option value="${a}">${a}</option>`).join("");
+
+  if (anios.length === 1) {
+    selAnio.value = anios[0];
+    onSelectAnio();
+    return;
+  }
+
+  if (items.length > 0) {
+    seleccionarFicha(items[0].id, false);
+  }
+}
+
+function onSelectAnio() {
+  const marca = document.getElementById("selMarca").value;
+  const modelo = document.getElementById("selModelo").value;
+  const anio = document.getElementById("selAnio").value;
+
+  const items = baseDatos.filter(i =>
+    i.cat === categoriaActual &&
+    (!marca || i.marca === marca) &&
+    (!modelo || i.modelo === modelo) &&
+    (!anio || i.anio === anio)
+  );
+
+  const selVersion = document.getElementById("selVersion");
+  selVersion.innerHTML = `<option value="">-- Elegir Versión / Caja --</option>` +
+    items.map(v => `<option value="${v.id}">${v.version} — ${v.caja}</option>`).join("");
+
+  if (items.length >= 1) {
+    selVersion.value = items[0].id;
+    seleccionarFicha(items[0].id, false);
+  }
+}
+
+function onSelectVersion() {
+  const id = document.getElementById("selVersion").value;
+  if (id) seleccionarFicha(id, false);
+}
+
+// ============================================================================
+// 6. RENDERIZADO DE FICHA TÉCNICA + CALCULADORA WHATSAPP
+// ============================================================================
+function seleccionarFicha(id, sincronizarSelects = true) {
+  const item = baseDatos.find(i => i.id === id);
+  if (!item) return;
+
+  fichaSeleccionadaId = id;
+
+  // Resaltar en lista de coincidencias si está visible
+  document.querySelectorAll(".match-card").forEach(el => {
+    el.classList.toggle("selected", el.getAttribute("onclick")?.includes(id));
+  });
+
+  if (sincronizarSelects && (item.cat === "auto" || item.cat === "moto")) {
+    const selMarca = document.getElementById("selMarca");
+    if (selMarca) {
+      selMarca.value = item.marca;
+    }
+  }
+
+  let badgeHtml = "";
+  if (item.cat === "moto") {
+    badgeHtml = `<span class="status-badge status-ok">🏍️ SERVICE MOTO 4T · JASO MA2</span>`;
+  } else if (item.dialisis === "ok") {
+    badgeHtml = `<span class="status-badge status-ok">✅ APTA DIÁLISIS CON MÁQUINA</span>`;
+  } else if (item.dialisis === "warn") {
+    badgeHtml = `<span class="status-badge status-warn">⚠️ DIÁLISIS CON ADAPTADOR (Intercambiador)</span>`;
+  } else {
+    badgeHtml = `<span class="status-badge status-no">🛑 NO DIALIZAR — SOLO GRAVEDAD</span>`;
+  }
+
+  const tagsGuardados = [
+    ...(item.p || []).map(p => `<span class="tag-pill">🚘 Patente: ${p}</span>`),
+    ...(item.v || []).map(v => `<span class="tag-pill">🔢 VIN: ${v}</span>`)
+  ].join("");
+
+  const labelLitrosServicio = item.cat === "moto" ? "Litros a Cotizar (Envases 1L)" : "Litros Diálisis / Barrido";
+  const labelFiltro = item.cat === "moto" ? "Filtro de Aceite Moto" : "Filtro de Caja & Junta";
+
+  document.getElementById("vistaFicha").innerHTML = `
+    <div class="result-grid">
+      <!-- COLUMNA IZQUIERDA: FICHA TÉCNICA -->
+      <div class="panel" style="margin-bottom:0;">
+        <div class="vehicle-header">
+          <div>
+            <div class="vehicle-title">${item.marca} ${item.modelo}</div>
+            <div class="vehicle-sub">Años: <strong>${item.anio}</strong> · Versión: <strong>${item.version}</strong></div>
+            ${tagsGuardados ? `<div class="saved-tags">${tagsGuardados}</div>` : ""}
           </div>
-          <div id="tot" style="font-weight:800;margin-top:10px;color:#14532d">Motor (${x.ml}L): $0 | Diálisis (${x.al}L): $0</div>
-          <button type="button" class="btn-wsp" onclick="wsp(${x.ml},${x.al})">📋 Copiar presupuesto para WhatsApp</button>
-        </div>`;
-      res.style.display = 'block';
-    }
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+            ${badgeHtml}
+            <div style="display:flex; gap:6px;">
+              <button class="btn-sm btn-blue" onclick="agendarPatenteRapida('${item.id}')">+ Patente/VIN</button>
+              <button class="btn-sm" onclick="abrirModalEditar('${item.id}')">✏️ Editar Ficha</button>
+            </div>
+          </div>
+        </div>
 
-    function calc(ml, al) {
-      const tm = (ml * (+document.getElementById('pm').value || 0)) + (+document.getElementById('em').value || 0);
-      const ta = (al * (+document.getElementById('pa').value || 0)) + (+document.getElementById('ea').value || 0);
-      document.getElementById('tot').textContent = `Motor (${ml}L): $${tm.toLocaleString('es-AR')} | Diálisis (${al}L): $${ta.toLocaleString('es-AR')}`;
-    }
+        <div class="specs-cards">
+          <div class="spec-box">
+            <div class="lbl">${item.cat === "moto" ? "Transmisión" : "Caja Automática"}</div>
+            <div class="val" style="font-size:0.93rem;">${item.caja}</div>
+          </div>
+          <div class="spec-box">
+            <div class="lbl">Norma Obligatoria</div>
+            <div class="val" style="font-size:0.92rem; color:var(--blue);">${item.norma}</div>
+          </div>
+          <div class="spec-box">
+            <div class="lbl">${item.cat === "moto" ? "Capacidad Cárter" : "Capacidad Total Caja"}</div>
+            <div class="val">${item.litrosTotal} L</div>
+          </div>
+          <div class="spec-box highlight">
+            <div class="lbl">${labelLitrosServicio}</div>
+            <div class="val">${item.litrosDialisis} L</div>
+          </div>
+        </div>
 
-    function wsp(ml, al) {
-      if (!actual) return;
-      const tm = (ml * (+document.getElementById('pm').value || 0)) + (+document.getElementById('em').value || 0);
-      const ta = (al * (+document.getElementById('pa').value || 0)) + (+document.getElementById('ea').value || 0);
-      const txt = `*PRESUPUESTO LUBRICENTRO*\nVehículo: ${actual.m} ${actual.mo} (${actual.a})\n• Service Motor (${ml}L ${actual.ma}): $${tm.toLocaleString('es-AR')}\n• Diálisis Caja AT (${al}L ${actual.aa}): $${ta.toLocaleString('es-AR')}`;
-      navigator.clipboard.writeText(txt).then(() => alert('¡Copiado! Pegalo en WhatsApp.'));
-    }
+        <div class="section-block">
+          <h3>🛢️ Equivalencias en tus Marcas Trabajadas</h3>
+          <div class="brands-list">
+            <div class="brand-row nishimoto">
+              <div class="brand-name">⭐ NISHIMOTO</div>
+              <div class="brand-prod">${item.nishimoto}</div>
+            </div>
+            <div class="brand-row">
+              <div class="brand-name">Valvoline</div>
+              <div class="brand-prod">${item.valvoline}</div>
+            </div>
+            <div class="brand-row">
+              <div class="brand-name">Liqui Moly</div>
+              <div class="brand-prod">${item.liquiMoly}</div>
+            </div>
+            <div class="brand-row">
+              <div class="brand-name">Mannol</div>
+              <div class="brand-prod">${item.mannol}</div>
+            </div>
+            <div class="brand-row">
+              <div class="brand-name">Motul</div>
+              <div class="brand-prod">${item.motul}</div>
+            </div>
+          </div>
+        </div>
 
-    function abrirModal() {
-      const codActual = document.getElementById('cod').value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-      if (codActual.length === 17) {
-        document.getElementById('nv').value = codActual;
-        const fab = WMI[codActual.substring(0, 3)];
-        if (fab) document.getElementById('nm').value = fab.split(' ').at(0);
-        if (ANIOS_VIN[codActual.charAt(9)]) document.getElementById('na').value = ANIOS_VIN[codActual.charAt(9)];
-      } else if (codActual.length >= 6) {
-        document.getElementById('np').value = codActual;
+        <div class="section-block">
+          <h3>🔧 Filtros, Juntas y Datos de Motor</h3>
+          <p style="font-size:0.88rem; margin-bottom:6px;"><strong>${labelFiltro}:</strong> ${item.filtroCaja}</p>
+          <p style="font-size:0.88rem; margin-bottom:6px;"><strong>${item.cat === "moto" ? "Detalle Capacidad:" : "Aceite Motor:"}</strong> ${item.motorAceite}</p>
+          <p style="font-size:0.88rem;"><strong>${item.cat === "moto" ? "Ref. Filtro:" : "Filtro Aceite Motor:"}</strong> ${item.filtroMotor}</p>
+          ${item.notas ? `<div class="note-box"><strong>Nota Técnica Taller:</strong> ${item.notas}</div>` : ""}
+        </div>
+      </div>
+
+      <!-- COLUMNA DERECHA: COTIZADOR WHATSAPP -->
+      <div class="quote-card">
+        <div class="panel-title" style="margin-bottom:12px;">
+          <span>💬 Presupuesto Rápido WhatsApp</span>
+        </div>
+
+        <div class="quote-row">
+          <label>Marca a Cotizar</label>
+          <select id="qMarcaAceite" onchange="recalcularPresupuesto()">
+            <option value="NISHIMOTO" ${preciosGuardados.marcaPresupuesto === "NISHIMOTO" ? "selected" : ""}>⭐ NISHIMOTO</option>
+            <option value="Valvoline" ${preciosGuardados.marcaPresupuesto === "Valvoline" ? "selected" : ""}>Valvoline</option>
+            <option value="Liqui Moly" ${preciosGuardados.marcaPresupuesto === "Liqui Moly" ? "selected" : ""}>Liqui Moly</option>
+            <option value="Mannol" ${preciosGuardados.marcaPresupuesto === "Mannol" ? "selected" : ""}>Mannol</option>
+            <option value="Motul" ${preciosGuardados.marcaPresupuesto === "Motul" ? "selected" : ""}>Motul</option>
+          </select>
+        </div>
+
+        <div class="quote-row">
+          <label>Litros a cobrar <small>${item.cat === "moto" ? "Envases 1L moto" : "Incluye barrido/diálisis"}</small></label>
+          <input type="number" step="0.5" id="qLitros" value="${item.litrosDialisis}" oninput="recalcularPresupuesto()" />
+        </div>
+
+        <div class="quote-row">
+          <label>Precio por Litro ($)</label>
+          <input type="number" step="500" id="qPrecioLitro" value="${preciosGuardados.precioLitro}" oninput="recalcularPresupuesto()" />
+        </div>
+
+        <div class="quote-row">
+          <label>${item.cat === "moto" ? "Filtro Aceite Moto ($)" : "Filtro Caja / Kit Cárter ($)"} <small>Poner 0 si no lleva</small></label>
+          <input type="number" step="500" id="qPrecioFiltro" value="${item.cat === "moto" ? 14000 : preciosGuardados.precioFiltroCaja}" oninput="recalcularPresupuesto()" />
+        </div>
+
+        <div class="quote-row">
+          <label>Mano de Obra ($) <small>${item.cat === "moto" ? "Service moto" : "Diálisis con máquina"}</small></label>
+          <input type="number" step="1000" id="qManoObra" value="${item.cat === "moto" ? 20000 : preciosGuardados.precioManoObra}" oninput="recalcularPresupuesto()" />
+        </div>
+
+        ${item.cat === "auto" ? `
+        <div style="margin:10px 0; padding:8px 10px; background:#0b1120; border-radius:8px; border:1px solid var(--border);">
+          <label style="display:flex; align-items:center; gap:8px; font-size:0.84rem; font-weight:700; cursor:pointer;">
+            <input type="checkbox" id="qSumarMotor" onchange="recalcularPresupuesto()" />
+            + Sumar Service de Motor (Aceite + Filtro)
+          </label>
+          <div id="qMotorFields" style="display:none; margin-top:8px;">
+            <div class="quote-row">
+              <label>Combo Aceite + Filtro Motor ($)</label>
+              <input type="number" step="1000" id="qComboMotor" value="135000" oninput="recalcularPresupuesto()" />
+            </div>
+          </div>
+        </div>
+        ` : ""}
+
+        <div class="quote-total">
+          <span>TOTAL PRESUPUESTO</span>
+          <strong id="qTotalDisplay">$ 0</strong>
+        </div>
+
+        <button class="btn-green" style="width:100%; justify-content:center; padding:12px; font-size:0.95rem;" onclick="copiarPresupuestoWA()">
+          📋 COPIAR PRESUPUESTO PARA WHATSAPP
+        </button>
+
+        <textarea class="wa-preview" id="waPreview" readonly></textarea>
+      </div>
+    </div>
+  `;
+
+  recalcularPresupuesto();
+}
+
+function recalcularPresupuesto() {
+  const item = baseDatos.find(i => i.id === fichaSeleccionadaId);
+  if (!item) return;
+
+  const marcaSel = document.getElementById("qMarcaAceite").value;
+  const litros = parseFloat(document.getElementById("qLitros").value) || 0;
+  const pLitro = parseFloat(document.getElementById("qPrecioLitro").value) || 0;
+  const pFiltro = parseFloat(document.getElementById("qPrecioFiltro").value) || 0;
+  const pMO = parseFloat(document.getElementById("qManoObra").value) || 0;
+
+  let sumarMotor = false;
+  let pMotor = 0;
+  const chkMotor = document.getElementById("qSumarMotor");
+  if (chkMotor) {
+    sumarMotor = chkMotor.checked;
+    document.getElementById("qMotorFields").style.display = sumarMotor ? "block" : "none";
+    if (sumarMotor) {
+      pMotor = parseFloat(document.getElementById("qComboMotor").value) || 0;
+    }
+  }
+
+  // Guardar preferencias de precios
+  preciosGuardados.marcaPresupuesto = marcaSel;
+  preciosGuardados.precioLitro = pLitro;
+  if (item.cat === "auto") {
+    preciosGuardados.precioFiltroCaja = pFiltro;
+    preciosGuardados.precioManoObra = pMO;
+  }
+  guardarPrecios();
+
+  const totalAceite = litros * pLitro;
+  const totalGeneral = totalAceite + pFiltro + pMO + pMotor;
+
+  const fmt = (n) => "$ " + Math.round(n).toLocaleString("es-AR");
+  document.getElementById("qTotalDisplay").textContent = fmt(totalGeneral);
+
+  const productoElegido = {
+    "NISHIMOTO": item.nishimoto,
+    "Valvoline": item.valvoline,
+    "Liqui Moly": item.liquiMoly,
+    "Mannol": item.mannol,
+    "Motul": item.motul
+  }[marcaSel] || item.nishimoto;
+
+  let textoWA = "";
+  if (item.cat === "moto") {
+    textoWA =
+`🔧 *PRESUPUESTO SERVICE MOTO*
+🏍️ *Moto:* ${item.marca} ${item.modelo} (${item.anio})
+🛢️ *Aceite:* ${productoElegido}
+📏 *Norma:* ${item.norma}
+📦 *Cantidad:* ${litros} L (${fmt(totalAceite)})
+${pFiltro > 0 ? `🔩 *Filtro de aceite:* ${fmt(pFiltro)}\n` : ""}🛠️ *Mano de obra service:* ${fmt(pMO)}
+💰 *TOTAL:* *${fmt(totalGeneral)}*
+
+_Turnos y consultas por este medio._`;
+  } else {
+    const tipoServicio = item.dialisis === "no"
+      ? "Cambio de aceite de caja por gravedad"
+      : "Service de Caja Automática con Máquina de Diálisis (barrido completo)";
+
+    textoWA =
+`🔧 *PRESUPUESTO SERVICE CAJA AUTOMÁTICA*
+🚘 *Vehículo:* ${item.marca} ${item.modelo} (${item.anio})
+⚙️ *Transmisión:* ${item.caja}
+🛠️ *Servicio:* ${tipoServicio}
+🛢️ *Fluido (${marcaSel}):* ${productoElegido}
+📏 *Norma:* ${item.norma}
+📦 *Cantidad (incluye barrido):* ${litros} L (${fmt(totalAceite)})
+${pFiltro > 0 ? `🔩 *Filtro de caja / Kit:* ${fmt(pFiltro)}\n` : "ℹ️ *Filtro de caja:* Interno sellado (se realiza barrido completo)\n"}👨‍🔧 *Mano de obra especializada:* ${fmt(pMO)}
+${sumarMotor ? `🚗 *Service de Motor (Aceite + Filtro):* ${fmt(pMotor)}\n` : ""}💰 *TOTAL ESTIMADO:* *${fmt(totalGeneral)}*
+
+_Incluye control de temperatura y nivelación según manual de fábrica._`;
+  }
+
+  document.getElementById("waPreview").value = textoWA;
+}
+
+function copiarPresupuestoWA() {
+  const txt = document.getElementById("waPreview").value;
+  navigator.clipboard.writeText(txt).then(() => {
+    mostrarToast("✅ Presupuesto copiado — Listo para pegar en WhatsApp");
+  }).catch(() => {
+    const el = document.getElementById("waPreview");
+    el.select();
+    document.execCommand("copy");
+    mostrarToast("✅ Presupuesto copiado");
+  });
+}
+
+// ============================================================================
+// 7. VINCULAR PATENTE / VIN, CREAR / EDITAR FICHA Y EXPORTAR / IMPORTAR JSON
+// ============================================================================
+function vincularVinActual() {
+  if (!vinDecodificadoActual || !fichaSeleccionadaId) return;
+  const item = baseDatos.find(i => i.id === fichaSeleccionadaId);
+  if (!item) return;
+
+  item.v = item.v || [];
+  if (!item.v.includes(vinDecodificadoActual.vin)) {
+    item.v.push(vinDecodificadoActual.vin);
+  }
+  const pat = prompt("¿Querés agregar también la PATENTE de este vehículo? (Opcional, dejar vacío si no):", "");
+  if (pat && pat.trim()) {
+    const patClean = pat.trim().toUpperCase();
+    item.p = item.p || [];
+    if (!item.p.includes(patClean)) item.p.push(patClean);
+  }
+
+  guardarEstado();
+  seleccionarFicha(item.id, false);
+  mostrarToast(`✅ VIN ${vinDecodificadoActual.vin} guardado en ${item.marca} ${item.modelo}`);
+}
+
+function agendarPatenteRapida(id) {
+  const item = baseDatos.find(i => i.id === id);
+  if (!item) return;
+
+  const entrada = prompt(`Ingresá PATENTE o VIN (17 dígitos) para asociar a ${item.marca} ${item.modelo}:`, "");
+  if (!entrada || !entrada.trim()) return;
+
+  const clean = entrada.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (clean.length === 17) {
+    item.v = item.v || [];
+    if (!item.v.includes(clean)) item.v.push(clean);
+  } else {
+    item.p = item.p || [];
+    if (!item.p.includes(clean)) item.p.push(clean);
+  }
+
+  guardarEstado();
+  seleccionarFicha(id, false);
+  mostrarToast(`✅ Dato "${clean}" agendado correctamente`);
+}
+
+function renderizarTablaClientes() {
+  const guardados = baseDatos.filter(i => (i.p && i.p.length > 0) || (i.v && i.v.length > 0));
+  const tbody = document.getElementById("tablaClientesBody");
+
+  if (!guardados.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="color:var(--muted); text-align:center; padding:20px;">Todavía no agendaste patentes o VINs. Usá el botón "+ Patente/VIN" dentro de cualquier ficha.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = guardados.map(i => `
+    <tr>
+      <td><strong>${i.marca} ${i.modelo}</strong><br><small style="color:var(--muted);">${i.caja}</small></td>
+      <td>${(i.p || []).join(", ") || "-"}</td>
+      <td style="font-family:monospace;">${(i.v || []).join(", ") || "-"}</td>
+      <td><small>${i.notas || ""}</small></td>
+      <td>
+        <button class="btn-sm btn-primary" onclick="irAFichaDesdeTabla('${i.id}')">Cotizar</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function irAFichaDesdeTabla(id) {
+  const item = baseDatos.find(i => i.id === id);
+  if (!item) return;
+  cambiarCategoria(item.cat);
+  seleccionarFicha(id);
+}
+
+function abrirModalNuevo() {
+  document.getElementById("modalTitulo").textContent = "Nueva Ficha Técnica / Agendar Vehículo";
+  document.getElementById("editId").value = "";
+  document.getElementById("fCat").value = categoriaActual === "moto" ? "moto" : "auto";
+  document.getElementById("fMarca").value = vinDecodificadoActual?.marcaDetectada || "";
+  document.getElementById("fModelo").value = "";
+  document.getElementById("fAnio").value = vinDecodificadoActual?.anio ? String(vinDecodificadoActual.anio) : "";
+  document.getElementById("fVersion").value = "";
+  document.getElementById("fCaja").value = "";
+  document.getElementById("fDialisis").value = "ok";
+  document.getElementById("fNorma").value = "";
+  document.getElementById("fLitrosTotal").value = "";
+  document.getElementById("fLitrosDialisis").value = "";
+  document.getElementById("fNishimoto").value = "";
+  document.getElementById("fValvoline").value = "";
+  document.getElementById("fLiquiMoly").value = "";
+  document.getElementById("fMannol").value = "";
+  document.getElementById("fMotul").value = "";
+  document.getElementById("fFiltroCaja").value = "";
+  document.getElementById("fMotorAceite").value = "";
+  document.getElementById("fFiltroMotor").value = "";
+  document.getElementById("fPatentes").value = "";
+  document.getElementById("fVins").value = vinDecodificadoActual?.vin || "";
+  document.getElementById("fNotas").value = "";
+
+  document.getElementById("modalFicha").classList.add("open");
+}
+
+function abrirModalEditar(id) {
+  const item = baseDatos.find(i => i.id === id);
+  if (!item) return;
+
+  document.getElementById("modalTitulo").textContent = `Editar Ficha: ${item.marca} ${item.modelo}`;
+  document.getElementById("editId").value = item.id;
+  document.getElementById("fCat").value = item.cat;
+  document.getElementById("fMarca").value = item.marca;
+  document.getElementById("fModelo").value = item.modelo;
+  document.getElementById("fAnio").value = item.anio;
+  document.getElementById("fVersion").value = item.version;
+  document.getElementById("fCaja").value = item.caja;
+  document.getElementById("fDialisis").value = item.dialisis;
+  document.getElementById("fNorma").value = item.norma;
+  document.getElementById("fLitrosTotal").value = item.litrosTotal;
+  document.getElementById("fLitrosDialisis").value = item.litrosDialisis;
+  document.getElementById("fNishimoto").value = item.nishimoto;
+  document.getElementById("fValvoline").value = item.valvoline;
+  document.getElementById("fLiquiMoly").value = item.liquiMoly;
+  document.getElementById("fMannol").value = item.mannol;
+  document.getElementById("fMotul").value = item.motul;
+  document.getElementById("fFiltroCaja").value = item.filtroCaja;
+  document.getElementById("fMotorAceite").value = item.motorAceite;
+  document.getElementById("fFiltroMotor").value = item.filtroMotor;
+  document.getElementById("fPatentes").value = (item.p || []).join(", ");
+  document.getElementById("fVins").value = (item.v || []).join(", ");
+  document.getElementById("fNotas").value = item.notas || "";
+
+  document.getElementById("modalFicha").classList.add("open");
+}
+
+function cerrarModal() {
+  document.getElementById("modalFicha").classList.remove("open");
+}
+
+function guardarFichaModal() {
+  const editId = document.getElementById("editId").value;
+  const marca = document.getElementById("fMarca").value.trim();
+  const modelo = document.getElementById("fModelo").value.trim();
+
+  if (!marca || !modelo) {
+    alert("Completá al menos Marca y Modelo.");
+    return;
+  }
+
+  const patentes = document.getElementById("fPatentes").value
+    .split(",").map(s => s.trim().toUpperCase().replace(/[^A-Z0-9]/g, "")).filter(Boolean);
+  const vins = document.getElementById("fVins").value
+    .split(",").map(s => s.trim().toUpperCase().replace(/[^A-Z0-9]/g, "")).filter(Boolean);
+
+  const obj = {
+    id: editId || ("custom-" + Date.now()),
+    cat: document.getElementById("fCat").value,
+    marca,
+    modelo,
+    anio: document.getElementById("fAnio").value.trim() || "Todos",
+    version: document.getElementById("fVersion").value.trim() || "Estándar",
+    caja: document.getElementById("fCaja").value.trim() || "Automática",
+    dialisis: document.getElementById("fDialisis").value,
+    norma: document.getElementById("fNorma").value.trim() || "Consultar manual",
+    litrosTotal: parseFloat(document.getElementById("fLitrosTotal").value) || 0,
+    litrosDialisis: parseFloat(document.getElementById("fLitrosDialisis").value) || 1,
+    nishimoto: document.getElementById("fNishimoto").value.trim() || "Consultar catálogo Nishimoto",
+    valvoline: document.getElementById("fValvoline").value.trim() || "-",
+    liquiMoly: document.getElementById("fLiquiMoly").value.trim() || "-",
+    mannol: document.getElementById("fMannol").value.trim() || "-",
+    motul: document.getElementById("fMotul").value.trim() || "-",
+    filtroCaja: document.getElementById("fFiltroCaja").value.trim() || "-",
+    motorAceite: document.getElementById("fMotorAceite").value.trim() || "-",
+    filtroMotor: document.getElementById("fFiltroMotor").value.trim() || "-",
+    notas: document.getElementById("fNotas").value.trim(),
+    p: patentes,
+    v: vins
+  };
+
+  if (editId) {
+    const idx = baseDatos.findIndex(i => i.id === editId);
+    if (idx !== -1) baseDatos[idx] = obj;
+  } else {
+    baseDatos.unshift(obj);
+  }
+
+  guardarEstado();
+  cerrarModal();
+  cambiarCategoria(obj.cat);
+  seleccionarFicha(obj.id);
+  mostrarToast("✅ Ficha guardada en la base del lubricentro");
+}
+
+function exportarBase() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(baseDatos, null, 2));
+  const a = document.createElement("a");
+  a.setAttribute("href", dataStr);
+  a.setAttribute("download", `respaldo-lubricentro-${new Date().toISOString().slice(0,10)}.json`);
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  mostrarToast("⬇ Respaldo JSON descargado");
+}
+
+function importarBase(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const json = JSON.parse(e.target.result);
+      if (Array.isArray(json) && json.length > 0) {
+        baseDatos = json;
+        guardarEstado();
+        cambiarCategoria("auto");
+        mostrarToast(`✅ Base importada (${json.length} fichas)`);
+      } else {
+        alert("El archivo JSON no tiene un formato válido.");
       }
-      document.getElementById('mod').style.display = 'block';
+    } catch (err) {
+      alert("Error al leer el archivo JSON.");
     }
+  };
+  reader.readAsText(file);
+}
 
-    function exportarBase() {
-      const blob = new Blob([JSON.stringify(guardados, null, 2)], {type: 'application/json'});
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url; link.download = 'patentes_lubricentro.json'; link.click();
-    }
+function mostrarToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3200);
+}
 
-    function importarBase(ev) {
-      const file = ev.target.files && ev.target.files.at(0);
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => {
-        try {
-          const data = JSON.parse(e.target.result);
-          if (Array.isArray(data)) {
-            localStorage.setItem('ldb_custom_v2', JSON.stringify(guardados));
-            db = [...base, ...guardados];
-            init(); alert('¡Patentes y fichas cargadas con éxito!');
-          } else {
-            alert('El respaldo debe contener una lista de fichas.');
-          }  
-        } catch { alert('Archivo inválido'); }
-      };
-      reader.readAsText(file);
-    }
+// ============================================================================
+// 8. INICIALIZACIÓN
+// ============================================================================
+window.addEventListener("DOMContentLoaded", () => {
+  cargarEstado();
+  cambiarCategoria("auto");
+});
+</script>
 
-    document.getElementById('fg').onsubmit = e => {
-      e.preventDefault();
-      const p = document.getElementById('np').value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-      const v = document.getElementById('nv').value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-      const n = {
-        p: p ? [p] : [], v: v ? [v] : [],
-        m: document.getElementById('nm').value.trim(), mo: document.getElementById('nmo').value.trim(),
-        a: +document.getElementById('na').value, ve: document.getElementById('nve').value.trim(),
-        mc: document.getElementById('nmc').value, cj: document.getElementById('ncj').value,
-        ma: document.getElementById('nma').value, ml: +document.getElementById('nml').value || 0,
-        aa: document.getElementById('naa').value, al: +document.getElementById('nal').value || 0,
-        fc: document.getElementById('nfc').value, fm: document.getElementById('nfm').value
-      };
-      guardados.push(n);
-      localStorage.setItem('ldb_custom_v2', JSON.stringify(guardados));
-      db = [...base, ...guardados];
-      init(); document.getElementById('mod').style.display = 'none'; show(n, p || v); e.target.reset();
-    };
-  </script>
 </body>
 </html>
