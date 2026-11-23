@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Consulta Técnica por VIN — Lubricentro</title>
+  <title>Consulta por VIN — Lubricentro</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -40,7 +40,7 @@
     }
 
     .header-inner {
-      max-width: 960px;
+      max-width: 920px;
       margin: 0 auto;
       display: flex;
       flex-wrap: wrap;
@@ -60,7 +60,7 @@
       font-size: 1.1rem;
     }
 
-    .brand h1 { font-size: 1.12rem; font-weight: 800; }
+    .brand h1 { font-size: 1.1rem; font-weight: 800; }
     .brand p { font-size: 0.78rem; color: var(--muted); }
 
     .header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -74,7 +74,6 @@
       border-radius: 8px;
       font-size: 0.85rem;
       font-weight: 600;
-      transition: all 0.15s ease;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -86,7 +85,7 @@
     .btn-blue { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
     .btn-sm { padding: 6px 10px; font-size: 0.78rem; }
 
-    .container { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+    .container { max-width: 920px; margin: 24px auto; padding: 0 16px; }
 
     .panel {
       background: var(--card);
@@ -94,7 +93,6 @@
       border-radius: 14px;
       padding: 20px;
       margin-bottom: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
     }
 
     .panel-title {
@@ -107,7 +105,6 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-wrap: wrap;
       gap: 8px;
     }
 
@@ -130,12 +127,14 @@
 
     .vin-input:focus { outline: none; border-color: var(--accent); }
 
-    .vin-counter {
+    .vin-meta {
       font-size: 0.78rem;
       color: var(--muted);
       margin-top: 8px;
       display: flex;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .online-box {
@@ -164,7 +163,7 @@
 
     .online-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 10px;
     }
 
@@ -175,24 +174,9 @@
       padding: 10px 12px;
     }
 
-    .online-item .k {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 800;
-    }
-
-    .online-item .v {
-      font-size: 0.94rem;
-      font-weight: 700;
-      margin-top: 3px;
-      color: var(--text);
-    }
-
-    .online-item .v.empty {
-      color: #fca5a5;
-      font-style: italic;
-    }
+    .online-item .k { font-size: 0.72rem; text-transform: uppercase; color: var(--muted); font-weight: 800; }
+    .online-item .v { font-size: 0.94rem; font-weight: 700; margin-top: 3px; }
+    .online-item .v.empty { color: #fca5a5; font-style: italic; }
 
     .ficha-banner-top {
       background: linear-gradient(90deg, #1d4ed8 0%, #1e40af 100%);
@@ -206,11 +190,7 @@
       gap: 10px;
     }
 
-    .ficha-banner-top h2 {
-      font-size: 1.15rem;
-      font-weight: 900;
-      text-transform: uppercase;
-    }
+    .ficha-banner-top h2 { font-size: 1.15rem; font-weight: 900; text-transform: uppercase; }
 
     .ficha-body {
       background: #0b1120;
@@ -367,8 +347,8 @@
     <div class="brand">
       <div class="brand-badge">VIN</div>
       <div>
-        <h1>CONSULTA TÉCNICA POR VIN — LUBRICENTRO</h1>
-        <p>Solo búsqueda por VIN (17 caracteres) · Sin datos inventados</p>
+        <h1>CONSULTA POR VIN — LUBRICENTRO</h1>
+        <p>Únicamente búsqueda por número de VIN (17 caracteres)</p>
       </div>
     </div>
     <div class="header-actions">
@@ -384,7 +364,7 @@
 
   <div class="panel">
     <div class="panel-title">
-      <span>🔍 Ingresá el Número de VIN / Chasis (17 caracteres)</span>
+      <span>🔍 Número de VIN / Chasis (17 caracteres)</span>
       <button class="btn-sm" id="btnLimpiar">Limpiar</button>
     </div>
 
@@ -399,9 +379,9 @@
       <button class="btn-primary" id="btnBuscarVin">CONSULTAR VIN</button>
     </div>
 
-    <div class="vin-counter">
+    <div class="vin-meta">
       <span id="contadorChars">0 / 17 caracteres</span>
-      <span>Fichas VIN guardadas en tu base: <strong id="totalGuardados">0</strong></span>
+      <span>VINs guardados: <strong id="totalGuardados">0</strong></span>
     </div>
 
     <div class="online-box" id="onlineBox">
@@ -460,4 +440,380 @@
     </div>
 
     <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
-      <button id="
+      <button id="btnCancelarModal">Cancelar</button>
+      <button class="btn-primary" id="btnGuardarFicha">💾 GUARDAR FICHA</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BASE_INICIAL = [
+  {
+    id: "vin-93HFA16808Z501002",
+    vin: "93HFA16808Z501002",
+    dominio: "GRR030",
+    marca: "Honda",
+    modelo: "Civic EXS Sedan 4 Ptas A/T",
+    codigo: "FA1 - FA168",
+    anio: "2008 - Dígito 8",
+    origen: "Brasil - Sumare",
+    version: "R18A18501020 - R18A1 1.8 i-VTEC 16V",
+    potencia: "140 cv @ 6300",
+    torque: "17.7 kgm @ 4300",
+    caja: "S5A 5 velocidades - Automática secuencial",
+    traccion: "Delantera",
+    norma: "Honda ATF DW-1 (reemplaza ATF Z1) 08200-9002",
+    carter: "3.2 - 3.5 Lts",
+    dialisisLitros: "6.1 - 6.5 Lts Diálisis",
+    noUsar: "Dexron / CVT / ATF WS / Dual Clutch",
+    fisica: [
+      "1. Palanca: P-R-N-D-D3-2-1 con S y levas",
+      "2. Varilla: Amarilla - lado caja",
+      "3. Filtro: Interno no cambiable sin desarme",
+      "4. Tapón: 18x1.5"
+    ],
+    alerta: "IMPORTANTE: Civic 8va Gen 1.8 A/T = ATF DW-1 (Z1). No lleva CVT ni Dexron. Lleva Honda DW-1 específico. El Dexron hace que patine y patee.",
+    nishimoto: "Verificar norma exacta DW-1 / Z1 antes de aplicar",
+    valvoline: "Valvoline MaxLife ATF (verificar compatibilidad DW-1)",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol ATF DW-1",
+    motul: "Motul ATF VI"
+  }
+];
+
+const STORAGE_KEY = "lubricentro_vin_exclusivo_v4";
+let baseDatos = [];
+let datosOnlineActuales = null;
+
+function limpiarVin(str) {
+  return (str || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+function cargarBase() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    baseDatos = raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(BASE_INICIAL));
+    if (!Array.isArray(baseDatos)) baseDatos = JSON.parse(JSON.stringify(BASE_INICIAL));
+  } catch (e) {
+    baseDatos = JSON.parse(JSON.stringify(BASE_INICIAL));
+  }
+  document.getElementById("totalGuardados").textContent = baseDatos.length;
+}
+
+function guardarBase() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(baseDatos));
+  document.getElementById("totalGuardados").textContent = baseDatos.length;
+}
+
+function limpiarPantalla() {
+  document.getElementById("inputVin").value = "";
+  document.getElementById("contadorChars").textContent = "0 / 17 caracteres";
+  document.getElementById("onlineBox").classList.remove("show", "error");
+  document.getElementById("onlineDetalle").innerHTML = "";
+  document.getElementById("vistaFicha").innerHTML = "";
+  datosOnlineActuales = null;
+}
+
+async function buscarPorVin() {
+  const vin = limpiarVin(document.getElementById("inputVin").value);
+  document.getElementById("inputVin").value = vin;
+  document.getElementById("contadorChars").textContent = `${vin.length} / 17 caracteres`;
+
+  const box = document.getElementById("onlineBox");
+  const titulo = document.getElementById("onlineTitulo");
+  const detalle = document.getElementById("onlineDetalle");
+  const btnGuardar = document.getElementById("btnGuardarDesdeOnline");
+  const vistaFicha = document.getElementById("vistaFicha");
+
+  datosOnlineActuales = null;
+  vistaFicha.innerHTML = "";
+
+  if (vin.length !== 17) {
+    box.classList.add("show", "error");
+    btnGuardar.style.display = "none";
+    titulo.textContent = "⚠️ Ingresá un número de VIN de 17 caracteres";
+    detalle.innerHTML = `<p style="font-size:0.86rem;">Cantidad actual: ${vin.length} caracteres.</p>`;
+    return;
+  }
+
+  // 1) Si el VIN exacto está en tu base local, mostrar SOLO tu ficha guardada (sin mezclar API)
+  const local = baseDatos.find(item => limpiarVin(item.vin) === vin);
+  if (local) {
+    box.classList.remove("show", "error");
+    renderizarFicha(local);
+    return;
+  }
+
+  // 2) Si el VIN no está guardado, consultar online
+  box.classList.remove("error");
+  box.classList.add("show");
+  btnGuardar.style.display = "none";
+  titulo.textContent = `🌐 Consultando VIN ${vin} online...`;
+  detalle.innerHTML = `<p style="font-size:0.86rem; color:var(--muted);">Consultando servicio VIN...</p>`;
+
+  try {
+    const url = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${encodeURIComponent(vin)}?format=json`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const json = await resp.json();
+    const r = (json && json.Results && json.Results[0]) ? json.Results[0] : {};
+
+    const errorCodes = (r.ErrorCode || "").split(",").map(s => s.trim()).filter(Boolean);
+    const decodificacionValida = errorCodes.includes("0");
+
+    const marca = decodificacionValida ? (r.Make || "").trim() : "";
+    const modelo = decodificacionValida ? (r.Model || "").trim() : "";
+    const anio = decodificacionValida ? (r.ModelYear || "").trim() : "";
+    const origen = decodificacionValida
+      ? [r.PlantCity, r.PlantCountry].map(s => (s || "").trim()).filter(Boolean).join(" · ")
+      : "";
+    const motor = decodificacionValida
+      ? [
+          (r.EngineModel || "").trim(),
+          (r.DisplacementL || "").trim() ? `${(r.DisplacementL || "").trim()}L` : "",
+          (r.EngineHP || "").trim() ? `${(r.EngineHP || "").trim()} HP` : ""
+        ].filter(Boolean).join(" · ")
+      : "";
+    // Nunca inventar caja: queda vacía si la API no la informa
+    const caja = decodificacionValida ? (r.TransmissionStyle || "").trim() : "";
+
+    datosOnlineActuales = { vin, marca, modelo, anio, origen, version: motor, caja };
+    btnGuardar.style.display = "inline-flex";
+
+    if (!decodificacionValida || (!marca && !modelo && !anio && !motor)) {
+      box.classList.add("error");
+      titulo.textContent = `⚠️ VIN ${vin}: sin datos confirmados en la consulta online`;
+      detalle.innerHTML = `<p style="font-size:0.88rem;">No se confirmó vehículo ni caja en la consulta online. Podés cargar la ficha manualmente para este VIN.</p>`;
+      return;
+    }
+
+    titulo.textContent = `🌐 Datos devueltos por la API para VIN ${vin}`;
+    const celda = (k, v, esCaja = false) => `
+      <div class="online-item">
+        <div class="k">${k}</div>
+        <div class="v ${v ? "" : "empty"}">${v || (esCaja ? "No informada (no se inventa caja)" : "No informado")}</div>
+      </div>
+    `;
+
+    detalle.innerHTML = `
+      <div class="online-grid">
+        ${celda("Marca", marca)}
+        ${celda("Modelo", modelo)}
+        ${celda("Año", anio)}
+        ${celda("Motor", motor)}
+        ${celda("Origen", origen)}
+        ${celda("Caja / Transmisión", caja, true)}
+      </div>
+      ${!caja ? `<p style="font-size:0.84rem; color:#fca5a5; margin-top:10px; font-weight:700;">⚠️ La API no devolvió caja: no se asigna caja ni fluido automáticamente.</p>` : ""}
+    `;
+  } catch (err) {
+    datosOnlineActuales = { vin };
+    box.classList.add("error");
+    btnGuardar.style.display = "inline-flex";
+    titulo.textContent = `⚠️ Error al consultar VIN ${vin} online`;
+    detalle.innerHTML = `<p style="font-size:0.86rem;">No se pudo consultar el servicio online (${err.message}).</p>`;
+  }
+}
+
+function renderizarFicha(item) {
+  const fisicaHtml = (item.fisica || []).map(l => `<li>${l}</li>`).join("");
+
+  document.getElementById("vistaFicha").innerHTML = `
+    <div class="ficha-banner-top">
+      <h2>FICHA TÉCNICA ${(item.marca || "").toUpperCase()} - VIN</h2>
+      <button class="btn-sm" id="btnEditarActual">✏️ Editar Ficha</button>
+    </div>
+    <div class="ficha-body">
+      <div class="dominio-bar">${item.dominio ? `Dominio: <strong>${item.dominio}</strong> — ` : ""}Consulta Taller</div>
+
+      <div class="meta-two-col">
+        <div>
+          <div class="meta-line"><div class="meta-label">VIN / Chasis:</div><div class="meta-val" style="font-family:monospace;">${item.vin}</div></div>
+          <div class="meta-line"><div class="meta-label">Motor:</div><div class="meta-val">${item.version || "-"}</div></div>
+          <div class="meta-line"><div class="meta-label">Modelo:</div><div class="meta-val">${item.modelo || "-"}</div></div>
+          <div class="meta-line"><div class="meta-label">Código:</div><div class="meta-val">${item.codigo || "-"}</div></div>
+        </div>
+        <div>
+          <div class="meta-line"><div class="meta-label">Año:</div><div class="meta-val">${item.anio || "-"}</div></div>
+          <div class="meta-line"><div class="meta-label">Origen:</div><div class="meta-val">${item.origen || "-"}</div></div>
+          <div class="meta-line"><div class="meta-label">Potencia:</div><div class="meta-val">${item.potencia || "-"}</div></div>
+          <div class="meta-line"><div class="meta-label">Torque:</div><div class="meta-val">${item.torque || "-"}</div></div>
+        </div>
+      </div>
+
+      <div class="sub-card">
+        <div class="sub-card-title">Transmisión</div>
+        <div class="kv-row"><div class="kv-key">Caja:</div><div class="kv-val">${item.caja || "No especificada"}</div></div>
+        <div class="kv-row"><div class="kv-key">Tracción:</div><div class="kv-val">${item.traccion || "-"}</div></div>
+        <div class="kv-row"><div class="kv-key">Fluido:</div><div class="kv-val" style="color:var(--green);">${item.norma || "-"}</div></div>
+        <div class="kv-row"><div class="kv-key">Cárter:</div><div class="kv-val">${item.carter || "-"}</div></div>
+        <div class="kv-row"><div class="kv-key">Total:</div><div class="kv-val" style="color:var(--accent);">${item.dialisisLitros || "-"}</div></div>
+        <div class="kv-row"><div class="kv-key">No usar:</div><div class="kv-val no-usar">${item.noUsar || "-"}</div></div>
+      </div>
+
+      <div class="sub-card">
+        <div class="sub-card-title">Identificación Física</div>
+        <ul class="fisica-list">${fisicaHtml || "<li>Sin datos cargados.</li>"}</ul>
+      </div>
+
+      <div class="sub-card">
+        <div class="sub-card-title">Equivalencias en Marcas Trabajadas</div>
+        <div class="brands-list">
+          <div class="brand-row nishimoto"><div class="brand-name">⭐ NISHIMOTO</div><div class="brand-prod">${item.nishimoto || "-"}</div></div>
+          <div class="brand-row"><div class="brand-name">Valvoline</div><div class="brand-prod">${item.valvoline || "-"}</div></div>
+          <div class="brand-row"><div class="brand-name">Liqui Moly</div><div class="brand-prod">${item.liquiMoly || "-"}</div></div>
+          <div class="brand-row"><div class="brand-name">Mannol</div><div class="brand-prod">${item.mannol || "-"}</div></div>
+          <div class="brand-row"><div class="brand-name">Motul</div><div class="brand-prod">${item.motul || "-"}</div></div>
+        </div>
+      </div>
+
+      ${item.alerta ? `<div class="alerta-roja"><strong>⚠️ IMPORTANTE</strong>${item.alerta}</div>` : ""}
+    </div>
+  `;
+
+  document.getElementById("btnEditarActual").addEventListener("click", () => abrirModal(item));
+}
+
+function abrirModal(precarga = {}) {
+  document.getElementById("editId").value = precarga.id || "";
+  document.getElementById("fVin").value = precarga.vin || "";
+  document.getElementById("fDominio").value = precarga.dominio || "";
+  document.getElementById("fMarca").value = precarga.marca || "";
+  document.getElementById("fModelo").value = precarga.modelo || "";
+  document.getElementById("fCodigo").value = precarga.codigo || "";
+  document.getElementById("fAnio").value = precarga.anio || "";
+  document.getElementById("fOrigen").value = precarga.origen || "";
+  document.getElementById("fVersion").value = precarga.version || "";
+  document.getElementById("fPotencia").value = precarga.potencia || "";
+  document.getElementById("fTorque").value = precarga.torque || "";
+  document.getElementById("fCaja").value = precarga.caja || "";
+  document.getElementById("fTraccion").value = precarga.traccion || "";
+  document.getElementById("fNorma").value = precarga.norma || "";
+  document.getElementById("fCarter").value = precarga.carter || "";
+  document.getElementById("fDialisis").value = precarga.dialisisLitros || "";
+  document.getElementById("fNoUsar").value = precarga.noUsar || "";
+  const f = precarga.fisica || [];
+  document.getElementById("fFis1").value = f[0] || "";
+  document.getElementById("fFis2").value = f[1] || "";
+  document.getElementById("fFis3").value = f[2] || "";
+  document.getElementById("fFis4").value = f[3] || "";
+  document.getElementById("fNishimoto").value = precarga.nishimoto || "";
+  document.getElementById("fValvoline").value = precarga.valvoline || "";
+  document.getElementById("fLiquiMoly").value = precarga.liquiMoly || "";
+  document.getElementById("fMannol").value = precarga.mannol || "";
+  document.getElementById("fMotul").value = precarga.motul || "";
+  document.getElementById("fAlerta").value = precarga.alerta || "";
+  document.getElementById("modalFicha").classList.add("open");
+}
+
+function cerrarModal() {
+  document.getElementById("modalFicha").classList.remove("open");
+}
+
+function guardarModal() {
+  const editId = document.getElementById("editId").value;
+  const vin = limpiarVin(document.getElementById("fVin").value);
+  const marca = document.getElementById("fMarca").value.trim();
+  const modelo = document.getElementById("fModelo").value.trim();
+
+  if (vin.length !== 17 || !marca || !modelo) {
+    alert("Completá el VIN de 17 caracteres, Marca y Modelo.");
+    return;
+  }
+
+  const obj = {
+    id: editId || ("vin-" + vin),
+    vin,
+    dominio: document.getElementById("fDominio").value.trim().toUpperCase(),
+    marca,
+    modelo,
+    codigo: document.getElementById("fCodigo").value.trim(),
+    anio: document.getElementById("fAnio").value.trim(),
+    origen: document.getElementById("fOrigen").value.trim(),
+    version: document.getElementById("fVersion").value.trim(),
+    potencia: document.getElementById("fPotencia").value.trim(),
+    torque: document.getElementById("fTorque").value.trim(),
+    caja: document.getElementById("fCaja").value.trim(),
+    traccion: document.getElementById("fTraccion").value.trim(),
+    norma: document.getElementById("fNorma").value.trim(),
+    carter: document.getElementById("fCarter").value.trim(),
+    dialisisLitros: document.getElementById("fDialisis").value.trim(),
+    noUsar: document.getElementById("fNoUsar").value.trim(),
+    fisica: [
+      document.getElementById("fFis1").value.trim(),
+      document.getElementById("fFis2").value.trim(),
+      document.getElementById("fFis3").value.trim(),
+      document.getElementById("fFis4").value.trim()
+    ].filter(Boolean),
+    nishimoto: document.getElementById("fNishimoto").value.trim(),
+    valvoline: document.getElementById("fValvoline").value.trim(),
+    liquiMoly: document.getElementById("fLiquiMoly").value.trim(),
+    mannol: document.getElementById("fMannol").value.trim(),
+    motul: document.getElementById("fMotul").value.trim(),
+    alerta: document.getElementById("fAlerta").value.trim()
+  };
+
+  const idx = baseDatos.findIndex(i => i.id === obj.id || limpiarVin(i.vin) === vin);
+  if (idx !== -1) baseDatos[idx] = obj;
+  else baseDatos.unshift(obj);
+
+  guardarBase();
+  cerrarModal();
+  document.getElementById("onlineBox").classList.remove("show", "error");
+  document.getElementById("inputVin").value = vin;
+  document.getElementById("contadorChars").textContent = "17 / 17 caracteres";
+  renderizarFicha(obj);
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  cargarBase();
+
+  const inputVin = document.getElementById("inputVin");
+  inputVin.addEventListener("input", () => {
+    const v = limpiarVin(inputVin.value);
+    inputVin.value = v;
+    document.getElementById("contadorChars").textContent = `${v.length} / 17 caracteres`;
+  });
+  inputVin.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") buscarPorVin();
+  });
+
+  document.getElementById("btnBuscarVin").addEventListener("click", buscarPorVin);
+  document.getElementById("btnLimpiar").addEventListener("click", limpiarPantalla);
+  document.getElementById("btnNuevoVin").addEventListener("click", () => abrirModal({}));
+  document.getElementById("btnGuardarDesdeOnline").addEventListener("click", () => abrirModal(datosOnlineActuales || {}));
+  document.getElementById("btnCerrarModal").addEventListener("click", cerrarModal);
+  document.getElementById("btnCancelarModal").addEventListener("click", cerrarModal);
+  document.getElementById("btnGuardarFicha").addEventListener("click", guardarModal);
+
+  document.getElementById("btnExportar").addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(baseDatos, null, 2));
+    a.download = "fichas-vin-lubricentro.json";
+    a.click();
+  });
+
+  document.getElementById("btnImportar").addEventListener("click", () => document.getElementById("fileImport").click());
+  document.getElementById("fileImport").addEventListener("change", (ev) => {
+    const file = ev.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target.result);
+        if (Array.isArray(json)) {
+          baseDatos = json;
+          guardarBase();
+          alert(`Base importada (${json.length} fichas).`);
+        }
+      } catch (err) {
+        alert("JSON inválido.");
+      }
+    };
+    reader.readAsText(file);
+  });
+});
+</script>
+
+</body>
+</html>
