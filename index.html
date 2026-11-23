@@ -1,531 +1,423 @@
+Sí. Esta vez lo rehice para que **la búsqueda no consulte internet**: trabaja con una base local que importás desde un archivo CSV o JSON. Podés buscar por patente, VIN, marca, modelo, año o motor; editar fichas y exportar una copia de la base.
+
+**Importante:** la app no trae un catálogo de vehículos precargado. Para que encuentre un vehículo, primero tenés que agregarlo manualmente o importar tus datos. Tampoco inventa recomendaciones: cargá aceite, capacidad y fuente solo cuando los hayas verificado.
+
+Guardá todo este código como `index.html`:
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Consulta Técnica por VIN - Taller</title>
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      padding: 16px;
-      background: #e2e8f0;
-      color: #0f172a;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    }
-
-    .contenedor {
-      max-width: 680px;
-      margin: 0 auto;
-    }
-
-    /* Buscador superior */
-    .buscador-card {
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      margin-bottom: 20px;
-    }
-
-    .buscador-card h2 {
-      margin: 0 0 12px;
-      font-size: 18px;
-      color: #0f294a;
-    }
-
-    .fila-inputs {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 10px;
-    }
-
-    @media (max-width: 500px) {
-      .fila-inputs { grid-template-columns: 1fr; }
-    }
-
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 5px;
-      color: #334155;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 16px;
-      text-transform: uppercase;
-      font-family: monospace;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 14px;
-      padding: 14px;
-      border: none;
-      border-radius: 8px;
-      background: #0f294a;
-      color: #ffffff;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      background: #64748b;
-      cursor: not-allowed;
-    }
-
-    #estado {
-      margin-top: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      text-align: center;
-      color: #0f294a;
-    }
-
-    .fuentes-log {
-      margin-top: 10px;
-      font-size: 12px;
-      color: #475569;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 8px 10px;
-      display: none;
-    }
-
-    /* Ficha técnica estilo tarjeta de taller */
-    .ficha {
-      display: none;
-      background: #ffffff;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15);
-    }
-
-    .ficha-header {
-      background: #0f294a;
-      color: #ffffff;
-      padding: 18px 20px;
-      text-align: center;
-    }
-
-    .ficha-header h1 {
-      margin: 0;
-      font-size: 22px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    .subtitulo-dominio {
-      background: #f8fafc;
-      text-align: center;
-      padding: 10px;
-      font-weight: 700;
-      font-size: 15px;
-      color: #0f294a;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .cuerpo-ficha {
-      padding: 18px 20px;
-    }
-
-    .grilla-datos {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 16px;
-      margin-bottom: 18px;
-    }
-
-    @media (max-width: 520px) {
-      .grilla-datos { grid-template-columns: 1fr; }
-    }
-
-    .dato-bloque {
-      font-size: 14px;
-      line-height: 1.4;
-    }
-
-    .dato-titulo {
-      font-weight: 800;
-      color: #0f172a;
-      text-transform: uppercase;
-      display: block;
-    }
-
-    .seccion-caja {
-      background: #f1f5f9;
-      border-radius: 8px;
-      padding: 14px;
-      margin-bottom: 14px;
-    }
-
-    .seccion-titulo {
-      background: #cbd5e1;
-      color: #1e293b;
-      font-weight: 800;
-      font-size: 14px;
-      padding: 6px 10px;
-      border-radius: 5px;
-      margin: -14px -14px 12px -14px;
-      text-transform: uppercase;
-    }
-
-    .fila-spec {
-      margin: 6px 0;
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .fila-spec strong {
-      display: inline-block;
-      min-width: 105px;
-      color: #0f172a;
-    }
-
-    .no-usar {
-      color: #b91c1c;
-      font-weight: 700;
-    }
-
-    .lista-fisica {
-      margin: 0;
-      padding-left: 18px;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .alerta-critica {
-      background: #fef2f2;
-      border: 1.5px solid #fca5a5;
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-size: 14px;
-      line-height: 1.45;
-      color: #1e293b;
-    }
-
-    .alerta-critica strong {
-      color: #b91c1c;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Buscador local de vehículos</title>
+<style>
+:root{color-scheme:dark;--bg:#0f172a;--panel:#1e293b;--input:#0b1120;--border:#334155;--text:#f1f5f9;--muted:#94a3b8;--accent:#f59e0b;--blue:#38bdf8;--red:#f87171}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif}
+header{padding:16px;border-bottom:1px solid var(--border);background:#111b2e}
+main,.header-inner{max-width:1050px;margin:auto}
+.header-inner,.actions,.row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+main{padding:18px 14px 40px}
+h1{font-size:1.2rem;margin:0}h2{font-size:1rem;margin:0 0 12px;color:var(--accent)}
+p{margin:8px 0}.muted{color:var(--muted);font-size:.88rem}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
+input,textarea,select{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--input);color:var(--text);font:inherit}
+textarea{resize:vertical}
+button,.button{display:inline-block;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:#263349;color:var(--text);font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
+button:hover,.button:hover{border-color:var(--accent)}
+.primary{background:var(--accent);border-color:var(--accent);color:#111827}
+.danger{color:#fecaca;border-color:#7f1d1d}
+.search{display:grid;grid-template-columns:1fr auto;gap:8px}
+.stats{margin-top:9px;color:var(--muted);font-size:.85rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:9px}
+.field label{display:block;margin:7px 0 4px;color:var(--muted);font-size:.8rem;font-weight:700}
+.item{padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--input);overflow-wrap:anywhere}
+.key{font-size:.72rem;color:var(--muted);font-weight:800;text-transform:uppercase}
+.value{font-weight:650;margin-top:3px;white-space:pre-wrap}
+.notice{padding:11px;border:1px solid #854d0e;border-radius:8px;background:#422006;color:#fef3c7}
+.result-title{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.empty{color:var(--muted);padding:10px 0}
+.modal{display:none;position:fixed;inset:0;z-index:2;overflow:auto;padding:14px;background:#000b}
+.modal.open{display:block}
+.dialog{max-width:900px;margin:18px auto;padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.modal-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:14px}
+input[type=file]{display:none}
+@media(max-width:550px){.search{grid-template-columns:1fr}.header-inner{align-items:flex-start}}
+</style>
 </head>
 <body>
-  <div class="contenedor">
-    <div class="buscador-card">
-      <h2>🔍 Generar Ficha Técnica por VIN</h2>
-      <form id="form-vin">
-        <div class="fila-inputs">
-          <div>
-            <label for="vin">Número de VIN / Chasis (17 dígitos)</label>
-            <input type="text" id="vin" maxlength="17" placeholder="Ej: 93HFA16808Z501002" required>
-          </div>
-          <div>
-            <label for="dominio">Dominio (Opcional)</label>
-            <input type="text" id="dominio" maxlength="10" placeholder="Ej: GRR030">
-          </div>
-        </div>
-        <button type="submit" id="btn-buscar">Cruzar datos y armar ficha</button>
-      </form>
-      <div id="estado"></div>
-      <div id="fuentes-log" class="fuentes-log"></div>
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>🔎 Buscador local de vehículos</h1>
+      <div class="muted">La búsqueda usa tu base guardada; no consulta internet.</div>
     </div>
-
-    <div id="ficha" class="ficha"></div>
+    <div class="actions">
+      <button class="primary" id="nuevoBtn" type="button">＋ Cargar vehículo</button>
+      <button id="plantillaBtn" type="button">Descargar plantilla CSV</button>
+      <button id="exportarBtn" type="button">Exportar base</button>
+      <button id="importarBtn" type="button">Importar CSV / JSON</button>
+      <input id="archivo" type="file" accept=".csv,.json,text/csv,application/json">
+    </div>
   </div>
+</header>
 
-  <script>
-    const form = document.getElementById('form-vin');
-    const btn = document.getElementById('btn-buscar');
-    const estado = document.getElementById('estado');
-    const logDiv = document.getElementById('fuentes-log');
-    const fichaDiv = document.getElementById('ficha');
+<main>
+  <section class="panel">
+    <h2>Buscar en tu base</h2>
+    <div class="search">
+      <input id="busqueda" placeholder="Patente, VIN, marca, modelo, año o motor">
+      <button class="primary" id="buscarBtn" type="button">Buscar</button>
+    </div>
+    <div class="stats"><span id="cantidad">0</span> vehículos en esta base. Los datos se guardan en este navegador.</div>
+  </section>
 
-    function esc(texto) {
-      const span = document.createElement('span');
-      span.textContent = (texto !== undefined && texto !== null && String(texto).trim() !== '')
-        ? String(texto).trim()
-        : 'Dato no confirmado';
-      return span.innerHTML;
-    }
+  <section class="panel">
+    <div class="notice">
+      La app no completa datos automáticamente ni determina el aceite por VIN. Cargá las especificaciones solo si las verificaste con una fuente confiable.
+    </div>
+  </section>
 
-    function limpiarVin(v) {
-      return String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 17);
-    }
+  <section id="resultados"></section>
+</main>
 
-    async function fetchJsonSeguro(url, nombre) {
-      const resp = await fetch(url);
-      const raw = await resp.text();
-      const limpio = raw.trim();
+<div class="modal" id="modal">
+  <section class="dialog">
+    <div class="row">
+      <h2 id="tituloModal">Cargar vehículo</h2>
+      <button id="cerrarBtn" type="button">Cerrar</button>
+    </div>
+    <input id="registroId" type="hidden">
+    <div class="grid" id="formulario"></div>
+    <div class="modal-actions">
+      <button id="cancelarBtn" type="button">Cancelar</button>
+      <button class="primary" id="guardarBtn" type="button">Guardar</button>
+    </div>
+  </section>
+</div>
 
-      if (!resp.ok) {
-        throw new Error(`${nombre}: HTTP ${resp.status}`);
+<script>
+"use strict";
+
+const CLAVE = "buscador_local_vehiculos_v1";
+const CAMPOS = [
+  ["patente","Patente / dominio"],
+  ["vin","VIN / número de chasis"],
+  ["marca","Marca"],
+  ["modelo","Modelo"],
+  ["version","Versión"],
+  ["anio","Año"],
+  ["motor","Motor / código de motor"],
+  ["caja","Caja / transmisión"],
+  ["traccion","Tracción"],
+  ["aceiteMotor","Aceite de motor verificado"],
+  ["capacidadMotor","Capacidad de aceite de motor"],
+  ["aceiteCaja","Aceite de caja verificado"],
+  ["capacidadCaja","Capacidad de aceite de caja"],
+  ["otrosFluidos","Otros fluidos / especificaciones"],
+  ["alertas","Alertas / notas"],
+  ["fuente","Fuente consultada"],
+  ["urlFuente","Enlace de la fuente"],
+  ["fechaRevision","Fecha de revisión"]
+];
+const $ = id => document.getElementById(id);
+let vehiculos = [];
+
+function escapar(valor) {
+  return String(valor ?? "").replace(/[&<>"']/g, caracter => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  })[caracter]);
+}
+
+function normalizar(valor) {
+  return String(valor ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function cargarBase() {
+  try {
+    const guardada = JSON.parse(localStorage.getItem(CLAVE) || "[]");
+    vehiculos = Array.isArray(guardada) ? guardada : [];
+  } catch {
+    vehiculos = [];
+  }
+  actualizarCantidad();
+}
+
+function guardarBase() {
+  try {
+    localStorage.setItem(CLAVE, JSON.stringify(vehiculos));
+    actualizarCantidad();
+    return true;
+  } catch {
+    alert("No se pudo guardar. Exportá la base y revisá el espacio disponible del navegador.");
+    return false;
+  }
+}
+
+function actualizarCantidad() {
+  $("cantidad").textContent = String(vehiculos.length);
+}
+
+function crearFormulario() {
+  $("formulario").innerHTML = CAMPOS.map(([clave, etiqueta]) => `
+    <div class="field">
+      <label for="campo_${clave}">${escapar(etiqueta)}</label>
+      ${clave === "alertas" || clave === "otrosFluidos"
+        ? `<textarea id="campo_${clave}" rows="2"></textarea>`
+        : `<input id="campo_${clave}" ${clave === "fechaRevision" ? 'type="date"' : ""}>`}
+    </div>`).join("");
+}
+
+function abrirFormulario(datos = {}) {
+  $("registroId").value = datos.id || "";
+  $("tituloModal").textContent = datos.id ? "Editar vehículo" : "Cargar vehículo";
+  for (const [clave] of CAMPOS) {
+    $("campo_" + clave).value = datos[clave] || "";
+  }
+  $("modal").classList.add("open");
+}
+
+function cerrarFormulario() {
+  $("modal").classList.remove("open");
+}
+
+function guardarVehiculo() {
+  const ficha = {id: $("registroId").value || crypto.randomUUID()};
+  for (const [clave] of CAMPOS) {
+    ficha[clave] = $("campo_" + clave).value.trim();
+  }
+
+  if (!ficha.patente && !ficha.vin && !(ficha.marca && ficha.modelo)) {
+    alert("Completá al menos una patente, un VIN o la marca y el modelo.");
+    return;
+  }
+
+  const indice = vehiculos.findIndex(v => v.id === ficha.id);
+  if (indice >= 0) vehiculos[indice] = ficha;
+  else vehiculos.unshift(ficha);
+
+  if (guardarBase()) {
+    cerrarFormulario();
+    mostrarResultados([ficha]);
+  }
+}
+
+function buscar() {
+  const termino = normalizar($("busqueda").value);
+  if (!termino) {
+    $("resultados").innerHTML = `<div class="panel empty">Escribí una patente, VIN, marca, modelo u otro dato para buscar.</div>`;
+    return;
+  }
+
+  const encontrados
+```
+Pegá esta continuación inmediatamente después de `const encontrados`:
+
+```js
+    = vehiculos.filter(ficha =>
+      CAMPOS.some(([clave]) => normalizar(ficha[clave]).includes(termino))
+    );
+
+  mostrarResultados(encontrados);
+}
+
+function mostrarResultados(lista) {
+  if (!lista.length) {
+    $("resultados").innerHTML =
+      `<section class="panel empty">No encontré coincidencias en tu base local.</section>`;
+    return;
+  }
+
+  $("resultados").innerHTML = lista.map(ficha => {
+    const principales = [
+      ["Patente",ficha.patente],["VIN / chasis",ficha.vin],
+      ["Marca",ficha.marca],["Modelo",ficha.modelo],
+      ["Versión",ficha.version],["Año",ficha.anio],
+      ["Motor",ficha.motor],["Caja",ficha.caja],
+      ["Aceite de motor",ficha.aceiteMotor],
+      ["Capacidad de motor",ficha.capacidadMotor],
+      ["Aceite de caja",ficha.aceiteCaja],
+      ["Capacidad de caja",ficha.capacidadCaja],
+      ["Otros fluidos",ficha.otrosFluidos],
+      ["Fuente",ficha.fuente],["Enlace",ficha.urlFuente],
+      ["Fecha de revisión",ficha.fechaRevision]
+    ];
+
+    return `
+      <section class="panel">
+        <div class="result-title">
+          <strong>${escapar(ficha.marca)} ${escapar(ficha.modelo)} ${escapar(ficha.anio)}</strong>
+          <button type="button" data-editar="${escapar(ficha.id)}">Editar</button>
+        </div>
+        <div class="grid">
+          ${principales.map(([etiqueta,valor]) => `
+            <div class="item">
+              <div class="key">${escapar(etiqueta)}</div>
+              <div class="value">${escapar(valor || "No cargado")}</div>
+            </div>`).join("")}
+        </div>
+        ${ficha.alertas ? `<p class="notice"><strong>Notas:</strong> ${escapar(ficha.alertas)}</p>` : ""}
+      </section>`;
+  }).join("");
+
+  $("resultados").querySelectorAll("[data-editar]").forEach(boton => {
+    boton.addEventListener("click", () => {
+      const ficha = vehiculos.find(v => v.id === boton.dataset.editar);
+      if (ficha) abrirFormulario(ficha);
+    });
+  });
+}
+
+function exportarBase() {
+  const archivo = new Blob(
+    [JSON.stringify(vehiculos, null, 2)],
+    {type:"application/json"}
+  );
+  descargarArchivo(archivo, "base-vehiculos.json");
+}
+
+function descargarArchivo(archivo, nombre) {
+  const url = URL.createObjectURL(archivo);
+  const enlace = document.createElement("a");
+  enlace.href = url;
+  enlace.download = nombre;
+  enlace.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function descargarPlantilla() {
+  const encabezados = CAMPOS.map(([clave]) => clave);
+  const ejemplo = [
+    "AB123CD","VIN_DE_EJEMPLO","Toyota","Corolla","XEi","2020",
+    "2ZR-FE","CVT","","","","","","","","Manual del vehículo","https://ejemplo.com","2026-01-01"
+  ];
+  const csv = [encabezados, ejemplo]
+    .map(fila => fila.map(celda => `"${String(celda).replace(/"/g,'""')}"`).join(","))
+    .join("\r\n");
+  descargarArchivo(new Blob(["\uFEFF" + csv], {type:"text/csv;charset=utf-8"}), "plantilla-vehiculos.csv");
+}
+
+function leerCsv(texto) {
+  const filas = [];
+  let fila = [], celda = "", entreComillas = false;
+
+  for (let i = 0; i < texto.length; i++) {
+    const caracter = texto[i];
+
+    if (caracter === '"') {
+      if (entreComillas && texto[i + 1] === '"') {
+        celda += '"';
+        i++;
+      } else {
+        entreComillas = !entreComillas;
       }
-      if (!limpio || limpio.startsWith('<')) {
-        throw new Error(`${nombre}: devolvió HTML o vacío`);
-      }
-      return JSON.parse(limpio);
+    } else if ((caracter === "," || caracter === ";") && !entreComillas) {
+      fila.push(celda);
+      celda = "";
+    } else if ((caracter === "\n" || caracter === "\r") && !entreComillas) {
+      if (caracter === "\r" && texto[i + 1] === "\n") i++;
+      fila.push(celda);
+      if (fila.some(valor => valor.trim() !== "")) filas.push(fila);
+      fila = [];
+      celda = "";
+    } else {
+      celda += caracter;
     }
+  }
 
-    function decodificarIso3779(vin) {
-      const mapaAnio = {
-        A: '2010 / 1980', B: '2011 / 1981', C: '2012 / 1982', D: '2013 / 1983',
-        E: '2014 / 1984', F: '2015 / 1985', G: '2016 / 1986', H: '2017 / 1987',
-        J: '2018 / 1988', K: '2019 / 1989', L: '2020 / 1990', M: '2021 / 1991',
-        N: '2022 / 1992', P: '2023 / 1993', R: '2024 / 1994', S: '2025 / 1995',
-        T: '2026 / 1996', V: '1997', W: '1998', X: '1999', Y: '2000',
-        '1': '2001', '2': '2002', '3': '2003', '4': '2004', '5': '2005',
-        '6': '2006', '7': '2007', '8': '2008', '9': '2009'
-      };
-      const d10 = vin[9] || '';
-      const anioIso = mapaAnio[d10] ? `${mapaAnio[d10]} (Dígito 10: ${d10})` : '';
+  fila.push(celda);
+  if (fila.some(valor => valor.trim() !== "")) filas.push(fila);
+  return filas;
+}
 
-      let paisIso = '';
-      const p2 = vin.slice(0, 2);
-      if (/^9[3-9]/.test(p2)) paisIso = 'Brasil';
-      else if (/^8[A-E]/.test(p2)) paisIso = 'Argentina';
-      else if (/^8[F-K]/.test(p2)) paisIso = 'Chile';
-      else if (/^8[X-Z]|^82/.test(p2)) paisIso = 'Venezuela';
-      else if (/^9[A-E]/.test(p2)) paisIso = 'Colombia';
-      else if (/^3[A-W]/.test(p2)) paisIso = 'México';
-      else if (/^[145]/.test(vin[0])) paisIso = 'Estados Unidos';
-      else if (vin[0] === '2') paisIso = 'Canadá';
-      else if (vin[0] === 'J') paisIso = 'Japón';
-      else if (/^K[L-R]/.test(p2)) paisIso = 'Corea del Sur';
-      else if (/^S[A-M]/.test(p2)) paisIso = 'Reino Unido';
-      else if (/^W/.test(vin[0])) paisIso = 'Alemania';
-      else if (/^V[F-R]/.test(p2)) paisIso = 'Francia';
-      else if (/^V[S-W]/.test(p2)) paisIso = 'España';
-      else if (/^Z[A-R]/.test(p2)) paisIso = 'Italia';
+async function importarArchivo(evento) {
+  const archivo = evento.target.files && evento.target.files[0];
+  if (!archivo) return;
 
-      return { fuente: 'ISO 3779', anio: anioIso, origen: paisIso };
-    }
+  try {
+    const texto = await archivo.text();
+    let registros;
 
-    async function consultarNhtsaValues(vin) {
-      const json = await fetchJsonSeguro(
-        `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${encodeURIComponent(vin)}?format=json`,
-        'NHTSA Values'
-      );
-      const r = (json && json.Results && json.Results[0]) ? json.Results[0] : {};
-      const ok = String(r.ErrorCode || '').split(',').map(s => s.trim()).includes('0');
-      return {
-        fuente: 'NHTSA Values',
-        ok,
-        marca: ok ? String(r.Make || '').trim() : '',
-        modelo: ok ? String(r.Model || '').trim() : '',
-        anio: ok ? String(r.ModelYear || '').trim() : '',
-        origen: ok ? [r.PlantCity, r.PlantCountry].map(s => String(s || '').trim()).filter(Boolean).join(' · ') : '',
-        motor: ok ? [
-          String(r.EngineModel || '').trim(),
-          String(r.DisplacementL || '').trim() ? `${String(r.DisplacementL || '').trim()}L` : '',
-          String(r.EngineCylinders || '').trim() ? `${String(r.EngineCylinders || '').trim()} cil.` : ''
-        ].filter(Boolean).join(' · ') : '',
-        potencia: ok && String(r.EngineHP || '').trim() ? `${String(r.EngineHP || '').trim()} HP` : '',
-        codigo_chasis: ok ? String(r.Series || r.Trim || '').trim() : '',
-        caja: ok ? String(r.TransmissionStyle || '').trim() : '',
-        traccion: ok ? String(r.DriveType || '').trim() : ''
-      };
-    }
+    if (archivo.name.toLowerCase().endsWith(".json")) {
+      const datos = JSON.parse(texto);
+      if (!Array.isArray(datos)) throw new Error("El JSON debe contener una lista.");
+      registros = datos;
+    } else {
+      const filas = leerCsv(texto.replace(/^\uFEFF/, ""));
+      if (filas.length < 2) throw new Error("El CSV no contiene filas de datos.");
 
-    async function consultarNhtsaWmi(vin) {
-      const wmi = vin.slice(0, 3);
-      const json = await fetchJsonSeguro(
-        `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeWMI/${encodeURIComponent(wmi)}?format=json`,
-        `NHTSA WMI (${wmi})`
-      );
-      const r = (json && json.Results && json.Results[0]) ? json.Results[0] : {};
-      return {
-        fuente: `NHTSA WMI (${wmi})`,
-        ok: Boolean(r.Make || r.CommonName || r.Country),
-        marca: String(r.Make || r.CommonName || r.ManufacturerName || '').trim(),
-        origen: String(r.Country || '').trim()
-      };
-    }
-
-    function elegirCoincidente(lista, campo) {
-      const vals = lista.map(x => String(x[campo] || '').trim()).filter(Boolean);
-      if (!vals.length) return '';
-      const unicos = [...new Set(vals.map(v => v.toLowerCase()))];
-      if (unicos.length === 1) return vals[0];
-      return [...new Set(vals)].join(' / ');
-    }
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const vinInput = document.getElementById('vin');
-      const vin = limpiarVin(vinInput.value);
-      vinInput.value = vin;
-      const dominio = document.getElementById('dominio').value.trim();
-
-      if (vin.length !== 17) {
-        estado.textContent = `⚠️ El VIN debe tener 17 caracteres (actual: ${vin.length}).`;
-        return;
+      const encabezados = filas[0].map(h => h.trim());
+      const camposValidos = CAMPOS.map(([clave]) => clave);
+      const desconocidos = encabezados.filter(h => !camposValidos.includes(h));
+      if (desconocidos.length) {
+        throw new Error("Hay encabezados no reconocidos: " + desconocidos.join(", "));
       }
 
-      btn.disabled = true;
-      btn.textContent = 'Buscando en fuentes online...';
-      estado.textContent = 'Consultando fuentes en paralelo...';
-      logDiv.style.display = 'none';
-      fichaDiv.style.display = 'none';
+      registros = filas.slice(1).map(fila => {
+        const ficha = {};
+        encabezados.forEach((clave, indice) => {
+          ficha[clave] = (fila[indice] || "").trim();
+        });
+        return ficha;
+      });
+    }
 
-      const iso = decodificarIso3779(vin);
-      const settled = await Promise.allSettled([
-        consultarNhtsaValues(vin),
-        consultarNhtsaWmi(vin)
-      ]);
-
-      const exitos = [];
-      const estadosFuentes = [`ISO 3779: OK`];
-
-      settled.forEach((s, i) => {
-        if (s.status === 'fulfilled') {
-          exitos.push(s.value);
-          estadosFuentes.push(`${s.value.fuente}: ${s.value.ok ? 'Con datos' : 'Sin coincidencia'}`);
-        } else {
-          const msg = s.reason && s.reason.message ? s.reason.message : `Fuente ${i + 1}: error`;
-          estadosFuentes.push(msg);
-        }
+    let importados = 0;
+    registros.forEach(registro => {
+      if (!registro || typeof registro !== "object") return;
+      const ficha = {};
+      CAMPOS.forEach(([clave]) => {
+        ficha[clave] = String(registro[clave] ?? "").trim();
       });
 
-      const todas = [iso, ...exitos];
-      const marca = elegirCoincidente(todas, 'marca');
-      const modelo = elegirCoincidente(todas, 'modelo');
-      const anio = elegirCoincidente(todas, 'anio');
-      const origen = elegirCoincidente(todas, 'origen');
-      const motor = elegirCoincidente(todas, 'motor');
-      const potencia = elegirCoincidente(todas, 'potencia');
-      const codigoChasis = elegirCoincidente(todas, 'codigo_chasis');
-      // Nunca inventar caja si ninguna fuente la confirma
-      const cajaConfirmada = elegirCoincidente(todas, 'caja');
-      const traccionConfirmada = elegirCoincidente(todas, 'traccion');
+      if (!ficha.patente && !ficha.vin && !(ficha.marca && ficha.modelo)) return;
 
-      const fichaArmada = {
-        titulo: [marca, modelo].filter(Boolean).join(' ') || `VIN ${vin}`,
-        vin,
-        anio,
-        motor,
-        origen,
-        modelo,
-        potencia,
-        codigo_chasis: codigoChasis,
-        torque: '',
-        transmision: {
-          caja: cajaConfirmada || '',
-          traccion: traccionConfirmada || '',
-          fluido: '',
-          carter: '',
-          total: '',
-          no_usar: ''
-        },
-        identificacion_fisica: [],
-        aceite_motor: {
-          viscosidad_norma: '',
-          capacidad: '',
-          filtros: ''
-        },
-        alerta_importante: !cajaConfirmada
-          ? 'Caja no confirmada en fuentes online: verificar físicamente y en catálogo OEM antes de elegir fluido.'
-          : 'Verificar código exacto de caja y norma del fabricante antes de aplicar.'
-      };
+      const existente = vehiculos.findIndex(v =>
+        (ficha.vin && normalizar(v.vin) === normalizar(ficha.vin)) ||
+        (ficha.patente && normalizar(v.patente) === normalizar(ficha.patente))
+      );
 
-      renderizarFicha(fichaArmada, dominio);
-      estado.textContent = '';
-      logDiv.textContent = 'Fuentes consultadas: ' + estadosFuentes.join(' · ');
-      logDiv.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = 'Cruzar datos y armar ficha';
+      ficha.id = existente >= 0 ? vehiculos[existente].id : crypto.randomUUID();
+      if (existente >= 0) vehiculos[existente] = ficha;
+      else vehiculos.push(ficha);
+      importados++;
     });
 
-    function renderizarFicha(d, dominio) {
-      const tx = d.transmision || {};
-      const mot = d.aceite_motor || {};
-      const fisica = Array.isArray(d.identificacion_fisica) && d.identificacion_fisica.length
-        ? d.identificacion_fisica.map(item => `<li>${esc(item)}</li>`).join('')
-        : '<li>Dato no confirmado</li>';
-
-      const textoDominio = dominio
-        ? `Dominio: ${esc(dominio.toUpperCase())} — Consulta Taller`
-        : 'Consulta Técnica de Taller';
-
-      fichaDiv.innerHTML = `
-        <div class="ficha-header">
-          <h1>${esc(d.titulo)}</h1>
-        </div>
-        <div class="subtitulo-dominio">${textoDominio}</div>
-
-        <div class="cuerpo-ficha">
-          <div class="grilla-datos">
-            <div class="dato-bloque">
-              <span class="dato-titulo">VIN / CHASIS:</span>
-              ${esc(d.vin)}
-            </div>
-            <div class="dato-bloque">
-              <span class="dato-titulo">AÑO:</span>
-              ${esc(d.anio)}
-            </div>
-            <div class="dato-bloque">
-              <span class="dato-titulo">MOTOR:</span>
-              ${esc(d.motor)}
-            </div>
-            <div class="dato-bloque">
-              <span class="dato-titulo">ORIGEN:</span>
-              ${esc(d.origen)}
-            </div>
-            <div class="dato-bloque">
-              <span class="dato-titulo">MODELO:</span>
-              ${esc(d.modelo)}
-            </div>
-            <div class="dato-bloque">
-              <span class="dato-titulo">POTENCIA:</span>
-              ${esc(d.potencia)}
-            </div>
-            <div class="dato-bloque">
-              <span class="dato-titulo">CÓDIGO:</span>
-              ${esc(d.codigo_chasis)}
-            </div>
-            <div class="dato-bloque">
-              <span class="dato-titulo">TORQUE:</span>
-              ${esc(d.torque)}
-            </div>
-          </div>
-
-          <div class="seccion-caja">
-            <div class="seccion-titulo">TRANSMISIÓN</div>
-            <div class="fila-spec"><strong>CAJA:</strong> ${esc(tx.caja)}</div>
-            <div class="fila-spec"><strong>TRACCIÓN:</strong> ${esc(tx.traccion)}</div>
-            <div class="fila-spec"><strong>FLUIDO:</strong> ${esc(tx.fluido)}</div>
-            <div class="fila-spec"><strong>CÁRTER:</strong> ${esc(tx.carter)}</div>
-            <div class="fila-spec"><strong>TOTAL:</strong> ${esc(tx.total)}</div>
-            <div class="fila-spec no-usar"><strong>NO USAR:</strong> ${esc(tx.no_usar)}</div>
-          </div>
-
-          <div class="seccion-caja">
-            <div class="seccion-titulo">IDENTIFICACIÓN FÍSICA</div>
-            <ul class="lista-fisica">${fisica}</ul>
-          </div>
-
-          <div class="seccion-caja">
-            <div class="seccion-titulo">ACEITE DE MOTOR Y FILTROS</div>
-            <div class="fila-spec"><strong>ACEITE:</strong> ${esc(mot.viscosidad_norma)}</div>
-            <div class="fila-spec"><strong>CAPACIDAD:</strong> ${esc(mot.capacidad)}</div>
-            <div class="fila-spec"><strong>FILTROS:</strong> ${esc(mot.filtros)}</div>
-          </div>
-
-          <div class="alerta-critica">
-            <strong>⚠️ IMPORTANTE:</strong> ${esc(d.alerta_importante)}
-          </div>
-        </div>
-      `;
-
-      fichaDiv.style.display = 'block';
+    if (guardarBase()) {
+      alert(`Importación terminada. Registros agregados o actualizados: ${importados}.`);
+      buscar();
     }
-  </script>
+  } catch (error) {
+    alert("No se pudo importar el archivo: " + error.message);
+  } finally {
+    evento.target.value = "";
+  }
+}
+
+$("buscarBtn").addEventListener("click", buscar);
+$("busqueda").addEventListener("keydown", evento => {
+  if (evento.key === "Enter") buscar();
+});
+$("nuevoBtn").addEventListener("click", () => abrirFormulario());
+$("guardarBtn").addEventListener("click", guardarVehiculo);
+$("cerrarBtn").addEventListener("click", cerrarFormulario);
+$("cancelarBtn").addEventListener("click", cerrarFormulario);
+$("modal").addEventListener("click", evento => {
+  if (evento.target === $("modal")) cerrarFormulario();
+});
+$("exportarBtn").addEventListener("click", exportarBase);
+$("plantillaBtn").addEventListener("click", descargarPlantilla);
+$("importarBtn").addEventListener("click", () => $("archivo").click());
+$("archivo").addEventListener("change", importarArchivo);
+
+crearFormulario();
+cargarBase();
+</script>
 </body>
 </html>
+```
