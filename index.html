@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cruce VIN Online — Lubricentro</title>
+  <title>Buscador VIN Multi-API en Paralelo — Lubricentro</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -41,7 +41,7 @@
     }
 
     .header-inner {
-      max-width: 1020px;
+      max-width: 1060px;
       margin: 0 auto;
       display: flex;
       flex-wrap: wrap;
@@ -66,27 +66,28 @@
 
     .header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
-    button {
+    button, .ext-link {
       cursor: pointer;
       border: 1px solid var(--border);
       background: var(--card-alt);
       color: var(--text);
       padding: 9px 14px;
       border-radius: 8px;
-      font-size: 0.85rem;
+      font-size: 0.84rem;
       font-weight: 600;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      text-decoration: none;
     }
 
-    button:hover { border-color: var(--accent); }
+    button:hover, .ext-link:hover { border-color: var(--accent); }
     .btn-primary { background: var(--accent); color: #0f172a; border-color: var(--accent); font-weight: 800; }
     .btn-primary:hover { background: var(--accent-hover); }
     .btn-blue { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
     .btn-sm { padding: 6px 10px; font-size: 0.78rem; }
 
-    .container { max-width: 1020px; margin: 24px auto; padding: 0 16px; }
+    .container { max-width: 1060px; margin: 24px auto; padding: 0 16px; }
 
     .panel {
       background: var(--card);
@@ -181,7 +182,7 @@
 
     .badge {
       display: inline-block;
-      padding: 2px 8px;
+      padding: 3px 9px;
       border-radius: 999px;
       font-size: 0.72rem;
       font-weight: 800;
@@ -195,8 +196,17 @@
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       font-size: 0.78rem;
+    }
+
+    .ext-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
     }
 
     .ficha-banner-top {
@@ -340,7 +350,7 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
-      max-width: 800px;
+      max-width: 820px;
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
@@ -368,12 +378,13 @@
     <div class="brand">
       <div class="brand-badge">VIN</div>
       <div>
-        <h1>CRUCE VIN ONLINE — LUBRICENTRO</h1>
-        <p>Consulta en paralelo por internet y cruza datos entre fuentes · Sin inventar caja</p>
+        <h1>BUSCADOR VIN MULTI-API EN PARALELO — LUBRICENTRO</h1>
+        <p>Consulta simultánea en múltiples fuentes + enlaces directos a catálogos externos</p>
       </div>
     </div>
     <div class="header-actions">
       <button class="btn-primary" onclick="abrirModal({})">+ Cargar Ficha VIN</button>
+      <button onclick="abrirModalApis()">🔑 APIs Extra</button>
       <button onclick="exportarJson()">⬇ Exportar JSON</button>
       <button onclick="document.getElementById('fileImport').click()">⬆ Importar JSON</button>
       <input type="file" id="fileImport" accept=".json" style="display:none" onchange="importarJson(event)" />
@@ -385,7 +396,7 @@
 
   <div class="panel">
     <div class="panel-title">
-      <span>🔍 Número de VIN / Chasis (17 caracteres) — Cruce Online</span>
+      <span>🔍 Número de VIN / Chasis (17 caracteres) — Búsqueda en Paralelo</span>
       <button class="btn-sm" onclick="limpiarPantalla()">Limpiar</button>
     </div>
 
@@ -395,27 +406,28 @@
         id="inputVin"
         class="vin-input"
         maxlength="17"
-        placeholder="EJ: 93HFA16808Z501002"
+        placeholder="EJ: 9BWAL5BZ1JP033561"
         oninput="actualizarContador()"
         onchange="actualizarContador()"
         onkeyup="actualizarContador()"
         onkeydown="if(event.key==='Enter'){ event.preventDefault(); buscarPorVin(); }"
       />
-      <button class="btn-primary" onclick="buscarPorVin()">CRUZAR VIN ONLINE</button>
+      <button class="btn-primary" onclick="buscarPorVin()">BUSCAR EN TODOS LADOS</button>
     </div>
 
     <div class="vin-meta">
       <span id="contadorChars">0 / 17 caracteres</span>
-      <span>Fichas guardadas: <strong id="totalGuardados">0</strong></span>
+      <span>Fichas guardadas en taller: <strong id="totalGuardados">0</strong></span>
     </div>
 
     <div class="cruce-box" id="cruceBox">
       <div class="cruce-header">
         <span id="cruceTitulo" style="font-size:0.92rem; font-weight:800; color:var(--blue);"></span>
-        <button class="btn-sm btn-blue" id="btnGuardarDesdeCruce" style="display:none;" onclick="abrirModal(borradorCruce || {})">➕ Cargar ficha con lo confirmado</button>
+        <button class="btn-sm btn-blue" id="btnGuardarDesdeCruce" style="display:none;" onclick="abrirModal(borradorCruce || {})">➕ Guardar ficha con estos datos</button>
       </div>
       <div class="fuentes-estado" id="fuentesEstado"></div>
       <div id="cruceTablaWrap"></div>
+      <div id="enlacesExternosWrap"></div>
     </div>
   </div>
 
@@ -423,6 +435,7 @@
 
 </div>
 
+<!-- Modal Ficha -->
 <div class="modal-backdrop" id="modalFicha">
   <div class="modal">
     <div class="modal-header">
@@ -472,6 +485,31 @@
   </div>
 </div>
 
+<!-- Modal API Keys Opcionales -->
+<div class="modal-backdrop" id="modalApis">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-header">
+      <h2 style="font-size:1.05rem;">🔑 Claves API Opcionales (para sumar más fuentes)</h2>
+      <button class="btn-sm" onclick="cerrarModalApis()">✕ Cerrar</button>
+    </div>
+    <p style="font-size:0.84rem; color:var(--muted); margin-bottom:12px;">
+      Por defecto se consultan en paralelo las APIs abiertas sin clave (NHTSA Values, NHTSA Extended, NHTSA WMI y decodificación ISO 3779). Si tenés claves de servicios privados con CORS habilitado, pegalas acá para sumarlas al cruce:
+    </p>
+    <div class="field" style="margin-bottom:10px;">
+      <label>Auto.dev API Key (opcional)</label>
+      <input type="text" id="keyAutoDev" placeholder="Pegar API Key de Auto.dev si tenés" />
+    </div>
+    <div class="field" style="margin-bottom:10px;">
+      <label>Endpoint JSON propio / Proxy (usar {VIN} como marcador)</label>
+      <input type="text" id="customApiUrl" placeholder="Ej: https://mi-worker.workers.dev/vin/{VIN}" />
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+      <button onclick="cerrarModalApis()">Cancelar</button>
+      <button class="btn-primary" onclick="guardarApisConfig()">Guardar Configuración</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const BASE_INICIAL = [
   {
@@ -507,7 +545,9 @@ const BASE_INICIAL = [
   }
 ];
 
-const STORAGE_KEY = "lubricentro_vin_cruce_v6";
+const STORAGE_KEY = "lubricentro_vin_multiapi_v7";
+const API_CFG_KEY = "lubricentro_vin_api_cfg_v1";
+
 let baseDatos = [];
 let borradorCruce = null;
 
@@ -535,412 +575,37 @@ function guardarBase() {
   if (el) el.textContent = String(baseDatos.length);
 }
 
+function obtenerApiCfg() {
+  try {
+    return JSON.parse(localStorage.getItem(API_CFG_KEY) || "{}");
+  } catch (e) {
+    return {};
+  }
+}
+
+function abrirModalApis() {
+  const cfg = obtenerApiCfg();
+  document.getElementById("keyAutoDev").value = cfg.autoDevKey || "";
+  document.getElementById("customApiUrl").value = cfg.customUrl || "";
+  document.getElementById("modalApis").classList.add("open");
+}
+
+function cerrarModalApis() {
+  document.getElementById("modalApis").classList.remove("open");
+}
+
+function guardarApisConfig() {
+  const cfg = {
+    autoDevKey: document.getElementById("keyAutoDev").value.trim(),
+    customUrl: document.getElementById("customApiUrl").value.trim()
+  };
+  localStorage.setItem(API_CFG_KEY, JSON.stringify(cfg));
+  cerrarModalApis();
+}
+
 function actualizarContador() {
   const input = document.getElementById("inputVin");
   if (!input) return;
   const v = limpiarVin(input.value).slice(0, 17);
   input.value = v;
   const el = document.getElementById("contadorChars");
-  if (el) el.textContent = `${v.length} / 17 caracteres`;
-}
-
-function limpiarPantalla() {
-  const input = document.getElementById("inputVin");
-  if (input) input.value = "";
-  const el = document.getElementById("contadorChars");
-  if (el) el.textContent = "0 / 17 caracteres";
-  const box = document.getElementById("cruceBox");
-  if (box) box.className = "cruce-box";
-  const est = document.getElementById("fuentesEstado");
-  if (est) est.innerHTML = "";
-  const wrap = document.getElementById("cruceTablaWrap");
-  if (wrap) wrap.innerHTML = "";
-  const btn = document.getElementById("btnGuardarDesdeCruce");
-  if (btn) btn.style.display = "none";
-  const ficha = document.getElementById("vistaFicha");
-  if (ficha) ficha.innerHTML = "";
-  borradorCruce = null;
-}
-
-function extraerCamposNhtsa(r, nombreFuente) {
-  const errorCodes = String(r.ErrorCode || "").split(",").map(s => s.trim()).filter(Boolean);
-  const decodValida = errorCodes.includes("0");
-  return {
-    fuente: nombreFuente,
-    ok: true,
-    decodValida,
-    marca: decodValida ? String(r.Make || "").trim() : "",
-    modelo: decodValida ? String(r.Model || "").trim() : "",
-    anio: decodValida ? String(r.ModelYear || "").trim() : "",
-    origen: decodValida
-      ? [r.PlantCity, r.PlantCountry].map(s => String(s || "").trim()).filter(Boolean).join(" · ")
-      : "",
-    motor: decodValida
-      ? [
-          String(r.EngineModel || "").trim(),
-          String(r.DisplacementL || "").trim() ? `${String(r.DisplacementL || "").trim()}L` : "",
-          String(r.EngineHP || "").trim() ? `${String(r.EngineHP || "").trim()} HP` : ""
-        ].filter(Boolean).join(" · ")
-      : "",
-    // Nunca inventar caja: queda vacía si la fuente no la informa
-    caja: decodValida ? String(r.TransmissionStyle || "").trim() : ""
-  };
-}
-
-async function consultarFuenteValues(vin) {
-  const url = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${encodeURIComponent(vin)}?format=json`;
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error("HTTP " + resp.status);
-  const json = await resp.json();
-  const r = (json && json.Results && json.Results[0]) ? json.Results[0] : {};
-  return extraerCamposNhtsa(r, "NHTSA DecodeVinValues");
-}
-
-async function consultarFuenteExtended(vin) {
-  const url = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${encodeURIComponent(vin)}?format=json`;
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error("HTTP " + resp.status);
-  const json = await resp.json();
-  const r = (json && json.Results && json.Results[0]) ? json.Results[0] : {};
-  const base = extraerCamposNhtsa(r, "NHTSA Extended");
-  // Si Extended trae TransmissionType adicional cuando TransmissionStyle viene vacío, lo toma; si no, vacío
-  if (!base.caja && base.decodValida && String(r.TransmissionType || "").trim()) {
-    base.caja = String(r.TransmissionType || "").trim();
-  }
-  return base;
-}
-
-function cruzarResultados(resultados, fichaGuardada) {
-  const campos = [
-    { key: "marca", label: "Marca" },
-    { key: "modelo", label: "Modelo" },
-    { key: "anio", label: "Año" },
-    { key: "motor", label: "Motor" },
-    { key: "origen", label: "Origen" },
-    { key: "caja", label: "Caja / Transmisión", esCaja: true }
-  ];
-
-  const filas = campos.map(c => {
-    const valoresPorFuente = resultados.map(res => ({
-      fuente: res.fuente,
-      val: res.ok ? (res[c.key] || "") : ""
-    }));
-
-    const noVacios = valoresPorFuente.map(x => x.val).filter(Boolean);
-    const unicosLower = [...new Set(noVacios.map(v => v.toLowerCase()))];
-
-    let estadoHtml = "";
-    let valorConfirmado = "";
-
-    if (noVacios.length === 0) {
-      estadoHtml = c.esCaja
-        ? `<span class="badge badge-warn">Sin confirmar (no se inventa)</span>`
-        : `<span class="badge badge-warn">No devuelto</span>`;
-    } else if (unicosLower.length === 1) {
-      valorConfirmado = noVacios[0];
-      estadoHtml = `<span class="badge badge-ok">Coincide</span>`;
-    } else {
-      estadoHtml = `<span class="badge badge-diff">Diferencias entre fuentes</span>`;
-    }
-
-    const detalleFuentes = valoresPorFuente
-      .map(x => `<strong>${x.fuente}:</strong> ${x.val || (c.esCaja ? "<em>No informada</em>" : "<em>Sin dato</em>")}`)
-      .join("<br>");
-
-    return {
-      key: c.key,
-      label: c.label,
-      valorConfirmado,
-      detalleFuentes,
-      estadoHtml
-    };
-  });
-
-  const confirmadoMap = {};
-  filas.forEach(f => {
-    confirmadoMap[f.key] = f.valorConfirmado;
-  });
-
-  return { filas, confirmadoMap, fichaGuardada };
-}
-
-async function buscarPorVin() {
-  if (!Array.isArray(baseDatos) || baseDatos.length === 0) cargarBase();
-
-  const input = document.getElementById("inputVin");
-  const vin = limpiarVin(input ? input.value : "").slice(0, 17);
-  if (input) input.value = vin;
-  actualizarContador();
-
-  const box = document.getElementById("cruceBox");
-  const titulo = document.getElementById("cruceTitulo");
-  const estadoFuentes = document.getElementById("fuentesEstado");
-  const tablaWrap = document.getElementById("cruceTablaWrap");
-  const btnGuardar = document.getElementById("btnGuardarDesdeCruce");
-  const vistaFicha = document.getElementById("vistaFicha");
-
-  borradorCruce = null;
-  if (vistaFicha) vistaFicha.innerHTML = "";
-
-  if (vin.length !== 17) {
-    if (box) box.className = "cruce-box show";
-    if (btnGuardar) btnGuardar.style.display = "none";
-    if (titulo) titulo.textContent = "⚠️ Ingresá un VIN de 17 caracteres para cruzar online";
-    if (estadoFuentes) estadoFuentes.innerHTML = "";
-    if (tablaWrap) tablaWrap.innerHTML = `<p style="font-size:0.86rem; color:#fca5a5;">Cantidad actual: ${vin.length} caracteres.</p>`;
-    return;
-  }
-
-  const fichaGuardada = baseDatos.find(item => limpiarVin(item.vin) === vin) || null;
-  if (fichaGuardada) {
-    renderizarFicha(fichaGuardada);
-  }
-
-  if (box) box.className = "cruce-box show";
-  if (btnGuardar) btnGuardar.style.display = "none";
-  if (titulo) titulo.textContent = `🌐 Cruzando VIN ${vin} en fuentes online...`;
-  if (estadoFuentes) estadoFuentes.innerHTML = `<span class="badge badge-diff">Consultando fuentes...</span>`;
-  if (tablaWrap) tablaWrap.innerHTML = "";
-
-  const promesas = [
-    consultarFuenteValues(vin).catch(err => ({ fuente: "NHTSA DecodeVinValues", ok: false, error: err.message })),
-    consultarFuenteExtended(vin).catch(err => ({ fuente: "NHTSA Extended", ok: false, error: err.message }))
-  ];
-
-  const resultados = await Promise.all(promesas);
-
-  if (estadoFuentes) {
-    estadoFuentes.innerHTML = resultados.map(r => {
-      if (!r.ok) return `<span class="badge badge-warn">${r.fuente}: Error (${r.error})</span>`;
-      if (!r.decodValida) return `<span class="badge badge-warn">${r.fuente}: Sin decodificación válida</span>`;
-      return `<span class="badge badge-ok">${r.fuente}: Respondido</span>`;
-    }).join("");
-  }
-
-  const { filas, confirmadoMap } = cruzarResultados(resultados, fichaGuardada);
-
-  borradorCruce = {
-    vin,
-    dominio: fichaGuardada ? fichaGuardada.dominio : "",
-    marca: confirmadoMap.marca || (fichaGuardada ? fichaGuardada.marca : ""),
-    modelo: confirmadoMap.modelo || (fichaGuardada ? fichaGuardada.modelo : ""),
-    anio: confirmadoMap.anio || (fichaGuardada ? fichaGuardada.anio : ""),
-    version: confirmadoMap.motor || (fichaGuardada ? fichaGuardada.version : ""),
-    origen: confirmadoMap.origen || (fichaGuardada ? fichaGuardada.origen : ""),
-    // Nunca inventar caja: solo se toma si coincide o si ya estaba en la ficha guardada
-    caja: confirmadoMap.caja || (fichaGuardada ? fichaGuardada.caja : "")
-  };
-
-  if (btnGuardar) btnGuardar.style.display = "inline-flex";
-  if (titulo) {
-    titulo.textContent = fichaGuardada
-      ? `🌐 Cruce online para VIN ${vin} (comparado con tu ficha guardada)`
-      : `🌐 Cruce online para VIN ${vin} (solo datos coincidentes o informados)`;
-  }
-
-  if (tablaWrap) {
-    tablaWrap.innerHTML = `
-      <table class="cruce-table">
-        <thead>
-          <tr>
-            <th>Campo</th>
-            <th>Detalle por fuente</th>
-            <th>Estado del cruce</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${filas.map(f => `
-            <tr>
-              <td><strong>${f.label}</strong></td>
-              <td>${f.detalleFuentes}</td>
-              <td>${f.estadoHtml}</td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-      ${!confirmadoMap.caja ? `<p style="font-size:0.84rem; color:#fca5a5; margin-top:10px; font-weight:700;">⚠️ Ninguna fuente online confirmó el tipo de caja de forma concluyente: no se asigna caja ni fluido automáticamente.</p>` : ""}
-    `;
-  }
-}
-
-function renderizarFicha(item) {
-  const fisicaHtml = (item.fisica || []).map(l => `<li>${l}</li>`).join("");
-  const fichaJsonEscapado = encodeURIComponent(JSON.stringify(item));
-
-  document.getElementById("vistaFicha").innerHTML = `
-    <div class="ficha-banner-top">
-      <h2>FICHA GUARDADA ${(item.marca || "").toUpperCase()} - VIN</h2>
-      <button class="btn-sm" onclick="abrirModal(JSON.parse(decodeURIComponent('${fichaJsonEscapado}')))">✏️ Editar Ficha</button>
-    </div>
-    <div class="ficha-body">
-      <div class="dominio-bar">${item.dominio ? `Dominio: <strong>${item.dominio}</strong> — ` : ""}Consulta Taller</div>
-
-      <div class="meta-two-col">
-        <div>
-          <div class="meta-line"><div class="meta-label">VIN / Chasis:</div><div class="meta-val" style="font-family:monospace;">${item.vin}</div></div>
-          <div class="meta-line"><div class="meta-label">Motor:</div><div class="meta-val">${item.version || "-"}</div></div>
-          <div class="meta-line"><div class="meta-label">Modelo:</div><div class="meta-val">${item.modelo || "-"}</div></div>
-          <div class="meta-line"><div class="meta-label">Código:</div><div class="meta-val">${item.codigo || "-"}</div></div>
-        </div>
-        <div>
-          <div class="meta-line"><div class="meta-label">Año:</div><div class="meta-val">${item.anio || "-"}</div></div>
-          <div class="meta-line"><div class="meta-label">Origen:</div><div class="meta-val">${item.origen || "-"}</div></div>
-          <div class="meta-line"><div class="meta-label">Potencia:</div><div class="meta-val">${item.potencia || "-"}</div></div>
-          <div class="meta-line"><div class="meta-label">Torque:</div><div class="meta-val">${item.torque || "-"}</div></div>
-        </div>
-      </div>
-
-      <div class="sub-card">
-        <div class="sub-card-title">Transmisión</div>
-        <div class="kv-row"><div class="kv-key">Caja:</div><div class="kv-val">${item.caja || "No especificada"}</div></div>
-        <div class="kv-row"><div class="kv-key">Tracción:</div><div class="kv-val">${item.traccion || "-"}</div></div>
-        <div class="kv-row"><div class="kv-key">Fluido:</div><div class="kv-val" style="color:var(--green);">${item.norma || "-"}</div></div>
-        <div class="kv-row"><div class="kv-key">Cárter:</div><div class="kv-val">${item.carter || "-"}</div></div>
-        <div class="kv-row"><div class="kv-key">Total:</div><div class="kv-val" style="color:var(--accent);">${item.dialisisLitros || "-"}</div></div>
-        <div class="kv-row"><div class="kv-key">No usar:</div><div class="kv-val no-usar">${item.noUsar || "-"}</div></div>
-      </div>
-
-      <div class="sub-card">
-        <div class="sub-card-title">Identificación Física</div>
-        <ul class="fisica-list">${fisicaHtml || "<li>Sin datos cargados.</li>"}</ul>
-      </div>
-
-      <div class="sub-card">
-        <div class="sub-card-title">Equivalencias en Marcas Trabajadas</div>
-        <div class="brands-list">
-          <div class="brand-row nishimoto"><div class="brand-name">⭐ NISHIMOTO</div><div class="brand-prod">${item.nishimoto || "-"}</div></div>
-          <div class="brand-row"><div class="brand-name">Valvoline</div><div class="brand-prod">${item.valvoline || "-"}</div></div>
-          <div class="brand-row"><div class="brand-name">Liqui Moly</div><div class="brand-prod">${item.liquiMoly || "-"}</div></div>
-          <div class="brand-row"><div class="brand-name">Mannol</div><div class="brand-prod">${item.mannol || "-"}</div></div>
-          <div class="brand-row"><div class="brand-name">Motul</div><div class="brand-prod">${item.motul || "-"}</div></div>
-        </div>
-      </div>
-
-      ${item.alerta ? `<div class="alerta-roja"><strong>⚠️ IMPORTANTE</strong>${item.alerta}</div>` : ""}
-    </div>
-  `;
-}
-
-function abrirModal(precarga) {
-  const p = precarga || {};
-  document.getElementById("editId").value = p.id || "";
-  document.getElementById("fVin").value = p.vin || "";
-  document.getElementById("fDominio").value = p.dominio || "";
-  document.getElementById("fMarca").value = p.marca || "";
-  document.getElementById("fModelo").value = p.modelo || "";
-  document.getElementById("fCodigo").value = p.codigo || "";
-  document.getElementById("fAnio").value = p.anio || "";
-  document.getElementById("fOrigen").value = p.origen || "";
-  document.getElementById("fVersion").value = p.version || "";
-  document.getElementById("fPotencia").value = p.potencia || "";
-  document.getElementById("fTorque").value = p.torque || "";
-  document.getElementById("fCaja").value = p.caja || "";
-  document.getElementById("fTraccion").value = p.traccion || "";
-  document.getElementById("fNorma").value = p.norma || "";
-  document.getElementById("fCarter").value = p.carter || "";
-  document.getElementById("fDialisis").value = p.dialisisLitros || "";
-  document.getElementById("fNoUsar").value = p.noUsar || "";
-  const f = p.fisica || [];
-  document.getElementById("fFis1").value = f[0] || "";
-  document.getElementById("fFis2").value = f[1] || "";
-  document.getElementById("fFis3").value = f[2] || "";
-  document.getElementById("fFis4").value = f[3] || "";
-  document.getElementById("fNishimoto").value = p.nishimoto || "";
-  document.getElementById("fValvoline").value = p.valvoline || "";
-  document.getElementById("fLiquiMoly").value = p.liquiMoly || "";
-  document.getElementById("fMannol").value = p.mannol || "";
-  document.getElementById("fMotul").value = p.motul || "";
-  document.getElementById("fAlerta").value = p.alerta || "";
-  document.getElementById("modalFicha").classList.add("open");
-}
-
-function cerrarModal() {
-  document.getElementById("modalFicha").classList.remove("open");
-}
-
-function guardarModal() {
-  const editId = document.getElementById("editId").value;
-  const vin = limpiarVin(document.getElementById("fVin").value).slice(0, 17);
-  const marca = document.getElementById("fMarca").value.trim();
-  const modelo = document.getElementById("fModelo").value.trim();
-
-  if (vin.length !== 17 || !marca || !modelo) {
-    alert("Completá el VIN de 17 caracteres, Marca y Modelo.");
-    return;
-  }
-
-  const obj = {
-    id: editId || ("vin-" + vin),
-    vin,
-    dominio: document.getElementById("fDominio").value.trim().toUpperCase(),
-    marca,
-    modelo,
-    codigo: document.getElementById("fCodigo").value.trim(),
-    anio: document.getElementById("fAnio").value.trim(),
-    origen: document.getElementById("fOrigen").value.trim(),
-    version: document.getElementById("fVersion").value.trim(),
-    potencia: document.getElementById("fPotencia").value.trim(),
-    torque: document.getElementById("fTorque").value.trim(),
-    caja: document.getElementById("fCaja").value.trim(),
-    traccion: document.getElementById("fTraccion").value.trim(),
-    norma: document.getElementById("fNorma").value.trim(),
-    carter: document.getElementById("fCarter").value.trim(),
-    dialisisLitros: document.getElementById("fDialisis").value.trim(),
-    noUsar: document.getElementById("fNoUsar").value.trim(),
-    fisica: [
-      document.getElementById("fFis1").value.trim(),
-      document.getElementById("fFis2").value.trim(),
-      document.getElementById("fFis3").value.trim(),
-      document.getElementById("fFis4").value.trim()
-    ].filter(Boolean),
-    nishimoto: document.getElementById("fNishimoto").value.trim(),
-    valvoline: document.getElementById("fValvoline").value.trim(),
-    liquiMoly: document.getElementById("fLiquiMoly").value.trim(),
-    mannol: document.getElementById("fMannol").value.trim(),
-    motul: document.getElementById("fMotul").value.trim(),
-    alerta: document.getElementById("fAlerta").value.trim()
-  };
-
-  const idx = baseDatos.findIndex(i => i.id === obj.id || limpiarVin(i.vin) === vin);
-  if (idx !== -1) baseDatos[idx] = obj;
-  else baseDatos.unshift(obj);
-
-  guardarBase();
-  cerrarModal();
-  document.getElementById("inputVin").value = vin;
-  actualizarContador();
-  renderizarFicha(obj);
-}
-
-function exportarJson() {
-  const a = document.createElement("a");
-  a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(baseDatos, null, 2));
-  a.download = "fichas-vin-lubricentro.json";
-  a.click();
-}
-
-function importarJson(ev) {
-  const file = ev.target.files && ev.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const json = JSON.parse(e.target.result);
-      if (Array.isArray(json)) {
-        baseDatos = json;
-        guardarBase();
-        alert(`Base importada (${json.length} fichas).`);
-      }
-    } catch (err) {
-      alert("JSON inválido.");
-    }
-  };
-  reader.readAsText(file);
-}
-
-cargarBase();
-actualizarContador();
-</script>
-
-</body>
-</html>
