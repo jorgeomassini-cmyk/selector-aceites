@@ -16,8 +16,6 @@
       --accent-hover: #d97706;
       --green: #10b981;
       --green-bg: rgba(16, 185, 129, 0.14);
-      --yellow: #f59e0b;
-      --yellow-bg: rgba(245, 158, 11, 0.14);
       --red: #ef4444;
       --red-bg: rgba(239, 68, 68, 0.16);
       --blue: #38bdf8;
@@ -71,7 +69,7 @@
 
     .header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
-    button, .btn {
+    button {
       cursor: pointer;
       border: 1px solid var(--border);
       background: var(--card-alt);
@@ -472,14 +470,14 @@
       <div class="brand-badge">VIN</div>
       <div>
         <h1>FICHA TÉCNICA POR VIN / DOMINIO — LUBRICENTRO</h1>
-        <p>Consulta VIN Online · Modelos Individuales · Cárter/Diálisis, Identificación Física y NISHIMOTO</p>
+        <p>Búsqueda VIN + Consulta Online · Selección Manual Individual · NISHIMOTO</p>
       </div>
     </div>
     <div class="header-actions">
-      <button class="btn-primary" onclick="abrirModalNuevo()">+ CARGAR / ASOCIAR FICHA</button>
-      <button onclick="exportarBase()">⬇ Exportar JSON</button>
-      <button onclick="document.getElementById('fileImport').click()">⬆ Importar JSON</button>
-      <input type="file" id="fileImport" accept=".json" style="display:none" onchange="importarBase(event)" />
+      <button class="btn-primary" id="btnAbrirNuevo">+ CARGAR / ASOCIAR FICHA</button>
+      <button id="btnExportar">⬇ Exportar JSON</button>
+      <button id="btnImportar">⬆ Importar JSON</button>
+      <input type="file" id="fileImport" accept=".json" style="display:none" />
     </div>
   </div>
 </header>
@@ -487,15 +485,15 @@
 <div class="container">
 
   <div class="tabs">
-    <button class="tab-btn active" id="tab-auto" onclick="cambiarCategoria('auto')">🚗 Autos & Camionetas (<span id="countAutos">0</span>)</button>
-    <button class="tab-btn" id="tab-moto" onclick="cambiarCategoria('moto')">🏍️ Motos 4T (<span id="countMotos">0</span>)</button>
-    <button class="tab-btn" id="tab-clientes" onclick="cambiarCategoria('clientes')">📋 VINs & Patentes Cargados (<span id="countGuardados">0</span>)</button>
+    <button class="tab-btn active" id="tab-auto">🚗 Autos & Camionetas (<span id="countAutos">0</span>)</button>
+    <button class="tab-btn" id="tab-moto">🏍️ Motos 4T (<span id="countMotos">0</span>)</button>
+    <button class="tab-btn" id="tab-clientes">📋 VINs & Patentes Cargados (<span id="countGuardados">0</span>)</button>
   </div>
 
   <div class="panel" id="panelBuscador">
     <div class="panel-title">
-      <span>🔍 Buscar por VIN (Consulta Online + Base Local), Dominio o Modelo Individual</span>
-      <button class="btn-sm" onclick="limpiarBusqueda()">Limpiar</button>
+      <span>🔍 Buscar por VIN (17 caracteres), Dominio, Modelo o Selección Manual</span>
+      <button class="btn-sm" id="btnLimpiar">Limpiar</button>
     </div>
 
     <div class="vin-box">
@@ -503,17 +501,15 @@
         type="text"
         id="inputBusqueda"
         class="vin-input"
-        placeholder="Escribí VIN (17 caracteres), Dominio o Modelo..."
-        oninput="onInputBusqueda(this.value)"
-        onkeydown="if(event.key==='Enter') ejecutarBusquedaCompleta()"
+        placeholder="Escribí VIN (ej: 93HFA16808Z501002), Dominio o Modelo..."
       />
-      <button class="btn-primary" onclick="ejecutarBusquedaCompleta()">BUSCAR</button>
+      <button class="btn-primary" id="btnBuscar">BUSCAR</button>
     </div>
 
     <div class="online-box" id="onlineBox">
       <div class="online-header">
         <span id="onlineTitulo" style="font-size:0.9rem; font-weight:800; color:var(--blue);"></span>
-        <button class="btn-sm btn-blue" id="btnUsarDatosOnline" style="display:none;" onclick="abrirModalConDatosOnline()">➕ Cargar ficha con estos datos</button>
+        <button class="btn-sm btn-blue" id="btnUsarDatosOnline" style="display:none;">➕ Cargar ficha con estos datos</button>
       </div>
       <div id="onlineDetalle"></div>
     </div>
@@ -521,25 +517,25 @@
     <div class="selectors-grid" id="selectoresManuales">
       <div class="field">
         <label>1. Marca</label>
-        <select id="selMarca" onchange="onSelectMarca()">
+        <select id="selMarca">
           <option value="">-- Elegir Marca --</option>
         </select>
       </div>
       <div class="field">
         <label>2. Modelo (Individual)</label>
-        <select id="selModelo" onchange="onSelectModelo()">
+        <select id="selModelo">
           <option value="">-- Elegir Modelo --</option>
         </select>
       </div>
       <div class="field">
         <label>3. Año</label>
-        <select id="selAnio" onchange="onSelectAnio()">
+        <select id="selAnio">
           <option value="">-- Elegir Año --</option>
         </select>
       </div>
       <div class="field">
         <label>4. Motor / Caja</label>
-        <select id="selVersion" onchange="onSelectVersion()">
+        <select id="selVersion">
           <option value="">-- Elegir Motor / Caja --</option>
         </select>
       </div>
@@ -583,7 +579,7 @@
   <div class="modal">
     <div class="modal-header">
       <h2 id="modalTitulo" style="font-size:1.1rem;">Cargar / Editar Ficha Técnica por VIN</h2>
-      <button class="btn-sm" onclick="cerrarModal()">✕ Cerrar</button>
+      <button class="btn-sm" id="btnCerrarModal">✕ Cerrar</button>
     </div>
 
     <input type="hidden" id="editId" />
@@ -637,7 +633,7 @@
         <input type="text" id="fTorque" placeholder="Ej: 17.7 kgm @ 4300" />
       </div>
       <div class="field">
-        <label>Caja / Transmisión (dejar vacío si no está confirmada)</label>
+        <label>Caja / Transmisión (vacía si no está confirmada)</label>
         <input type="text" id="fCaja" placeholder="Ej: S5A 5 velocidades - Automática secuencial" />
       </div>
       <div class="field">
@@ -704,8 +700,8 @@
     </div>
 
     <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
-      <button onclick="cerrarModal()">Cancelar</button>
-      <button class="btn-primary" onclick="guardarFichaModal()">💾 GUARDAR FICHA</button>
+      <button id="btnCancelarModal">Cancelar</button>
+      <button class="btn-primary" id="btnGuardarFicha">💾 GUARDAR FICHA</button>
     </div>
   </div>
 </div>
@@ -747,6 +743,29 @@ const BASE_INICIAL = [
     motul: "Motul ATF VI"
   },
   {
+    id: "audi-a1-individual",
+    cat: "auto", dominio: "", vin: "",
+    marca: "Audi", modelo: "A1", codigo: "8X",
+    anio: "2011-2018", origen: "Europa",
+    version: "1.4 TFSI", potencia: "122 cv", torque: "20.4 kgm",
+    caja: "S-Tronic 7M (DQ200 Seco)", traccion: "Delantera",
+    norma: "VW G 052 512 (75W GL-4)",
+    carter: "1.7 Lts", dialisisLitros: "2.0 Lts (Gravedad)",
+    noUsar: "ATF / Diálisis a presión",
+    fisica: [
+      "1. Selectora: Automática secuencial",
+      "2. Varilla: Sin varilla superior",
+      "3. Filtro: Sin filtro cambiable externo",
+      "4. Tapón: Drenaje y llenado inferior"
+    ],
+    alerta: "Embrague seco DQ200: no usar máquina de diálisis ni fluido ATF.",
+    nishimoto: "Nishimoto GL-4 75W",
+    valvoline: "Valvoline Gear Oil 75W",
+    liquiMoly: "Liqui Moly Top Tec MTF 5100 75W",
+    mannol: "Mannol MTF-4 75W-80",
+    motul: "Motul Multi DCTF"
+  },
+  {
     id: "audi-a3-individual",
     cat: "auto", dominio: "", vin: "",
     marca: "Audi", modelo: "A3", codigo: "8V",
@@ -762,12 +781,58 @@ const BASE_INICIAL = [
       "3. Filtro: Cartucho superior (en húmedo)",
       "4. Tapón: Drenaje y control de nivel"
     ],
-    alerta: "Confirmar siempre si es DQ200 (seco) o DQ250/DQ381 (húmedo) antes de cambiar aceite.",
+    alerta: "Confirmar siempre si es DQ200 (seco) o DQ250/DQ381 (húmedo).",
     nishimoto: "Nishimoto Multi ATF / DCTF 7",
     valvoline: "Valvoline DCT / MaxLife ATF",
     liquiMoly: "Liqui Moly Doppelkupplungsgetriebe-Öl 8100",
     mannol: "Mannol DCT Fluid 8202",
     motul: "Motul Multi DCTF"
+  },
+  {
+    id: "audi-a4-individual",
+    cat: "auto", dominio: "", vin: "",
+    marca: "Audi", modelo: "A4", codigo: "B9",
+    anio: "2016-2024", origen: "Alemania",
+    version: "2.0 TFSI", potencia: "190 cv", torque: "32.6 kgm",
+    caja: "S-Tronic 7M (DL382 Doble Embrague Húmedo)", traccion: "Delantera / Quattro",
+    norma: "VW G 055 529",
+    carter: "5.0 - 6.0 Lts", dialisisLitros: "7.5 - 8.0 Lts Diálisis",
+    noUsar: "ATF convencional sin especificación DCT/DL382",
+    fisica: [
+      "1. Selectora: Electrónica / secuencial",
+      "2. Varilla: Sin varilla superior",
+      "3. Filtro: Según variante DL382",
+      "4. Tapón: Control de nivel a temperatura"
+    ],
+    alerta: "Verificar código de transmisión en etiqueta antes de conectar equipo.",
+    nishimoto: "Nishimoto Multi ATF / DCTF 7",
+    valvoline: "Valvoline DCT / MaxLife ATF",
+    liquiMoly: "Liqui Moly Doppelkupplungsgetriebe-Öl 8100",
+    mannol: "Mannol DCT Fluid 8202",
+    motul: "Motul Multi DCTF"
+  },
+  {
+    id: "bmw-serie1-individual",
+    cat: "auto", dominio: "", vin: "",
+    marca: "BMW", modelo: "Serie 1", codigo: "F20 / F40",
+    anio: "2012-2024", origen: "Alemania",
+    version: "118i / 120i", potencia: "136 - 184 cv", torque: "22.4 - 28.5 kgm",
+    caja: "Steptronic 8M (ZF 8HP / Aisin según tracción)", traccion: "Trasera / Delantera",
+    norma: "ZF LifeguardFluid 8 / BMW 83 22 2 289 720",
+    carter: "6.5 - 8.5 Lts", dialisisLitros: "10.0 - 11.5 Lts Diálisis",
+    noUsar: "Dexron III / Mercon V",
+    fisica: [
+      "1. Palanca: Joystick electrónico P-R-N-D + S/M",
+      "2. Varilla: No posee",
+      "3. Filtro: Integrado en cárter plástico (ZF)",
+      "4. Tapón: Llenado y control lateral a 40°C-50°C"
+    ],
+    alerta: "Controlar nivel con diagnóstico/temperatura entre 40°C y 50°C.",
+    nishimoto: "Nishimoto Multi ATF",
+    valvoline: "Valvoline MaxLife ATF",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol AG60 8218",
+    motul: "Motul ATF VI"
   },
   {
     id: "bmw-serie3-individual",
@@ -791,10 +856,79 @@ const BASE_INICIAL = [
     liquiMoly: "Liqui Moly Top Tec ATF 1800",
     mannol: "Mannol AG60 8218",
     motul: "Motul ATF VI"
+  },
+  {
+    id: "bmw-x1-individual",
+    cat: "auto", dominio: "", vin: "",
+    marca: "BMW", modelo: "X1", codigo: "F48 / U11",
+    anio: "2016-2024", origen: "Alemania",
+    version: "sDrive20i / xDrive25i", potencia: "192 - 231 cv", torque: "28.5 - 35.7 kgm",
+    caja: "Steptronic 7M / 8M (Aisin / Getrag)", traccion: "Delantera / xDrive",
+    norma: "BMW ATF 7 / Toyota WS / JWS 3324",
+    carter: "5.5 - 7.5 Lts", dialisisLitros: "9.0 - 10.5 Lts Diálisis",
+    noUsar: "Dexron III",
+    fisica: [
+      "1. Palanca: Joystick electrónico P-R-N-D + S/M",
+      "2. Varilla: No posee",
+      "3. Filtro: Según transmisión",
+      "4. Tapón: Control a temperatura de servicio"
+    ],
+    alerta: "Verificar versión de caja antes de proceder con la máquina.",
+    nishimoto: "Nishimoto Multi ATF",
+    valvoline: "Valvoline MaxLife ATF",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol ATF WS 8217",
+    motul: "Motul ATF VI"
+  },
+  {
+    id: "fiat-toro-18-individual",
+    cat: "auto", dominio: "", vin: "",
+    marca: "Fiat", modelo: "Toro", codigo: "226",
+    anio: "2016-2024", origen: "Brasil - Goiana",
+    version: "1.8 16V E.torQ", potencia: "130 cv", torque: "18.6 kgm",
+    caja: "Aisin AW60T (TF-72SC — AT6)", traccion: "Delantera",
+    norma: "Toyota WS / JWS 3324 / AW-1 / Fiat 9.55550-AV2",
+    carter: "4.0 - 6.5 Lts", dialisisLitros: "9.5 Lts Diálisis",
+    noUsar: "Multi ATF genérico sin cobertura WS / JWS 3324",
+    fisica: [
+      "1. Palanca: P-R-N-D + manual secuencial",
+      "2. Varilla: No posee",
+      "3. Filtro: Interno no cambiable sin desarmar carcasa",
+      "4. Tapón: Rebalse inferior + llenado"
+    ],
+    alerta: "Requiere adaptador en el intercambiador agua-aceite.",
+    nishimoto: "Nishimoto Multi ATF (verificar cobertura WS)",
+    valvoline: "Valvoline MaxLife ATF",
+    liquiMoly: "Liqui Moly Top Tec ATF 1800",
+    mannol: "Mannol ATF WS 8217",
+    motul: "Motul ATF VI"
+  },
+  {
+    id: "moto-honda-tornado-individual",
+    cat: "moto", dominio: "", vin: "",
+    marca: "Honda", modelo: "XR 250 Tornado", codigo: "MD38",
+    anio: "2006-2025", origen: "Brasil",
+    version: "249cc 4T Refrigerado por aire/aceite", potencia: "23.3 cv", torque: "2.48 kgm",
+    caja: "6 Velocidades (Embrague húmedo multidisco)", traccion: "Cadena",
+    norma: "SAE 10W-30 / 10W-40 API SN · JASO MA2",
+    carter: "1.5 Lts (con filtro) / 1.4 Lts (sin filtro)", dialisisLitros: "1.5 - 2.0 Lts",
+    noUsar: "Aceites con modificadores de fricción (JASO MB / autos)",
+    fisica: [
+      "1. Caja: 6 marchas a pedal",
+      "2. Varilla: Tapón/varilla lateral derecha",
+      "3. Filtro: Cartucho interno lado derecho",
+      "4. Tapón: Inferior cárter"
+    ],
+    alerta: "Obligatorio JASO MA2 para no hacer patinar el embrague húmedo.",
+    nishimoto: "Nishimoto Ultima Racing 10W-40 (JASO MA2)",
+    valvoline: "Valvoline 4T Full Synthetic 10W-40",
+    liquiMoly: "Liqui Moly Motorbike 4T Synth 10W-40",
+    mannol: "Mannol 4-Takt Plus 10W-40",
+    motul: "Motul 7100 10W-40"
   }
 ];
 
-const STORAGE_KEY = "lubricentro_ficha_vin_online_v1";
+const STORAGE_KEY = "lubricentro_ficha_vin_v2";
 
 let baseDatos = [];
 let categoriaActual = "auto";
@@ -853,7 +987,7 @@ async function ejecutarBusquedaCompleta() {
     return;
   }
 
-  // 1) Buscar primero en base local por VIN o Dominio exacto
+  // 1) Coincidencia exacta por VIN o Dominio en base local
   const exacta = baseDatos.find(item => {
     const vClean = (item.vin || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
     const dClean = (item.dominio || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
@@ -862,13 +996,16 @@ async function ejecutarBusquedaCompleta() {
 
   if (exacta) {
     ocultarPanelOnline();
-    if (categoriaActual !== exacta.cat) cambiarCategoria(exacta.cat, true);
+    if (categoriaActual !== exacta.cat) {
+      activarPestanaVisual(exacta.cat);
+      poblarSelectoresSolo(exacta.cat);
+    }
     mostrarCoincidencias([exacta], `Ficha registrada en tu base para "${qAlnum}"`);
     seleccionarFicha(exacta.id);
     return;
   }
 
-  // 2) Si es VIN de 17 caracteres no cargado en base local: consultar API online
+  // 2) VIN de 17 caracteres no cargado en base local: consultar API online
   if (qAlnum.length === 17) {
     ultimoVinConsultado = qAlnum;
     await consultarYMostrarVinOnline(qAlnum);
@@ -880,13 +1017,16 @@ async function ejecutarBusquedaCompleta() {
   // 3) Búsqueda por texto (Marca, Modelo, Código, Motor o Caja)
   const palabras = qRaw.toLowerCase().split(/\s+/).filter(Boolean);
   const resultados = baseDatos.filter(item => {
-    const texto = `${item.marca} ${item.modelo} ${item.codigo} ${item.anio} ${item.version} ${item.caja} ${item.dominio} ${item.vin}`.toLowerCase();
+    const texto = `${item.marca} ${item.modelo} ${item.codigo || ""} ${item.anio} ${item.version} ${item.caja || ""} ${item.dominio || ""} ${item.vin || ""}`.toLowerCase();
     return palabras.every(p => texto.includes(p));
   });
 
   if (resultados.length > 0) {
     const primera = resultados[0];
-    if (categoriaActual !== primera.cat) cambiarCategoria(primera.cat, true);
+    if (categoriaActual !== primera.cat) {
+      activarPestanaVisual(primera.cat);
+      poblarSelectoresSolo(primera.cat);
+    }
     mostrarCoincidencias(resultados, `${resultados.length} ficha(s) encontrada(s) para "${qRaw}"`);
     seleccionarFicha(primera.id);
   } else {
@@ -909,7 +1049,7 @@ async function consultarYMostrarVinOnline(vin) {
   try {
     const url = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${encodeURIComponent(vin)}?format=json`;
     const resp = await fetch(url);
-    if (!resp.ok) throw new Error("Error de red o respuesta HTTP " + resp.status);
+    if (!resp.ok) throw new Error("Respuesta HTTP " + resp.status);
     const data = await resp.json();
     const r = data && data.Results && data.Results[0] ? data.Results[0] : {};
 
@@ -923,24 +1063,16 @@ async function consultarYMostrarVinOnline(vin) {
       (r.EngineHP || "").trim() ? `${(r.EngineHP || "").trim()} HP` : ""
     ].filter(Boolean);
     const motor = motorPartes.join(" · ");
-    // Nunca inventar caja: se deja vacío si la API no informa transmisión
+    // Nunca inventar caja: queda vacío si la API no la informa
     const caja = (r.TransmissionStyle || "").trim();
 
-    ultimosDatosOnline = {
-      vin,
-      marca,
-      modelo,
-      anio,
-      origen,
-      version: motor,
-      caja
-    };
+    ultimosDatosOnline = { vin, marca, modelo, anio, origen, version: motor, caja };
 
     const tieneAlgunDato = Boolean(marca || modelo || anio || origen || motor || caja);
     if (!tieneAlgunDato) {
       box.classList.add("error");
       titulo.textContent = `⚠️ VIN ${vin}: sin datos devueltos por la consulta online`;
-      detalle.innerHTML = `<p style="font-size:0.86rem;">El servicio online no devolvió información para este VIN (frecuente en códigos regionales/Mercosur sin mapeo en esta API). No se asume ningún vehículo ni caja.</p>`;
+      detalle.innerHTML = `<p style="font-size:0.86rem;">La consulta online no devolvió información para este VIN. No se asume ningún vehículo ni caja.</p>`;
       btnCargar.style.display = "inline-flex";
       return;
     }
@@ -986,7 +1118,6 @@ function abrirModalConDatosOnline() {
   document.getElementById("fAnio").value = d.anio || "";
   document.getElementById("fOrigen").value = d.origen || "";
   document.getElementById("fVersion").value = d.version || "";
-  // Caja queda vacía si la API no devolvió ninguna
   document.getElementById("fCaja").value = d.caja || "";
 }
 
@@ -1009,7 +1140,7 @@ function mostrarCoincidencias(lista, titulo) {
   }
 
   grid.innerHTML = lista.map(item => `
-    <div class="match-card ${item.id === fichaSeleccionadaId ? "selected" : ""}" onclick="seleccionarFicha('${item.id}')">
+    <div class="match-card ${item.id === fichaSeleccionadaId ? "selected" : ""}" data-match-id="${item.id}">
       <div class="m-title">${item.cat === "moto" ? "🏍️" : "🚗"} ${item.marca} — ${item.modelo}</div>
       <div class="m-sub">${item.anio} · <strong>${item.caja || "Caja sin especificar"}</strong></div>
     </div>
@@ -1028,10 +1159,14 @@ function limpiarBusqueda() {
   ultimosDatosOnline = null;
   ocultarPanelOnline();
   ocultarCoincidencias();
-  poblarSelectores();
+  if (categoriaActual !== "clientes") {
+    poblarSelectoresSolo(categoriaActual);
+    const itemsCat = baseDatos.filter(i => i.cat === categoriaActual);
+    if (itemsCat.length > 0) seleccionarFicha(itemsCat[0].id);
+  }
 }
 
-function cambiarCategoria(cat, mantenerBusqueda = false) {
+function activarPestanaVisual(cat) {
   categoriaActual = cat;
   document.getElementById("tab-auto").classList.toggle("active", cat === "auto");
   document.getElementById("tab-moto").classList.toggle("active", cat === "moto");
@@ -1043,18 +1178,24 @@ function cambiarCategoria(cat, mantenerBusqueda = false) {
     document.getElementById("matchesBar").classList.remove("show");
     document.getElementById("vistaClientes").style.display = "block";
     renderizarTablaClientes();
-    return;
+  } else {
+    document.getElementById("selectoresManuales").style.display = "grid";
+    document.getElementById("vistaFicha").style.display = "block";
+    document.getElementById("vistaClientes").style.display = "none";
   }
-
-  document.getElementById("selectoresManuales").style.display = "grid";
-  document.getElementById("vistaFicha").style.display = "block";
-  document.getElementById("vistaClientes").style.display = "none";
-  if (!mantenerBusqueda) ocultarCoincidencias();
-  poblarSelectores();
 }
 
-function poblarSelectores() {
-  const itemsCat = baseDatos.filter(i => i.cat === categoriaActual);
+function cambiarCategoria(cat) {
+  activarPestanaVisual(cat);
+  if (cat === "clientes") return;
+  ocultarCoincidencias();
+  poblarSelectoresSolo(cat);
+  const itemsCat = baseDatos.filter(i => i.cat === cat);
+  if (itemsCat.length > 0) seleccionarFicha(itemsCat[0].id);
+}
+
+function poblarSelectoresSolo(cat) {
+  const itemsCat = baseDatos.filter(i => i.cat === cat);
   const marcas = [...new Set(itemsCat.map(i => i.marca))].sort();
 
   document.getElementById("selMarca").innerHTML = `<option value="">-- Elegir Marca (${marcas.length}) --</option>` +
@@ -1062,12 +1203,6 @@ function poblarSelectores() {
   document.getElementById("selModelo").innerHTML = `<option value="">-- Elegir Modelo --</option>`;
   document.getElementById("selAnio").innerHTML = `<option value="">-- Elegir Año --</option>`;
   document.getElementById("selVersion").innerHTML = `<option value="">-- Elegir Motor / Caja --</option>`;
-
-  if (itemsCat.length > 0 && !itemsCat.some(i => i.id === fichaSeleccionadaId)) {
-    seleccionarFicha(itemsCat[0].id);
-  } else if (fichaSeleccionadaId) {
-    seleccionarFicha(fichaSeleccionadaId);
-  }
 }
 
 function onSelectMarca() {
@@ -1081,7 +1216,7 @@ function onSelectMarca() {
   document.getElementById("selVersion").innerHTML = `<option value="">-- Elegir Motor / Caja --</option>`;
 
   if (marca && items.length > 0) {
-    mostrarCoincidencias(items, `Modelos de ${marca}`);
+    mostrarCoincidencias(items, `Modelos individuales de ${marca}`);
     seleccionarFicha(items[0].id);
   }
 }
@@ -1101,7 +1236,7 @@ function onSelectModelo() {
   document.getElementById("selVersion").innerHTML = `<option value="">-- Elegir Motor / Caja --</option>`;
 
   if (items.length > 0) {
-    mostrarCoincidencias(items, `Versiones de ${marca} ${modelo}`);
+    mostrarCoincidencias(items, `Versiones de ${marca || ""} ${modelo || ""}`.trim());
     seleccionarFicha(items[0].id);
   }
 }
@@ -1138,7 +1273,7 @@ function seleccionarFicha(id) {
 
   fichaSeleccionadaId = id;
   document.querySelectorAll(".match-card").forEach(el => {
-    el.classList.toggle("selected", el.getAttribute("onclick")?.includes(id));
+    el.classList.toggle("selected", el.getAttribute("data-match-id") === id);
   });
 
   const fisicaHtml = (item.fisica || []).map(line => `<li>${line}</li>`).join("");
@@ -1147,7 +1282,7 @@ function seleccionarFicha(id) {
     <div class="ficha-banner-top">
       <h2>FICHA TÉCNICA ${item.marca.toUpperCase()} - VIN</h2>
       <div style="display:flex; gap:8px;">
-        <button class="btn-sm" onclick="abrirModalEditar('${item.id}')">✏️ Editar Ficha</button>
+        <button class="btn-sm" data-edit-id="${item.id}">✏️ Editar Ficha</button>
       </div>
     </div>
     <div class="ficha-body">
@@ -1241,16 +1376,9 @@ function renderizarTablaClientes() {
       <td>${i.dominio || "-"}</td>
       <td style="font-family:monospace;">${i.vin || "-"}</td>
       <td><small>${i.norma || "-"}<br><strong>${i.dialisisLitros || ""}</strong></small></td>
-      <td><button class="btn-sm btn-primary" onclick="irAFichaDesdeTabla('${i.id}')">Ver Ficha</button></td>
+      <td><button class="btn-sm btn-primary" data-ver-id="${i.id}">Ver Ficha</button></td>
     </tr>
   `).join("");
-}
-
-function irAFichaDesdeTabla(id) {
-  const item = baseDatos.find(i => i.id === id);
-  if (!item) return;
-  cambiarCategoria(item.cat);
-  seleccionarFicha(id);
 }
 
 function abrirModalNuevo() {
@@ -1357,7 +1485,6 @@ function guardarFichaModal() {
     version: document.getElementById("fVersion").value.trim() || "Estándar",
     potencia: document.getElementById("fPotencia").value.trim(),
     torque: document.getElementById("fTorque").value.trim(),
-    // Nunca inventar caja: queda vacía si el usuario no la completó
     caja: document.getElementById("fCaja").value.trim(),
     traccion: document.getElementById("fTraccion").value.trim(),
     norma: document.getElementById("fNorma").value.trim() || "Consultar manual",
@@ -1383,7 +1510,8 @@ function guardarFichaModal() {
   guardarEstado();
   cerrarModal();
   ocultarPanelOnline();
-  cambiarCategoria(obj.cat);
+  activarPestanaVisual(obj.cat);
+  poblarSelectoresSolo(obj.cat);
   seleccionarFicha(obj.id);
   mostrarToast("✅ Ficha guardada");
 }
@@ -1428,9 +1556,66 @@ function mostrarToast(msg) {
   setTimeout(() => t.classList.remove("show"), 3200);
 }
 
+function registrarEventos() {
+  document.getElementById("tab-auto").addEventListener("click", () => cambiarCategoria("auto"));
+  document.getElementById("tab-moto").addEventListener("click", () => cambiarCategoria("moto"));
+  document.getElementById("tab-clientes").addEventListener("click", () => cambiarCategoria("clientes"));
+
+  document.getElementById("btnAbrirNuevo").addEventListener("click", abrirModalNuevo);
+  document.getElementById("btnExportar").addEventListener("click", exportarBase);
+  document.getElementById("btnImportar").addEventListener("click", () => document.getElementById("fileImport").click());
+  document.getElementById("fileImport").addEventListener("change", importarBase);
+
+  document.getElementById("btnLimpiar").addEventListener("click", limpiarBusqueda);
+  document.getElementById("btnBuscar").addEventListener("click", ejecutarBusquedaCompleta);
+  document.getElementById("inputBusqueda").addEventListener("input", (e) => onInputBusqueda(e.target.value));
+  document.getElementById("inputBusqueda").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") ejecutarBusquedaCompleta();
+  });
+
+  document.getElementById("btnUsarDatosOnline").addEventListener("click", abrirModalConDatosOnline);
+
+  document.getElementById("selMarca").addEventListener("change", onSelectMarca);
+  document.getElementById("selModelo").addEventListener("change", onSelectModelo);
+  document.getElementById("selAnio").addEventListener("change", onSelectAnio);
+  document.getElementById("selVersion").addEventListener("change", onSelectVersion);
+
+  document.getElementById("btnCerrarModal").addEventListener("click", cerrarModal);
+  document.getElementById("btnCancelarModal").addEventListener("click", cerrarModal);
+  document.getElementById("btnGuardarFicha").addEventListener("click", guardarFichaModal);
+
+  document.addEventListener("click", (e) => {
+    const matchCard = e.target.closest(".match-card");
+    if (matchCard) {
+      const id = matchCard.getAttribute("data-match-id");
+      if (id) seleccionarFicha(id);
+      return;
+    }
+    const editBtn = e.target.closest("[data-edit-id]");
+    if (editBtn) {
+      abrirModalEditar(editBtn.getAttribute("data-edit-id"));
+      return;
+    }
+    const verBtn = e.target.closest("[data-ver-id]");
+    if (verBtn) {
+      const id = verBtn.getAttribute("data-ver-id");
+      const item = baseDatos.find(i => i.id === id);
+      if (item) {
+        activarPestanaVisual(item.cat);
+        poblarSelectoresSolo(item.cat);
+        seleccionarFicha(item.id);
+      }
+    }
+  });
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   cargarEstado();
-  cambiarCategoria("auto");
+  registrarEventos();
+  activarPestanaVisual("auto");
+  poblarSelectoresSolo("auto");
+  const autos = baseDatos.filter(i => i.cat === "auto");
+  if (autos.length > 0) seleccionarFicha(autos[0].id);
 });
 </script>
 
