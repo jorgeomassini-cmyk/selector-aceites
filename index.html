@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Consulta por VIN — Lubricentro</title>
+  <title>Consulta Técnica por VIN — Lubricentro</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -40,7 +40,7 @@
     }
 
     .header-inner {
-      max-width: 920px;
+      max-width: 960px;
       margin: 0 auto;
       display: flex;
       flex-wrap: wrap;
@@ -60,7 +60,7 @@
       font-size: 1.1rem;
     }
 
-    .brand h1 { font-size: 1.1rem; font-weight: 800; }
+    .brand h1 { font-size: 1.12rem; font-weight: 800; }
     .brand p { font-size: 0.78rem; color: var(--muted); }
 
     .header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -85,7 +85,7 @@
     .btn-blue { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
     .btn-sm { padding: 6px 10px; font-size: 0.78rem; }
 
-    .container { max-width: 920px; margin: 24px auto; padding: 0 16px; }
+    .container { max-width: 960px; margin: 24px auto; padding: 0 16px; }
 
     .panel {
       background: var(--card);
@@ -93,6 +93,7 @@
       border-radius: 14px;
       padding: 20px;
       margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
     }
 
     .panel-title {
@@ -105,6 +106,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
       gap: 8px;
     }
 
@@ -127,7 +129,7 @@
 
     .vin-input:focus { outline: none; border-color: var(--accent); }
 
-    .vin-meta {
+    .vin-counter {
       font-size: 0.78rem;
       color: var(--muted);
       margin-top: 8px;
@@ -163,7 +165,7 @@
 
     .online-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 10px;
     }
 
@@ -175,7 +177,7 @@
     }
 
     .online-item .k { font-size: 0.72rem; text-transform: uppercase; color: var(--muted); font-weight: 800; }
-    .online-item .v { font-size: 0.94rem; font-weight: 700; margin-top: 3px; }
+    .online-item .v { font-size: 0.94rem; font-weight: 700; margin-top: 3px; color: var(--text); }
     .online-item .v.empty { color: #fca5a5; font-style: italic; }
 
     .ficha-banner-top {
@@ -347,15 +349,15 @@
     <div class="brand">
       <div class="brand-badge">VIN</div>
       <div>
-        <h1>CONSULTA POR VIN — LUBRICENTRO</h1>
-        <p>Únicamente búsqueda por número de VIN (17 caracteres)</p>
+        <h1>CONSULTA TÉCNICA POR VIN — LUBRICENTRO</h1>
+        <p>Solo búsqueda por VIN (17 caracteres) · Sin datos inventados</p>
       </div>
     </div>
     <div class="header-actions">
-      <button class="btn-primary" id="btnNuevoVin">+ Cargar Ficha VIN</button>
-      <button id="btnExportar">⬇ Exportar JSON</button>
-      <button id="btnImportar">⬆ Importar JSON</button>
-      <input type="file" id="fileImport" accept=".json" style="display:none" />
+      <button class="btn-primary" id="btnNuevoVin" onclick="abrirModal({})">+ Cargar Ficha VIN</button>
+      <button id="btnExportar" onclick="exportarJson()">⬇ Exportar JSON</button>
+      <button id="btnImportar" onclick="document.getElementById('fileImport').click()">⬆ Importar JSON</button>
+      <input type="file" id="fileImport" accept=".json" style="display:none" onchange="importarJson(event)" />
     </div>
   </div>
 </header>
@@ -364,8 +366,8 @@
 
   <div class="panel">
     <div class="panel-title">
-      <span>🔍 Número de VIN / Chasis (17 caracteres)</span>
-      <button class="btn-sm" id="btnLimpiar">Limpiar</button>
+      <span>🔍 Ingresá el Número de VIN / Chasis (17 caracteres)</span>
+      <button class="btn-sm" id="btnLimpiar" onclick="limpiarPantalla()">Limpiar</button>
     </div>
 
     <div class="vin-box">
@@ -375,19 +377,23 @@
         class="vin-input"
         maxlength="17"
         placeholder="EJ: 93HFA16808Z501002"
+        oninput="actualizarContador()"
+        onchange="actualizarContador()"
+        onkeyup="actualizarContador()"
+        onkeydown="if(event.key==='Enter'){ event.preventDefault(); buscarPorVin(); }"
       />
-      <button class="btn-primary" id="btnBuscarVin">CONSULTAR VIN</button>
+      <button class="btn-primary" id="btnBuscarVin" onclick="buscarPorVin()">CONSULTAR VIN</button>
     </div>
 
-    <div class="vin-meta">
+    <div class="vin-counter">
       <span id="contadorChars">0 / 17 caracteres</span>
-      <span>VINs guardados: <strong id="totalGuardados">0</strong></span>
+      <span>Fichas VIN guardadas en tu base: <strong id="totalGuardados">0</strong></span>
     </div>
 
     <div class="online-box" id="onlineBox">
       <div class="online-header">
         <span id="onlineTitulo" style="font-size:0.92rem; font-weight:800; color:var(--blue);"></span>
-        <button class="btn-sm btn-blue" id="btnGuardarDesdeOnline" style="display:none;">➕ Guardar ficha para este VIN</button>
+        <button class="btn-sm btn-blue" id="btnGuardarDesdeOnline" style="display:none;" onclick="abrirModal(datosOnlineActuales || {})">➕ Guardar ficha para este VIN</button>
       </div>
       <div id="onlineDetalle"></div>
     </div>
@@ -401,7 +407,7 @@
   <div class="modal">
     <div class="modal-header">
       <h2 id="modalTitulo" style="font-size:1.08rem;">Ficha Técnica por VIN</h2>
-      <button class="btn-sm" id="btnCerrarModal">✕ Cerrar</button>
+      <button class="btn-sm" onclick="cerrarModal()">✕ Cerrar</button>
     </div>
 
     <input type="hidden" id="editId" />
@@ -440,8 +446,8 @@
     </div>
 
     <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
-      <button id="btnCancelarModal">Cancelar</button>
-      <button class="btn-primary" id="btnGuardarFicha">💾 GUARDAR FICHA</button>
+      <button onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" onclick="guardarModal()">💾 GUARDAR FICHA</button>
     </div>
   </div>
 </div>
@@ -481,12 +487,12 @@ const BASE_INICIAL = [
   }
 ];
 
-const STORAGE_KEY = "lubricentro_vin_exclusivo_v4";
+const STORAGE_KEY = "lubricentro_vin_github_v5";
 let baseDatos = [];
 let datosOnlineActuales = null;
 
 function limpiarVin(str) {
-  return (str || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return String(str || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
 function cargarBase() {
@@ -497,27 +503,53 @@ function cargarBase() {
   } catch (e) {
     baseDatos = JSON.parse(JSON.stringify(BASE_INICIAL));
   }
-  document.getElementById("totalGuardados").textContent = baseDatos.length;
+  const elTotal = document.getElementById("totalGuardados");
+  if (elTotal) elTotal.textContent = String(baseDatos.length);
 }
 
 function guardarBase() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(baseDatos));
-  document.getElementById("totalGuardados").textContent = baseDatos.length;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(baseDatos));
+  } catch (e) {}
+  const elTotal = document.getElementById("totalGuardados");
+  if (elTotal) elTotal.textContent = String(baseDatos.length);
+}
+
+function actualizarContador() {
+  const input = document.getElementById("inputVin");
+  if (!input) return;
+  const v = limpiarVin(input.value).slice(0, 17);
+  input.value = v;
+  const elCont = document.getElementById("contadorChars");
+  if (elCont) elCont.textContent = `${v.length} / 17 caracteres`;
 }
 
 function limpiarPantalla() {
-  document.getElementById("inputVin").value = "";
-  document.getElementById("contadorChars").textContent = "0 / 17 caracteres";
-  document.getElementById("onlineBox").classList.remove("show", "error");
-  document.getElementById("onlineDetalle").innerHTML = "";
-  document.getElementById("vistaFicha").innerHTML = "";
+  const input = document.getElementById("inputVin");
+  if (input) input.value = "";
+  const elCont = document.getElementById("contadorChars");
+  if (elCont) elCont.textContent = "0 / 17 caracteres";
+  const box = document.getElementById("onlineBox");
+  if (box) box.className = "online-box";
+  const det = document.getElementById("onlineDetalle");
+  if (det) det.innerHTML = "";
+  const btn = document.getElementById("btnGuardarDesdeOnline");
+  if (btn) btn.style.display = "none";
+  const ficha = document.getElementById("vistaFicha");
+  if (ficha) ficha.innerHTML = "";
   datosOnlineActuales = null;
 }
 
 async function buscarPorVin() {
-  const vin = limpiarVin(document.getElementById("inputVin").value);
-  document.getElementById("inputVin").value = vin;
-  document.getElementById("contadorChars").textContent = `${vin.length} / 17 caracteres`;
+  if (!Array.isArray(baseDatos) || baseDatos.length === 0) {
+    cargarBase();
+  }
+
+  const input = document.getElementById("inputVin");
+  const vin = limpiarVin(input ? input.value : "").slice(0, 17);
+  if (input) input.value = vin;
+  const elCont = document.getElementById("contadorChars");
+  if (elCont) elCont.textContent = `${vin.length} / 17 caracteres`;
 
   const box = document.getElementById("onlineBox");
   const titulo = document.getElementById("onlineTitulo");
@@ -526,30 +558,29 @@ async function buscarPorVin() {
   const vistaFicha = document.getElementById("vistaFicha");
 
   datosOnlineActuales = null;
-  vistaFicha.innerHTML = "";
+  if (vistaFicha) vistaFicha.innerHTML = "";
 
   if (vin.length !== 17) {
-    box.classList.add("show", "error");
-    btnGuardar.style.display = "none";
-    titulo.textContent = "⚠️ Ingresá un número de VIN de 17 caracteres";
-    detalle.innerHTML = `<p style="font-size:0.86rem;">Cantidad actual: ${vin.length} caracteres.</p>`;
+    if (box) box.className = "online-box show error";
+    if (btnGuardar) btnGuardar.style.display = "none";
+    if (titulo) titulo.textContent = "⚠️ El VIN debe tener 17 caracteres";
+    if (detalle) detalle.innerHTML = `<p style="font-size:0.86rem;">Detectados: ${vin.length} caracteres (${vin || "vacío"}). Verificá que el número completo esté en el campo.</p>`;
     return;
   }
 
-  // 1) Si el VIN exacto está en tu base local, mostrar SOLO tu ficha guardada (sin mezclar API)
+  // 1) Coincidencia exacta en tu base local
   const local = baseDatos.find(item => limpiarVin(item.vin) === vin);
   if (local) {
-    box.classList.remove("show", "error");
+    if (box) box.className = "online-box";
     renderizarFicha(local);
     return;
   }
 
-  // 2) Si el VIN no está guardado, consultar online
-  box.classList.remove("error");
-  box.classList.add("show");
-  btnGuardar.style.display = "none";
-  titulo.textContent = `🌐 Consultando VIN ${vin} online...`;
-  detalle.innerHTML = `<p style="font-size:0.86rem; color:var(--muted);">Consultando servicio VIN...</p>`;
+  // 2) Consulta online si no está en la base local
+  if (box) box.className = "online-box show";
+  if (btnGuardar) btnGuardar.style.display = "none";
+  if (titulo) titulo.textContent = `🌐 Consultando VIN ${vin} online...`;
+  if (detalle) detalle.innerHTML = `<p style="font-size:0.86rem; color:var(--muted);">Consultando servicio de decodificación...</p>`;
 
   try {
     const url = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${encodeURIComponent(vin)}?format=json`;
@@ -558,36 +589,41 @@ async function buscarPorVin() {
     const json = await resp.json();
     const r = (json && json.Results && json.Results[0]) ? json.Results[0] : {};
 
-    const errorCodes = (r.ErrorCode || "").split(",").map(s => s.trim()).filter(Boolean);
+    const errorCodes = String(r.ErrorCode || "").split(",").map(s => s.trim()).filter(Boolean);
     const decodificacionValida = errorCodes.includes("0");
 
-    const marca = decodificacionValida ? (r.Make || "").trim() : "";
-    const modelo = decodificacionValida ? (r.Model || "").trim() : "";
-    const anio = decodificacionValida ? (r.ModelYear || "").trim() : "";
+    const marca = decodificacionValida ? String(r.Make || "").trim() : "";
+    const modelo = decodificacionValida ? String(r.Model || "").trim() : "";
+    const anio = decodificacionValida ? String(r.ModelYear || "").trim() : "";
     const origen = decodificacionValida
-      ? [r.PlantCity, r.PlantCountry].map(s => (s || "").trim()).filter(Boolean).join(" · ")
+      ? [r.PlantCity, r.PlantCountry].map(s => String(s || "").trim()).filter(Boolean).join(" · ")
       : "";
     const motor = decodificacionValida
       ? [
-          (r.EngineModel || "").trim(),
-          (r.DisplacementL || "").trim() ? `${(r.DisplacementL || "").trim()}L` : "",
-          (r.EngineHP || "").trim() ? `${(r.EngineHP || "").trim()} HP` : ""
+          String(r.EngineModel || "").trim(),
+          String(r.DisplacementL || "").trim() ? `${String(r.DisplacementL || "").trim()}L` : "",
+          String(r.EngineHP || "").trim() ? `${String(r.EngineHP || "").trim()} HP` : ""
         ].filter(Boolean).join(" · ")
       : "";
     // Nunca inventar caja: queda vacía si la API no la informa
-    const caja = decodificacionValida ? (r.TransmissionStyle || "").trim() : "";
+    const caja = decodificacionValida ? String(r.TransmissionStyle || "").trim() : "";
 
     datosOnlineActuales = { vin, marca, modelo, anio, origen, version: motor, caja };
-    btnGuardar.style.display = "inline-flex";
+    if (btnGuardar) btnGuardar.style.display = "inline-flex";
 
     if (!decodificacionValida || (!marca && !modelo && !anio && !motor)) {
-      box.classList.add("error");
-      titulo.textContent = `⚠️ VIN ${vin}: sin datos confirmados en la consulta online`;
-      detalle.innerHTML = `<p style="font-size:0.88rem;">No se confirmó vehículo ni caja en la consulta online. Podés cargar la ficha manualmente para este VIN.</p>`;
+      if (box) box.className = "online-box show error";
+      if (titulo) titulo.textContent = `⚠️ VIN ${vin}: sin datos confirmados en la consulta online`;
+      if (detalle) {
+        detalle.innerHTML = `
+          <p style="font-size:0.88rem;">Este VIN no figura decodificado con certeza en la API pública (habitual en patentes/chasis Mercosur). <strong>No se muestra ningún auto al azar ni se inventa caja.</strong> Podés tocar <em>"+ Guardar ficha para este VIN"</em> para cargarlo una vez que lo verifiques.</p>
+        `;
+      }
       return;
     }
 
-    titulo.textContent = `🌐 Datos devueltos por la API para VIN ${vin}`;
+    if (box) box.className = "online-box show";
+    if (titulo) titulo.textContent = `🌐 Datos devueltos por la API para VIN ${vin}`;
     const celda = (k, v, esCaja = false) => `
       <div class="online-item">
         <div class="k">${k}</div>
@@ -595,33 +631,36 @@ async function buscarPorVin() {
       </div>
     `;
 
-    detalle.innerHTML = `
-      <div class="online-grid">
-        ${celda("Marca", marca)}
-        ${celda("Modelo", modelo)}
-        ${celda("Año", anio)}
-        ${celda("Motor", motor)}
-        ${celda("Origen", origen)}
-        ${celda("Caja / Transmisión", caja, true)}
-      </div>
-      ${!caja ? `<p style="font-size:0.84rem; color:#fca5a5; margin-top:10px; font-weight:700;">⚠️ La API no devolvió caja: no se asigna caja ni fluido automáticamente.</p>` : ""}
-    `;
+    if (detalle) {
+      detalle.innerHTML = `
+        <div class="online-grid">
+          ${celda("Marca", marca)}
+          ${celda("Modelo", modelo)}
+          ${celda("Año", anio)}
+          ${celda("Motor", motor)}
+          ${celda("Origen", origen)}
+          ${celda("Caja / Transmisión", caja, true)}
+        </div>
+        ${!caja ? `<p style="font-size:0.84rem; color:#fca5a5; margin-top:10px; font-weight:700;">⚠️ La API no devolvió caja: no se asigna caja ni fluido automáticamente.</p>` : ""}
+      `;
+    }
   } catch (err) {
     datosOnlineActuales = { vin };
-    box.classList.add("error");
-    btnGuardar.style.display = "inline-flex";
-    titulo.textContent = `⚠️ Error al consultar VIN ${vin} online`;
-    detalle.innerHTML = `<p style="font-size:0.86rem;">No se pudo consultar el servicio online (${err.message}).</p>`;
+    if (box) box.className = "online-box show error";
+    if (btnGuardar) btnGuardar.style.display = "inline-flex";
+    if (titulo) titulo.textContent = `⚠️ Error al consultar VIN ${vin} online`;
+    if (detalle) detalle.innerHTML = `<p style="font-size:0.86rem;">No se pudo consultar el servicio online (${err.message}).</p>`;
   }
 }
 
 function renderizarFicha(item) {
   const fisicaHtml = (item.fisica || []).map(l => `<li>${l}</li>`).join("");
+  const fichaJsonEscapado = encodeURIComponent(JSON.stringify(item));
 
   document.getElementById("vistaFicha").innerHTML = `
     <div class="ficha-banner-top">
       <h2>FICHA TÉCNICA ${(item.marca || "").toUpperCase()} - VIN</h2>
-      <button class="btn-sm" id="btnEditarActual">✏️ Editar Ficha</button>
+      <button class="btn-sm" onclick="abrirModal(JSON.parse(decodeURIComponent('${fichaJsonEscapado}')))">✏️ Editar Ficha</button>
     </div>
     <div class="ficha-body">
       <div class="dominio-bar">${item.dominio ? `Dominio: <strong>${item.dominio}</strong> — ` : ""}Consulta Taller</div>
@@ -670,39 +709,38 @@ function renderizarFicha(item) {
       ${item.alerta ? `<div class="alerta-roja"><strong>⚠️ IMPORTANTE</strong>${item.alerta}</div>` : ""}
     </div>
   `;
-
-  document.getElementById("btnEditarActual").addEventListener("click", () => abrirModal(item));
 }
 
-function abrirModal(precarga = {}) {
-  document.getElementById("editId").value = precarga.id || "";
-  document.getElementById("fVin").value = precarga.vin || "";
-  document.getElementById("fDominio").value = precarga.dominio || "";
-  document.getElementById("fMarca").value = precarga.marca || "";
-  document.getElementById("fModelo").value = precarga.modelo || "";
-  document.getElementById("fCodigo").value = precarga.codigo || "";
-  document.getElementById("fAnio").value = precarga.anio || "";
-  document.getElementById("fOrigen").value = precarga.origen || "";
-  document.getElementById("fVersion").value = precarga.version || "";
-  document.getElementById("fPotencia").value = precarga.potencia || "";
-  document.getElementById("fTorque").value = precarga.torque || "";
-  document.getElementById("fCaja").value = precarga.caja || "";
-  document.getElementById("fTraccion").value = precarga.traccion || "";
-  document.getElementById("fNorma").value = precarga.norma || "";
-  document.getElementById("fCarter").value = precarga.carter || "";
-  document.getElementById("fDialisis").value = precarga.dialisisLitros || "";
-  document.getElementById("fNoUsar").value = precarga.noUsar || "";
-  const f = precarga.fisica || [];
+function abrirModal(precarga) {
+  const p = precarga || {};
+  document.getElementById("editId").value = p.id || "";
+  document.getElementById("fVin").value = p.vin || "";
+  document.getElementById("fDominio").value = p.dominio || "";
+  document.getElementById("fMarca").value = p.marca || "";
+  document.getElementById("fModelo").value = p.modelo || "";
+  document.getElementById("fCodigo").value = p.codigo || "";
+  document.getElementById("fAnio").value = p.anio || "";
+  document.getElementById("fOrigen").value = p.origen || "";
+  document.getElementById("fVersion").value = p.version || "";
+  document.getElementById("fPotencia").value = p.potencia || "";
+  document.getElementById("fTorque").value = p.torque || "";
+  document.getElementById("fCaja").value = p.caja || "";
+  document.getElementById("fTraccion").value = p.traccion || "";
+  document.getElementById("fNorma").value = p.norma || "";
+  document.getElementById("fCarter").value = p.carter || "";
+  document.getElementById("fDialisis").value = p.dialisisLitros || "";
+  document.getElementById("fNoUsar").value = p.noUsar || "";
+  const f = p.fisica || [];
   document.getElementById("fFis1").value = f[0] || "";
   document.getElementById("fFis2").value = f[1] || "";
   document.getElementById("fFis3").value = f[2] || "";
   document.getElementById("fFis4").value = f[3] || "";
-  document.getElementById("fNishimoto").value = precarga.nishimoto || "";
-  document.getElementById("fValvoline").value = precarga.valvoline || "";
-  document.getElementById("fLiquiMoly").value = precarga.liquiMoly || "";
-  document.getElementById("fMannol").value = precarga.mannol || "";
-  document.getElementById("fMotul").value = precarga.motul || "";
-  document.getElementById("fAlerta").value = precarga.alerta || "";
+  document.getElementById("fNishimoto").value = p.nishimoto || "";
+  document.getElementById("fValvoline").value = p.valvoline || "";
+  document.getElementById("fLiquiMoly").value = p.liquiMoly || "";
+  document.getElementById("fMannol").value = p.mannol || "";
+  document.getElementById("fMotul").value = p.motul || "";
+  document.getElementById("fAlerta").value = p.alerta || "";
   document.getElementById("modalFicha").classList.add("open");
 }
 
@@ -712,7 +750,7 @@ function cerrarModal() {
 
 function guardarModal() {
   const editId = document.getElementById("editId").value;
-  const vin = limpiarVin(document.getElementById("fVin").value);
+  const vin = limpiarVin(document.getElementById("fVin").value).slice(0, 17);
   const marca = document.getElementById("fMarca").value.trim();
   const modelo = document.getElementById("fModelo").value.trim();
 
@@ -759,60 +797,40 @@ function guardarModal() {
 
   guardarBase();
   cerrarModal();
-  document.getElementById("onlineBox").classList.remove("show", "error");
+  document.getElementById("onlineBox").className = "online-box";
   document.getElementById("inputVin").value = vin;
   document.getElementById("contadorChars").textContent = "17 / 17 caracteres";
   renderizarFicha(obj);
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-  cargarBase();
+function exportarJson() {
+  const a = document.createElement("a");
+  a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(baseDatos, null, 2));
+  a.download = "fichas-vin-lubricentro.json";
+  a.click();
+}
 
-  const inputVin = document.getElementById("inputVin");
-  inputVin.addEventListener("input", () => {
-    const v = limpiarVin(inputVin.value);
-    inputVin.value = v;
-    document.getElementById("contadorChars").textContent = `${v.length} / 17 caracteres`;
-  });
-  inputVin.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") buscarPorVin();
-  });
-
-  document.getElementById("btnBuscarVin").addEventListener("click", buscarPorVin);
-  document.getElementById("btnLimpiar").addEventListener("click", limpiarPantalla);
-  document.getElementById("btnNuevoVin").addEventListener("click", () => abrirModal({}));
-  document.getElementById("btnGuardarDesdeOnline").addEventListener("click", () => abrirModal(datosOnlineActuales || {}));
-  document.getElementById("btnCerrarModal").addEventListener("click", cerrarModal);
-  document.getElementById("btnCancelarModal").addEventListener("click", cerrarModal);
-  document.getElementById("btnGuardarFicha").addEventListener("click", guardarModal);
-
-  document.getElementById("btnExportar").addEventListener("click", () => {
-    const a = document.createElement("a");
-    a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(baseDatos, null, 2));
-    a.download = "fichas-vin-lubricentro.json";
-    a.click();
-  });
-
-  document.getElementById("btnImportar").addEventListener("click", () => document.getElementById("fileImport").click());
-  document.getElementById("fileImport").addEventListener("change", (ev) => {
-    const file = ev.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const json = JSON.parse(e.target.result);
-        if (Array.isArray(json)) {
-          baseDatos = json;
-          guardarBase();
-          alert(`Base importada (${json.length} fichas).`);
-        }
-      } catch (err) {
-        alert("JSON inválido.");
+function importarJson(ev) {
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const json = JSON.parse(e.target.result);
+      if (Array.isArray(json)) {
+        baseDatos = json;
+        guardarBase();
+        alert(`Base importada (${json.length} fichas).`);
       }
-    };
-    reader.readAsText(file);
-  });
-});
+    } catch (err) {
+      alert("JSON inválido.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+cargarBase();
+actualizarContador();
 </script>
 
 </body>
