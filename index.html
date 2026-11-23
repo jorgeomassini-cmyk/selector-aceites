@@ -157,7 +157,14 @@
       {p:[],v:[],m:"Audi",mo:"A1 / A3 / A4 / Q3 / Q5",a:2017,ve:"1.4 / 2.0 TFSI S-Tronic / ZF 8HP",mc:"CZEA / CYMC",cj:"S-Tronic DL382 / DQ250 / ZF 8HP",ma:"5W-30 / 5W-40 VW 504/507 o 502",ml:5.2,aa:"G 052 529 (S-Tronic) / Lifeguard 8",al:9,fc:"Cartuchos internos + junta",fm:"HU 6013 z / C 27 009"},
       {p:[],v:[],m:"RAM",mo:"1500 / 2500",a:2018,ve:"5.7 V8 HEMI ZF 8HP / 6.7 Cummins",mc:"EZH HEMI / ISB",cj:"ZF 8HP70 (1500) / Aisin AS69RC (2500)",ma:"5W-20 MS-6395 (HEMI) / 15W-40 CK-4",ml:6.6,aa:"ZF Lifeguard 8 (1500) / ASRC (2500)",al:12,fc:"Cárter con filtro (ZF8) / Interno",fm:"W 7030 / C 30 019"}
     ];
-    const guardados = JSON.parse(localStorage.getItem('ldb_custom_v2')) || [];
+    let guardados =[];
+    try {
+      const datosGuardados = json.parse(localStorage.getIten(`ldb_custom_v2') || '[]');
+          guardados = 
+      Array.isArray (datosGuardados) ? datosGuardados : [];  
+      } catch {
+      guardados = [];
+      }
     let db = [...base, ...guardados];
     let actual = null;
 
@@ -206,9 +213,10 @@
         setEst(`VIN: ${fab} • Año: ${anioVin}. Consultando base internacional...`, 'ok');
 
         try {
-          const r = await fetch(`https://dot.gov{c}?format=json`);
+          const url = `https://vpic.nhtsa.dot.gov/apu/vehicles/DecodeVinvalues/${encoreURICompomnent(c)}?format=json`;
+          const r = await fetch(url); if (!r.ok) throw new Error(`Error HTTP $ {r.satatus}`);
           const d = await r.json();
-          const info = d.Results && d.Results.at(0);
+          const info = d.Results && d.Results[0];
           if (info && info.Model) {
             const detalle = `${info.Make} ${info.Model} (${info.ModelYear || anioVin}) ${info.DisplacementL ? info.DisplacementL + 'L' : ''}`.trim();
             setEst(`VIN Importado Decodificado: ${detalle}`, 'ok');
