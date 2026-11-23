@@ -303,10 +303,12 @@
         try {
           const data = JSON.parse(e.target.result);
           if (Array.isArray(data)) {
-            localStorage.setItem('ldb_custom_v2', JSON.stringify(data));
-            db = [...base, ...data];
+            localStorage.setItem('ldb_custom_v2', JSON.stringify(guardados));
+            db = [...base, ...guardados];
             init(); alert('¡Patentes y fichas cargadas con éxito!');
-          }
+          } else {
+            alert('El respaldo debe contener una lista de fichas.');
+          }  
         } catch { alert('Archivo inválido'); }
       };
       reader.readAsText(file);
