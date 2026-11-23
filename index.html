@@ -1,239 +1,327 @@
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Buscador de vehículos</title>
+  <title>Cotizador Técnico Universal - Lubricentro</title>
   <style>
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 20px 14px;
-      background: #f1f5f9;
-      color: #172033;
-      font: 16px Arial, sans-serif;
-    }
-    main {
-      max-width: 760px;
-      margin: 20px auto;
-      padding: 22px;
-      background: white;
-      border-radius: 14px;
-      box-shadow: 0 8px 24px #17203318;
-    }
-    h1, h2 { color: #14532d; }
-    section {
-      margin: 20px 0;
-      padding: 16px;
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-    }
-    label { display: block; margin: 12px 0 6px; font-weight: bold; }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    button {
-      margin-top: 12px;
-      border: 0;
-      background: #15803d;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:disabled { opacity: .6; cursor: wait; }
-    #resultado {
-      display: none;
-      margin-top: 20px;
-      padding: 16px;
-      background: #f0fdf4;
-      border-radius: 10px;
-      line-height: 1.55;
-    }
-    .aviso { color: #475569; font-size: 14px; line-height: 1.5; }
+    body { margin: 0; padding: 12px 10px; background: #0f172a; color: #1e293b; font-family: system-ui, sans-serif; }
+    main { max-width: 860px; margin: 0 auto; padding: 16px; background: #fff; border-radius: 14px; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 14px; gap: 6px; flex-wrap: wrap; }
+    h1 { margin: 0; font-size: 1.2rem; }
+    .top-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    label { display: block; margin: 10px 0 4px; font-weight: 700; font-size: .85rem; }
+    input, select, button { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; }
+    input.mayus { text-transform: uppercase; font-weight: 700; }
+    button { margin-top: 10px; border: 0; background: #1d4ed8; color: #fff; font-weight: 700; cursor: pointer; }
+    .btn-sec { background: #475569; width: auto; padding: 8px 11px; margin: 0; font-size: .8rem; }
+    .btn-verde { background: #15803d; }
+    .btn-wsp { background: #16a34a; margin-top: 10px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media(max-width:600px) { .grid-2 { grid-template-columns: 1fr; } }
+    .panel { background: #f8fafc; border: 1px solid #cbd5e1; padding: 14px; border-radius: 10px; }
+    #est { margin-top: 10px; padding: 10px; border-radius: 8px; display: none; font-size: .9rem; font-weight: 600; }
+    .est-ok { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+    .est-warn { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    #res { display: none; margin-top: 18px; padding: 16px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; }
+    .box { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 10px; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); padding: 14px; overflow-y: auto; z-index: 50; }
+    .modal-box { background: #fff; max-width: 600px; margin: 16px auto; padding: 18px; border-radius: 12px; }
   </style>
 </head>
 <body>
-<main>
-  <h1>🔎 Buscador de vehículos</h1>
-  <p>Buscá por VIN o encontrá un vehículo en el catálogo manual.</p>
+  <main>
+    <header>
+      <h1>🛢️ Mostrador Técnico Universal</h1>
+      <div class="top-btns">
+        <button type="button" class="btn-sec" onclick="abrirModal()">+ Cargar Ficha</button>
+        <button type="button" class="btn-sec" onclick="exportarBase()">⬇ Respaldo</button>
+        <button type="button" class="btn-sec" onclick="document.getElementById('imp-file').click()">⬆ Cargar Respaldo</button>
+        <input type="file" id="imp-file" accept=".json" style="display:none" onchange="importarBase(event)">
+      </div>
+    </header>
 
-  <section>
-    <h2>Buscar por VIN</h2>
-    <label for="vin">Número VIN (17 caracteres)</label>
-    <input id="vin" maxlength="17" placeholder="Ej.: ingresá el VIN" autocomplete="off">
-    <button id="buscarVin">Decodificar VIN</button>
-    <p id="estadoVin" aria-live="polite"></p>
-    <p class="aviso">
-      El decodificador puede devolver datos incompletos, especialmente en vehículos
-      de otros mercados. No determina por sí solo la norma de aceite.
-    </p>
-  </section>
+    <form id="fc" class="panel">
+      <label>VIN (17 dígitos nacional o importado) o Patente guardada</label>
+      <input id="cod" class="mayus" maxlength="17" placeholder="Ej: 9BWCB05W26T176579 o AB123CD" required>
+      <button type="submit">Decodificar VIN / Buscar Patente</button>
+      <div id="est"></div>
+    </form>
 
-  <section>
-    <h2>Búsqueda manual</h2>
-    <label for="busqueda">Marca, modelo, año o motor</label>
-    <input id="busqueda" placeholder="Ej.: Toyota Corolla 2018 1.8">
-    <button id="buscarManual">Buscar en el catálogo</button>
-    <p class="aviso">
-      Esta búsqueda consulta las fichas cargadas en el catálogo de la página;
-      no busca automáticamente en todo internet.
-    </p>
-  </section>
+    <form id="fm" style="margin-top:14px">
+      <div class="grid-2">
+        <div><label>Marca</label><select id="m"></select></div>
+        <div><label>Modelo</label><select id="mo" disabled></select></div>
+        <div><label>Año</label><select id="a" disabled></select></div>
+        <div><label>Versión / Caja</label><select id="v" disabled></select></div>
+      </div>
+      <button type="submit" class="btn-verde">Ver Ficha Técnica</button>
+    </form>
 
-  <div id="resultado" aria-live="polite"></div>
-</main>
+    <div id="res"></div>
+  </main>
 
-<script>
-  /*
-    CATÁLOGO MANUAL:
-    Agregá aquí fichas de vehículos verificadas.
-    No cargues una norma o cantidad de aceite si no tenés una fuente confiable.
-  */
-  const catalogo = [
-    /*
-    {
-      marca: "Toyota",
-      modelo: "Corolla",
-      anio: "2018",
-      motor: "1.8",
-      combustible: "Nafta",
-      caja: "Automática",
-      aceiteMotor: "Completar con dato verificado",
-      norma: "Completar con norma verificada",
-      capacidad: "Completar con capacidad verificada",
-      fuente: "Manual del vehículo, página ..."
+  <div id="mod" class="modal">
+    <div class="modal-box">
+      <h2>Agendar Patente / Vehículo Nuevo</h2>
+      <form id="fg">
+        <div class="grid-2">
+          <input id="np" class="mayus" placeholder="Patente (ej: AE123BC)">
+          <input id="nv" class="mayus" maxlength="17" placeholder="VIN (17 caracteres)">
+          <input id="nm" required placeholder="Marca *">
+          <input id="nmo" required placeholder="Modelo *">
+          <input id="na" type="number" required placeholder="Año *">
+          <input id="nve" required placeholder="Versión / Motor *">
+          <input id="nmc" placeholder="Cód. Motor">
+          <input id="ncj" placeholder="Caja AT (ej: ZF 8HP / CVT)">
+          <input id="nma" placeholder="Aceite Motor y Norma">
+          <input id="nml" type="number" step="0.1" placeholder="Litros Motor">
+          <input id="naa" placeholder="Norma ATF / CVT Caja">
+          <input id="nal" type="number" step="0.5" placeholder="Litros Diálisis">
+          <input id="nfc" placeholder="Filtro Caja">
+          <input id="nfm" placeholder="Filtros Motor">
+        </div>
+        <button type="submit" class="btn-verde">Guardar Ficha</button>
+        <button type="button" class="btn-sec" style="width:100%;margin-top:8px" onclick="document.getElementById('mod').style.display='none'">Cerrar</button>
+      </form>
+    </div>
+  </div>
+  <script>
+    const WMI = {
+      "8AW":"Volkswagen (Argentina)","9BW":"Volkswagen (Brasil)","3VW":"Volkswagen (México)","WVW":"Volkswagen (Alemania)","WV1":"Volkswagen Comerciales","WV2":"Volkswagen (Alemania)","1VW":"Volkswagen (EE.UU.)",
+      "8AJ":"Toyota (Argentina)","9BR":"Toyota (Brasil)","JTD":"Toyota (Japón)","JTE":"Toyota (Japón)","JTM":"Toyota (Japón)","JTN":"Toyota (Japón)","5TF":"Toyota (EE.UU.)","4T1":"Toyota (EE.UU.)","MR0":"Toyota (Tailandia)","SB1":"Toyota (Reino Unido)",
+      "8AG":"Chevrolet (Argentina)","9BG":"Chevrolet (Brasil)","3G1":"Chevrolet (México)","1G1":"Chevrolet (EE.UU.)","KL1":"Chevrolet (Corea)",
+      "8AF":"Ford (Argentina)","9BF":"Ford (Brasil)","3FA":"Ford (México)","1FA":"Ford (EE.UU.)","1FT":"Ford Pickups (EE.UU.)","1FM":"Ford SUV (EE.UU.)","WF0":"Ford (Europa)","MAJ":"Ford (India)",
+      "8AP":"Fiat (Argentina)","9BD":"Fiat (Brasil)","ZFA":"Fiat (Italia)","3C4":"Fiat/Chrysler (México)","ZAR":"Alfa Romeo (Italia)","ZAM":"Maserati (Italia)",
+      "8AD":"Peugeot (Argentina)","936":"Peugeot (Brasil)","VF3":"Peugeot (Francia)",
+      "8BC":"Citroën (Argentina)","935":"Citroën (Brasil)","VF7":"Citroën (Francia)","VR7":"Citroën/DS (Francia)",
+      "8A1":"Renault (Argentina)","93Y":"Renault (Brasil)","VF1":"Renault (Francia)","UU1":"Dacia/Renault (Rumania)",
+      "3N1":"Nissan (México)","94D":"Nissan (Brasil)","8AN":"Nissan (Argentina)","JN1":"Nissan (Japón)","JN8":"Nissan SUV (Japón)","VSK":"Nissan (España)",
+      "8A3":"Mercedes-Benz (Argentina)","9BM":"Mercedes-Benz (Brasil)","WDB":"Mercedes-Benz (Alemania)","WDD":"Mercedes-Benz (Alemania)","WDC":"Mercedes-Benz SUV","W1K":"Mercedes-Benz (Alemania)","4JG":"Mercedes-Benz (EE.UU.)",
+      "93H":"Honda (Brasil)","1HG":"Honda (EE.UU.)","JHM":"Honda (Japón)","3HG":"Honda (México)","2HG":"Honda (Canadá)","SHH":"Honda (Reino Unido)",
+      "9BH":"Hyundai (Brasil)","KMH":"Hyundai (Corea)","KM8":"Hyundai SUV (Corea)","5NP":"Hyundai (EE.UU.)","NLH":"Hyundai (Turquía)",
+      "KNA":"Kia (Corea)","KND":"Kia SUV (Corea)","KNE":"Kia (Corea)","3KP":"Kia (México)","U5Y":"Kia (Eslovaquia)",
+      "WAU":"Audi (Alemania)","TRU":"Audi (Hungría)","WA1":"Audi SUV (Alemania)","WBA":"BMW (Alemania)","WBS":"BMW M","WBY":"BMW i","5UX":"BMW SUV (EE.UU.)","98M":"BMW (Brasil)","WMW":"MINI (Reino Unido)",
+      "988":"Jeep (Brasil)","1C4":"Jeep (EE.UU.)","1J4":"Jeep (EE.UU.)","ZAC":"Jeep (Italia)","1C6":"RAM (EE.UU.)","3C6":"RAM (México)","1C3":"Chrysler/Dodge","2C3":"Chrysler/Dodge (Canadá)",
+      "YV1":"Volvo (Suecia)","YV4":"Volvo SUV (Suecia)","LVY":"Volvo (China)","SAL":"Land Rover (Reino Unido)","SAJ":"Jaguar (Reino Unido)","WP0":"Porsche (Alemania)","WP1":"Porsche SUV (Alemania)",
+      "JF1":"Subaru (Japón)","JF2":"Subaru SUV (Japón)","4S3":"Subaru (EE.UU.)","JMZ":"Mazda (Japón)","JM1":"Mazda (Japón)","3MZ":"Mazda (México)","JSA":"Suzuki (Japón)","JS3":"Suzuki SUV (Japón)","MA3":"Suzuki (India)","JA3":"Mitsubishi (Japón)","JA4":"Mitsubishi SUV (Japón)","MMB":"Mitsubishi (Tailandia)",
+      "LVS":"Ford/Changan (China)","LGW":"Great Wall / Haval (China)","LVV":"Chery (China)","8AE":"Chery (Mercosur)","LFV":"FAW/VW (China)","LDC":"Dongfeng/PSA (China)","LSG":"SAIC/GM (China)","LZW":"SGMW (China)","L6T":"Geely (China)","LB3":"Geely (China)","LNB":"BAIC (China)","LPA":"Changan/PSA (China)"
+    };
+    const ANIOS_VIN = {A:2010,B:2011,C:2012,D:2013,E:2014,F:2015,G:2016,H:2017,J:2018,K:2019,L:2020,M:2021,N:2022,P:2023,R:2024,S:2025,T:2026,V:2027,W:2028,X:2029,Y:2030,1:2001,2:2002,3:2003,4:2004,5:2005,6:2006,7:2007,8:2008,9:2009};
+
+    const base = [
+      // JEEP (Toda la línea en Argentina)
+      {p:[],v:[],m:"Jeep",mo:"Renegade",a:2019,ve:"1.8 E.torQ AT6",mc:"E.torQ Evo",cj:"Aisin TF-72SC (AT6)",ma:"5W-30 / 0W-20 Chrysler MS-6395",ml:4.5,aa:"ATF AW-1 / Toyota WS",al:9,fc:"Interno (no sale por cárter)",fm:"HU 7019 z / C 22 037"},
+      {p:[],v:[],m:"Jeep",mo:"Renegade",a:2022,ve:"1.3 Turbo T270 AT6",mc:"GSE T270",cj:"Aisin TF-72SC (AT6)",ma:"0W-30 ACEA C2 / Fiat 9.55535-GS1",ml:4.5,aa:"ATF AW-1 / Toyota WS",al:9,fc:"Interno (no sale por cárter)",fm:"WOE-628 / C 22 037"},
+      {p:[],v:[],m:"Jeep",mo:"Compass",a:2019,ve:"2.4 Tigershark AT6 / AT9",mc:"ED6 Tigershark",cj:"Aisin AT6 (4x2) / ZF 9HP48 (4x4)",ma:"0W-20 Chrysler MS-6395",ml:5.2,aa:"ATF WS (AT6) / ZF Lifeguard 9 (AT9)",al:10,fc:"Interno (no sale por cárter)",fm:"W 7030 / C 25 028"},
+      {p:[],v:[],m:"Jeep",mo:"Commander",a:2022,ve:"1.3 T270 AT6 / 2.0 TD380 AT9",mc:"T270 / Multijet",cj:"Aisin AT6 / ZF 9HP48",ma:"0W-30 ACEA C2 (DPF)",ml:4.8,aa:"ATF WS (AT6) / ZF Lifeguard 9 (AT9)",al:10,fc:"Interno (no sale por cárter)",fm:"HU 7019 z / C 25 028"},
+      {p:[],v:[],m:"Jeep",mo:"Grand Cherokee",a:2016,ve:"3.6 V6 Pentastar ZF 8HP",mc:"ERB Pentastar",cj:"ZF 8HP45 / 8HP70 (8v)",ma:"5W-20 / 5W-30 Chrysler MS-6395",ml:5.6,aa:"ZF LifeguardFluid 8",al:12,fc:"Cárter plástico con filtro integrado",fm:"HU 7026 z / C 24 024"},
+      {p:[],v:[],m:"Jeep",mo:"Grand Cherokee",a:2015,ve:"3.0 V6 CRD Diesel ZF 8HP",mc:"EXF VM Motori",cj:"ZF 8HP70 (8v)",ma:"5W-30 / 5W-40 ACEA C3 / MB 229.51",ml:7.7,aa:"ZF LifeguardFluid 8",al:12,fc:"Cárter plástico con filtro integrado",fm:"HU 7018 z / C 24 024"},
+      {p:[],v:[],m:"Jeep",mo:"Wrangler",a:2018,ve:"3.6 V6 / 2.0 Turbo AT5-AT8",mc:"Pentastar / GME",cj:"W5A580 (NAG1) / ZF 8HP50",ma:"5W-20 / 5W-30 MS-6395",ml:5.6,aa:"ATF+4 (5v) / ZF Lifeguard 8 (8v)",al:11,fc:"Filtro interno cárter + junta",fm:"HU 7026 z / C 28 043"},
+      {p:[],v:[],m:"Jeep",mo:"Patriot / Cherokee",a:2014,ve:"2.4 / 3.2 V6 CVT / ZF 9HP",mc:"ED3 / EHB",cj:"Jatco JF011E CVT / ZF 9HP48",ma:"5W-20 / 0W-20 MS-6395",ml:4.3,aa:"CVTF+4 / NS-2 (CVT) o Lifeguard 9",al:10,fc:"Cartucho enfriador + malla",fm:"W 7030 / C 25 010"},
+
+      // VOLKSWAGEN
+      {p:[],v:[],m:"Volkswagen",mo:"Amarok",a:2019,ve:"2.0 TDI Biturbo ZF 8HP",mc:"CNEA / CSHA",cj:"ZF 8HP45 / 8HP70",ma:"5W-30 VW 504/507 (DPF)",ml:7,aa:"ZF Lifeguard 8 / G 060 162",al:12,fc:"Cárter completo con filtro",fm:"HU 7008 z / C 32 130 / WK 8026 z"},
+      {p:[],v:[],m:"Volkswagen",mo:"Amarok",a:2021,ve:"3.0 V6 TDI ZF 8HP",mc:"DDXC / DDXE",cj:"ZF 8HP70",ma:"5W-30 VW 504/507 (DPF)",ml:8,aa:"ZF Lifeguard 8 / G 060 162",al:12,fc:"Cárter completo con filtro",fm:"HU 7012 z / C 32 130 / WK 8026 z"},
+      {p:[],v:[],m:"Volkswagen",mo:"Gol / Voyage / Saveiro",a:2016,ve:"1.6 8v / 16v Manual o I-Motion",mc:"CFZA / CWSA",cj:"Manual MQ200 / Robotizada ASG",ma:"5W-40 / 10W-40 VW 502.00",ml:4,aa:"Engranajes 75W-90 GL-4 (1.9L) + Actuador Pentosin CHF 11S",al:2,fc:"No lleva diálisis",fm:"W 712/52 o W 712/95 / C 2295/2"},
+      {p:[],v:[],m:"Volkswagen",mo:"Polo / Virtus / T-Cross / Nivus",a:2019,ve:"1.6 MSI / 1.0 TSI Tiptronic",mc:"EA211",cj:"Aisin 09G / AQ160",ma:"5W-40 VW 502.00",ml:4,aa:"VW G 055 540 A2 / Toyota WS",al:10,fc:"Filtro interno cárter + junta",fm:"W 712/95 / C 27 009"},
+      {p:[],v:[],m:"Volkswagen",mo:"Vento / Golf / Tiguan",a:2017,ve:"1.4 TSI DSG7 / 2.0 TSI DSG6",mc:"CZCA / CULC",cj:"DSG DQ200 (Seca) / DQ250 (Húmeda)",ma:"5W-40 VW 502.00",ml:4.7,aa:"G 052 182 A2 (DQ250 - 8L diálisis)",al:8,fc:"Cartucho superior (DQ250)",fm:"HU 6002 z / C 35 154"},
+
+      // TOYOTA
+      {p:[],v:[],m:"Toyota",mo:"Hilux / SW4",a:2020,ve:"2.8 TDI 4x4 AT",mc:"1GD-FTV",cj:"Aisin AC60F (6v)",ma:"5W-30 ACEA C2 (DPF)",ml:7.5,aa:"Toyota Genuine ATF WS",al:12,fc:"Malla interna + junta cárter",fm:"W 712/83 / C 23 007 / PU 8021"},
+      {p:[],v:[],m:"Toyota",mo:"Corolla / Corolla Cross",a:2019,ve:"1.8 / 2.0 CVT",mc:"2ZR-FE / M20A",cj:"Aisin K311 / Direct Shift CVT",ma:"0W-20 / 5W-30 ILSAC GF-5/6",ml:4.2,aa:"Toyota CVT Fluid FE",al:10,fc:"Filtro interno cárter + junta",fm:"W 610/9 / C 24 005"},
+      {p:[],v:[],m:"Toyota",mo:"Etios / Yaris / RAV4",a:2019,ve:"1.5 / 2.0 / 2.5 AT-CVT",mc:"2NR-FE / 3ZR / A25A",cj:"Aisin U440E / K114 CVT / UB80E",ma:"0W-20 / 5W-30 API SN",ml:4.2,aa:"ATF WS (AT) o CVT FE (CVT)",al:10,fc:"Filtro interno + junta",fm:"W 68/3 / C 25 024"},
+
+      // FIAT
+      {p:[],v:[],m:"Fiat",mo:"Cronos / Argo / Pulse",a:2020,ve:"1.8 E.torQ AT6 / 1.0 T200 CVT",mc:"E.torQ / GSE T200",cj:"Aisin TF-72SC (AT6) / Aisin CVT",ma:"5W-30 / 0W-30 Chrysler MS-6395",ml:4.5,aa:"ATF AW-1 (AT6) / CVT FE (Pulse)",al:9,fc:"Interno + junta",fm:"W 7019 z / C 22 037"},
+      {p:[],v:[],m:"Fiat",mo:"Toro",a:2019,ve:"1.8 AT6 / 2.0 Multijet AT9",mc:"E.torQ / 55263088",cj:"Aisin AT6 / ZF 9HP48 (9v)",ma:"5W-30 (Nafta) / 0W-30 C2 (Diesel)",ml:4.5,aa:"ATF WS (AT6) / ZF Lifeguard 9 (AT9)",al:10,fc:"Interno (no sale por cárter)",fm:"HU 7019 z / C 22 037"},
+
+      // CHEVROLET & FORD
+      {p:[],v:[],m:"Chevrolet",mo:"Cruze / Onix / Tracker",a:2019,ve:"1.0T / 1.2T / 1.4T AT6",mc:"LE2 / CSS Prime",cj:"GM 6T30 / 6T35 / 6T40 (GF6)",ma:"5W-30 / 0W-20 dexos1 Gen2/Gen3",ml:4,aa:"GM Dexron VI",al:11,fc:"Interno (apertura de caja)",fm:"W 7056 / C 27 004"},
+      {p:[],v:[],m:"Chevrolet",mo:"S10 / Trailblazer",a:2019,ve:"2.8 Duramax CTDI AT6",mc:"XLD28",cj:"GM 6L50 (6v)",ma:"5W-30 dexos2 (ACEA C3 DPF)",ml:6.2,aa:"GM Dexron VI",al:12,fc:"Filtro interno cárter + junta",fm:"HU 7010 z / C 30 014 / PU 9007 z"},
+      {p:[],v:[],m:"Ford",mo:"Ranger",a:2019,ve:"3.2 TDCi 5 cil AT / 2.0 BiTurbo",mc:"Duratorq P5AT / Panther",cj:"Ford 6R80 (6v) / 10R80 (10v)",ma:"5W-30 Ford WSS-M2C913-D",ml:9.8,aa:"Mercon LV (6v) / Mercon ULV (10v)",al:13,fc:"Filtro interno cárter + junta",fm:"HU 7002 z / C 23 111 / PU 8028"},
+      {p:[],v:[],m:"Ford",mo:"Focus / EcoSport / Kuga / Territory",a:2018,ve:"1.5T / 2.0 AT6 / Powershift / CVT",mc:"EcoBoost / Duratec",cj:"6F35 (AT6) / 6DCT250 / Punch CVT",ma:"5W-30 / 5W-20 WSS-M2C946-B1",ml:4.5,aa:"Mercon LV (6F35) / CVT Fluid",al:10,fc:"Interno según caja",fm:"W 7015 / C 16 134/1"},
+
+      // FRANCESES (PEUGEOT / CITROËN / RENAULT)
+      {p:[],v:[],m:"Peugeot",mo:"208 / 308 / 408 / 2008 / 3008",a:2018,ve:"1.6 VTi / THP AT6 (Aisin)",mc:"EC5 / EP6FDT",cj:"Aisin EAT6 (6v)",ma:"5W-30 / 0W-30 PSA B71 2290/2312",ml:4.2,aa:"AW-1 / JWS 3324 / Toyota WS",al:9,fc:"Interno (no sale por cárter)",fm:"HU 711/51 x / C 36 003"},
+      {p:[],v:[],m:"Citroën",mo:"C4 Cactus / C4 Lounge / C3",a:2019,ve:"1.6 VTi / THP AT6",mc:"EC5 / EP6",cj:"Aisin EAT6 (6v)",ma:"5W-30 PSA B71 2290",ml:4.2,aa:"AW-1 / JWS 3324",al:9,fc:"Interno (no sale por cárter)",fm:"HU 711/51 x / C 3585"},
+      {p:[],v:[],m:"Renault",mo:"Duster / Oroch / Fluence / Koleos / Stepway",a:2018,ve:"1.6 / 2.0 AT4 (DP2) o CVT",mc:"H4M / F4R / M4R",cj:"DP2/AL4 (4v) o Jatco JF011E/JF015E CVT",ma:"5W-30 / 5W-40 RN0710",ml:4.4,aa:"Dexron III (DP2) / Nissan NS-2 o NS-3 (CVT)",al:10,fc:"Cartucho enfriador (CVT)",fm:"W 67/1 / C 25 040"},
+      {p:[],v:[],m:"Nissan",mo:"Kicks / Sentra / Versa / Frontier",a:2019,ve:"1.6 / 1.8 CVT o 2.3 BiTurbo AT7",mc:"HR16DE / MRA8DE / YS23",cj:"Jatco CVT7/8 o Jatco JR710E (7v)",ma:"5W-30 API SN o ACEA C3 (Frontier)",ml:4.1,aa:"Nissan NS-3 (CVT) / Matic S (Frontier)",al:10,fc:"Cartucho enfriador + interno",fm:"W 67/1 / C 25 012"},
+      {p:[],v:[],m:"Honda",mo:"Civic / HR-V / CR-V / Fit",a:2018,ve:"1.5T / 1.8 / 2.0 CVT",mc:"R18Z / L15B / K20Z",cj:"Honda CVT (HCF-2)",ma:"0W-20 API SN / ILSAC GF-5/6",ml:3.7,aa:"Honda HCF-2 (Exclusivo)",al:9,fc:"Cartucho enfriador + interno",fm:"W 610/6 / C 22 020"},
+      {p:[],v:[],m:"Subaru",mo:"Forester / Outback / XV / Impreza",a:2018,ve:"2.0 / 2.5 Boxer Lineartronic CVT",mc:"FB20 / FB25",cj:"Subaru Lineartronic TR580 / TR690",ma:"0W-20 API SN / ILSAC GF-5",ml:4.8,aa:"Subaru CVT Fluid Lineartronic II",al:11,fc:"Malla interna cárter + junta",fm:"W 610/6 / C 2201"},
+      {p:[],v:[],m:"Hyundai",mo:"Tucson / Santa Fe / Creta / Kona",a:2018,ve:"1.6T / 2.0 / 2.2 CRDi AT6-AT8",mc:"G4NA / D4HB",cj:"Hyundai A6MF1 / A8LF1",ma:"5W-30 ACEA A5/B5 o C3 (DPF)",ml:4.5,aa:"Hyundai ATF SP-IV / SP-IV-RR",al:10,fc:"Interno (apertura de caja)",fm:"W 811/80 / C 28 035"},
+      {p:[],v:[],m:"Kia",mo:"Sportage / Sorento / Cerato / Carnival",a:2018,ve:"2.0 Nafta / 2.2 CRDi AT6-AT8",mc:"G4NA / D4HB",cj:"Kia A6MF1 / A8LF1",ma:"5W-30 ACEA A5/B5 o C3 (DPF)",ml:4.5,aa:"Kia ATF SP-IV / SP-IV-RR",al:10,fc:"Interno (apertura de caja)",fm:"W 811/80 / C 28 035"},
+      {p:[],v:[],m:"BMW",mo:"Serie 1 / 3 / 5 / X1 / X3 / X5",a:2017,ve:"2.0 / 3.0 Turbo ZF 8HP",mc:"N20 / B48 / B58",cj:"ZF 8HP45 / 8HP50 / 8HP70",ma:"5W-30 / 5W-40 BMW LL-01 / LL-04",ml:5.2,aa:"ZF LifeguardFluid 8",al:11,fc:"Cárter plástico con filtro integrado",fm:"HU 816 x / C 24 025"},
+      {p:[],v:[],m:"Mercedes-Benz",mo:"Clase A / C / E / GLA / GLC",a:2017,ve:"1.6 / 2.0 Turbo 7G / 9G-Tronic",mc:"M270 / M274",cj:"7G-DCT / 7G-Tronic / 9G-Tronic",ma:"5W-30 / 5W-40 MB 229.5 / 229.51",ml:6.5,aa:"MB 236.15 (7G) / MB 236.17 (9G)",al:11,fc:"Cárter con filtro integrado (9G)",fm:"HU 711/6 z / C 28 004"},
+      {p:[],v:[],m:"Audi",mo:"A1 / A3 / A4 / Q3 / Q5",a:2017,ve:"1.4 / 2.0 TFSI S-Tronic / ZF 8HP",mc:"CZEA / CYMC",cj:"S-Tronic DL382 / DQ250 / ZF 8HP",ma:"5W-30 / 5W-40 VW 504/507 o 502",ml:5.2,aa:"G 052 529 (S-Tronic) / Lifeguard 8",al:9,fc:"Cartuchos internos + junta",fm:"HU 6013 z / C 27 009"},
+      {p:[],v:[],m:"RAM",mo:"1500 / 2500",a:2018,ve:"5.7 V8 HEMI ZF 8HP / 6.7 Cummins",mc:"EZH HEMI / ISB",cj:"ZF 8HP70 (1500) / Aisin AS69RC (2500)",ma:"5W-20 MS-6395 (HEMI) / 15W-40 CK-4",ml:6.6,aa:"ZF Lifeguard 8 (1500) / ASRC (2500)",al:12,fc:"Cárter con filtro (ZF8) / Interno",fm:"W 7030 / C 30 019"}
+    ];
+    const guardados = JSON.parse(localStorage.getItem('ldb_custom_v2')) || [];
+    let db = [...base, ...guardados];
+    let actual = null;
+
+    const m = document.getElementById('m'), mo = document.getElementById('mo'), a = document.getElementById('a'), v = document.getElementById('v'), res = document.getElementById('res'), est = document.getElementById('est');
+
+    function setEst(txt, tipo = 'ok') {
+      if (!txt) { est.style.display = 'none'; return; }
+      est.textContent = txt;
+      est.className = tipo === 'warn' ? 'est-warn' : 'est-ok';
+      est.style.display = 'block';
     }
-    */
-  ];
 
-  const resultado = document.getElementById("resultado");
-  const estadoVin = document.getElementById("estadoVin");
-  const campoVin = document.getElementById("vin");
-  const botonVin = document.getElementById("buscarVin");
-
-  function mostrar(html) {
-    resultado.innerHTML = html;
-    resultado.style.display = "block";
-    resultado.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  function escapar(texto) {
-    const elemento = document.createElement("span");
-    elemento.textContent = texto || "No informado";
-    return elemento.innerHTML;
-  }
-
-  document.getElementById("buscarManual").addEventListener("click", () => {
-    const consulta = document.getElementById("busqueda").value
-      .trim().toLocaleLowerCase("es");
-
-    if (!consulta) {
-      mostrar("<p>Escribí una marca, modelo, año o motor para buscar.</p>");
-      return;
+    function fill(el, arr, txt) {
+      el.innerHTML = `<option value="">${txt}</option>`;
+      [...new Set(arr)].sort().forEach(x => { const o = document.createElement('option'); o.value = o.textContent = x; el.appendChild(o); });
+      el.disabled = !arr.length;
     }
+    function init() { fill(m, db.map(x => x.m), 'Seleccionar marca (' + [...new Set(db.map(x=>x.m))].length + ' marcas)...'); }
+    init();
 
-    const palabras = consulta.split(/\s+/);
-    const encontrados = catalogo.filter(auto => {
-      const texto = [
-        auto.marca, auto.modelo, auto.anio, auto.motor, auto.combustible, auto.caja
-      ].join(" ").toLocaleLowerCase("es");
+    m.onchange = () => { fill(mo, db.filter(x => x.m === m.value).map(x => x.mo), 'Modelo...'); fill(a, [], 'Año...'); fill(v, [], 'Versión...'); };
+    mo.onchange = () => { fill(a, db.filter(x => x.m === m.value && x.mo === mo.value).map(x => x.a), 'Año...'); fill(v, [], 'Versión...'); };
+    a.onchange = () => { fill(v, db.filter(x => x.m === m.value && x.mo === mo.value && String(x.a) === a.value).map(x => x.ve), 'Versión...'); };
 
-      return palabras.every(palabra => texto.includes(palabra));
-    });
+    document.getElementById('fm').onsubmit = e => {
+      e.preventDefault(); setEst('');
+      const x = db.find(i => i.m === m.value && i.mo === mo.value && String(i.a) === a.value && i.ve === v.value);
+      if (x) show(x);
+    };
 
-    if (!encontrados.length) {
-      mostrar(
-        "<p>No hay coincidencias en el catálogo todavía. " +
-        "La búsqueda manual necesita fichas cargadas y verificadas.</p>"
-      );
-      return;
-    }
+    document.getElementById('fc').onsubmit = async e => {
+      e.preventDefault(); setEst('');
+      const c = document.getElementById('cod').value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      const loc = db.find(i => (i.p && i.p.includes(c)) || (i.v && i.v.includes(c)));
+      if (loc) { show(loc, c); return; }
 
-    mostrar(encontrados.map(auto => `
-      <article>
-        <h2>${escapar(auto.marca)} ${escapar(auto.modelo)} ${escapar(auto.anio)}</h2>
-        <p><b>Motor:</b> ${escapar(auto.motor)}</p>
-        <p><b>Combustible:</b> ${escapar(auto.combustible)}</p>
-        <p><b>Caja:</b> ${escapar(auto.caja)}</p>
-        <p><b>Aceite de motor:</b> ${escapar(auto.aceiteMotor)}</p>
-        <p><b>Norma:</b> ${escapar(auto.norma)}</p>
-        <p><b>Capacidad:</b> ${escapar(auto.capacidad)}</p>
-        <p><b>Fuente:</b> ${escapar(auto.fuente)}</p>
-      </article>
-    `).join("<hr>"));
-  });
+      if (c.length === 17) {
+        const pref = c.substring(0, 3);
+        const fab = WMI[pref] || `Fabricante código "${pref}"`;
+        const anioVin = ANIOS_VIN[c.charAt(9)] || 'S/D';
+        const marcaBase = fab.split(' ').at(0);
 
-  botonVin.addEventListener("click", async () => {
-    const vin = campoVin.value.trim().toUpperCase();
-    campoVin.value = vin;
+        const optMarca = [...m.options].find(o => o.value.toLowerCase() === marcaBase.toLowerCase());
+        if (optMarca) { m.value = optMarca.value; m.onchange(); }
 
-    if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) {
-      estadoVin.textContent =
-        "Revisá el VIN: debe tener 17 caracteres y no incluir I, O ni Q.";
-      return;
-    }
+        setEst(`VIN: ${fab} • Año: ${anioVin}. Consultando base internacional...`, 'ok');
 
-    botonVin.disabled = true;
-    estadoVin.textContent = "Consultando el decodificador…";
-
-    try {
-      const url =
-        "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/" +
-        encodeURIComponent(vin) + "?format=json";
-      const respuesta = await fetch(url);
-
-      if (!respuesta.ok) throw new Error("Error en la consulta");
-
-      const datos = await respuesta.json();
-      const auto = datos.Results && datos.Results[0];
-
-      if (!auto) {
-        estadoVin.textContent = "No se encontraron datos para ese VIN.";
-        return;
+        try {
+          const r = await fetch(`https://dot.gov{c}?format=json`);
+          const d = await r.json();
+          const info = d.Results && d.Results.at(0);
+          if (info && info.Model) {
+            const detalle = `${info.Make} ${info.Model} (${info.ModelYear || anioVin}) ${info.DisplacementL ? info.DisplacementL + 'L' : ''}`.trim();
+            setEst(`VIN Importado Decodificado: ${detalle}`, 'ok');
+            const mt = db.find(i => i.m.toLowerCase() === info.Make.trim().toLowerCase() && i.mo.toLowerCase().includes(info.Model.trim().toLowerCase()));
+            if (mt) { show(mt, c); return; }
+            show({
+              m: info.Make.trim(), mo: info.Model.trim(), a: info.ModelYear || anioVin,
+              ve: `${info.Trim || ''} ${info.DisplacementL ? info.DisplacementL + 'L' : ''}`.trim() || 'Importado (Confirmar versión)',
+              mc: info.EngineModel || `${info.EngineCylinders || ''} cil. ${info.FuelTypePrimary || ''}`.trim() || 'S/D',
+              cj: info.TransmissionStyle || 'Confirmar caja',
+              ma: 'Confirmar norma en catálogo', ml: 5, aa: 'Confirmar norma ATF/CVT', al: 10, fc: 'Confirmar', fm: 'Confirmar'
+            }, c);
+          } else {
+            setEst(`Chasis identificado: ${fab} — Año ${anioVin}. Elegí el modelo de ${marcaBase} abajo o agéndalo con "+ Cargar Ficha".`, 'warn');
+          }
+        } catch {
+          setEst(`Chasis identificado offline: ${fab} — Año ${anioVin}. Elegí el modelo de ${marcaBase} en el selector de abajo.`, 'warn');
+        }
+      } else {
+        setEst(`Patente "${c}" no agendada aún. Tocá "+ Cargar Ficha" arriba para guardarla.`, 'warn');
       }
+    };
 
-      const campos = [
-        ["VIN", vin],
-        ["Año", auto.ModelYear],
-        ["Marca", auto.Make],
-        ["Modelo", auto.Model],
-        ["Motor", auto.EngineModel || auto.DisplacementL],
-        ["Cilindros", auto.EngineCylinders],
-        ["Combustible", auto.FuelTypePrimary],
-        ["Carrocería", auto.BodyClass],
-        ["País de fabricación", auto.PlantCountry]
-      ].filter(([, valor]) => valor && String(valor).trim());
-
-      mostrar(`
-        <h2>Resultado del VIN</h2>
-        ${campos.map(([nombre, valor]) =>
-          `<p><b>${escapar(nombre)}:</b> ${escapar(valor)}</p>`
-        ).join("")}
-        <p class="aviso">
-          Resultado del decodificador público. Puede ser incompleto y no confirma
-          la norma ni la cantidad de aceite. Esos datos deben agregarse al catálogo
-          usando una fuente técnica confiable.
-        </p>
-      `);
-
-      estadoVin.textContent = "Consulta terminada.";
-    } catch (error) {
-      estadoVin.textContent =
-        "No se pudo consultar. Revisá la conexión e intentá de nuevo.";
-    } finally {
-      botonVin.disabled = false;
+    function show(x, c = '') {
+      actual = x;
+      res.innerHTML = `
+        <h2>${x.m} ${x.mo} (${x.a}) ${c}</h2>
+        <div><b>Versión:</b> ${x.ve} | <b>Motor:</b> ${x.mc} | <b>Caja:</b> ${x.cj}</div>
+        <div class="box"><b>Aceite Motor:</b> ${x.ma} (${x.ml}L)<br><b>Filtros Motor:</b> ${x.fm}</div>
+        <div class="box"><b>Diálisis Caja AT:</b> ${x.aa} (${x.al}L)<br><b>Filtro Caja:</b> ${x.fc}</div>
+        <div class="box">
+          <b>Cotizador Rápido</b>
+          <div class="grid-2" style="margin-top:8px">
+            <input type="number" id="pm" placeholder="$ Litro Motor" oninput="calc(${x.ml},${x.al})">
+            <input type="number" id="em" placeholder="$ Filtros + MO Motor" oninput="calc(${x.ml},${x.al})">
+            <input type="number" id="pa" placeholder="$ Litro ATF Caja" oninput="calc(${x.ml},${x.al})">
+            <input type="number" id="ea" placeholder="$ Filtro + Diálisis" oninput="calc(${x.ml},${x.al})">
+          </div>
+          <div id="tot" style="font-weight:800;margin-top:10px;color:#14532d">Motor (${x.ml}L): $0 | Diálisis (${x.al}L): $0</div>
+          <button type="button" class="btn-wsp" onclick="wsp(${x.ml},${x.al})">📋 Copiar presupuesto para WhatsApp</button>
+        </div>`;
+      res.style.display = 'block';
     }
-  });
 
-  campoVin.addEventListener("keydown", evento => {
-    if (evento.key === "Enter") botonVin.click();
-  });
-</script>
+    function calc(ml, al) {
+      const tm = (ml * (+document.getElementById('pm').value || 0)) + (+document.getElementById('em').value || 0);
+      const ta = (al * (+document.getElementById('pa').value || 0)) + (+document.getElementById('ea').value || 0);
+      document.getElementById('tot').textContent = `Motor (${ml}L): $${tm.toLocaleString('es-AR')} | Diálisis (${al}L): $${ta.toLocaleString('es-AR')}`;
+    }
+
+    function wsp(ml, al) {
+      if (!actual) return;
+      const tm = (ml * (+document.getElementById('pm').value || 0)) + (+document.getElementById('em').value || 0);
+      const ta = (al * (+document.getElementById('pa').value || 0)) + (+document.getElementById('ea').value || 0);
+      const txt = `*PRESUPUESTO LUBRICENTRO*\nVehículo: ${actual.m} ${actual.mo} (${actual.a})\n• Service Motor (${ml}L ${actual.ma}): $${tm.toLocaleString('es-AR')}\n• Diálisis Caja AT (${al}L ${actual.aa}): $${ta.toLocaleString('es-AR')}`;
+      navigator.clipboard.writeText(txt).then(() => alert('¡Copiado! Pegalo en WhatsApp.'));
+    }
+
+    function abrirModal() {
+      const codActual = document.getElementById('cod').value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      if (codActual.length === 17) {
+        document.getElementById('nv').value = codActual;
+        const fab = WMI[codActual.substring(0, 3)];
+        if (fab) document.getElementById('nm').value = fab.split(' ').at(0);
+        if (ANIOS_VIN[codActual.charAt(9)]) document.getElementById('na').value = ANIOS_VIN[codActual.charAt(9)];
+      } else if (codActual.length >= 6) {
+        document.getElementById('np').value = codActual;
+      }
+      document.getElementById('mod').style.display = 'block';
+    }
+
+    function exportarBase() {
+      const blob = new Blob([JSON.stringify(guardados, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url; link.download = 'patentes_lubricentro.json'; link.click();
+    }
+
+    function importarBase(ev) {
+      const file = ev.target.files && ev.target.files.at(0);
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (Array.isArray(data)) {
+            localStorage.setItem('ldb_custom_v2', JSON.stringify(data));
+            db = [...base, ...data];
+            init(); alert('¡Patentes y fichas cargadas con éxito!');
+          }
+        } catch { alert('Archivo inválido'); }
+      };
+      reader.readAsText(file);
+    }
+
+    document.getElementById('fg').onsubmit = e => {
+      e.preventDefault();
+      const p = document.getElementById('np').value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      const v = document.getElementById('nv').value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      const n = {
+        p: p ? [p] : [], v: v ? [v] : [],
+        m: document.getElementById('nm').value.trim(), mo: document.getElementById('nmo').value.trim(),
+        a: +document.getElementById('na').value, ve: document.getElementById('nve').value.trim(),
+        mc: document.getElementById('nmc').value, cj: document.getElementById('ncj').value,
+        ma: document.getElementById('nma').value, ml: +document.getElementById('nml').value || 0,
+        aa: document.getElementById('naa').value, al: +document.getElementById('nal').value || 0,
+        fc: document.getElementById('nfc').value, fm: document.getElementById('nfm').value
+      };
+      guardados.push(n);
+      localStorage.setItem('ldb_custom_v2', JSON.stringify(guardados));
+      db = [...base, ...guardados];
+      init(); document.getElementById('mod').style.display = 'none'; show(n, p || v); e.target.reset();
+    };
+  </script>
 </body>
 </html>
