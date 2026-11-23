@@ -89,6 +89,17 @@
       color: #0f294a;
     }
 
+    .fuentes-log {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #475569;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: none;
+    }
+
     /* Ficha técnica estilo tarjeta de taller */
     .ficha {
       display: none;
@@ -224,6 +235,7 @@
         <button type="submit" id="btn-buscar">Cruzar datos y armar ficha</button>
       </form>
       <div id="estado"></div>
+      <div id="fuentes-log" class="fuentes-log"></div>
     </div>
 
     <div id="ficha" class="ficha"></div>
@@ -233,53 +245,210 @@
     const form = document.getElementById('form-vin');
     const btn = document.getElementById('btn-buscar');
     const estado = document.getElementById('estado');
+    const logDiv = document.getElementById('fuentes-log');
     const fichaDiv = document.getElementById('ficha');
 
     function esc(texto) {
       const span = document.createElement('span');
-      span.textContent = texto || 'Dato no confirmado';
+      span.textContent = (texto !== undefined && texto !== null && String(texto).trim() !== '')
+        ? String(texto).trim()
+        : 'Dato no confirmado';
       return span.innerHTML;
+    }
+
+    function limpiarVin(v) {
+      return String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 17);
+    }
+
+    async function fetchJsonSeguro(url, nombre) {
+      const resp = await fetch(url);
+      const raw = await resp.text();
+      const limpio = raw.trim();
+
+      if (!resp.ok) {
+        throw new Error(`${nombre}: HTTP ${resp.status}`);
+      }
+      if (!limpio || limpio.startsWith('<')) {
+        throw new Error(`${nombre}: devolvió HTML o vacío`);
+      }
+      return JSON.parse(limpio);
+    }
+
+    function decodificarIso3779(vin) {
+      const mapaAnio = {
+        A: '2010 / 1980', B: '2011 / 1981', C: '2012 / 1982', D: '2013 / 1983',
+        E: '2014 / 1984', F: '2015 / 1985', G: '2016 / 1986', H: '2017 / 1987',
+        J: '2018 / 1988', K: '2019 / 1989', L: '2020 / 1990', M: '2021 / 1991',
+        N: '2022 / 1992', P: '2023 / 1993', R: '2024 / 1994', S: '2025 / 1995',
+        T: '2026 / 1996', V: '1997', W: '1998', X: '1999', Y: '2000',
+        '1': '2001', '2': '2002', '3': '2003', '4': '2004', '5': '2005',
+        '6': '2006', '7': '2007', '8': '2008', '9': '2009'
+      };
+      const d10 = vin[9] || '';
+      const anioIso = mapaAnio[d10] ? `${mapaAnio[d10]} (Dígito 10: ${d10})` : '';
+
+      let paisIso = '';
+      const p2 = vin.slice(0, 2);
+      if (/^9[3-9]/.test(p2)) paisIso = 'Brasil';
+      else if (/^8[A-E]/.test(p2)) paisIso = 'Argentina';
+      else if (/^8[F-K]/.test(p2)) paisIso = 'Chile';
+      else if (/^8[X-Z]|^82/.test(p2)) paisIso = 'Venezuela';
+      else if (/^9[A-E]/.test(p2)) paisIso = 'Colombia';
+      else if (/^3[A-W]/.test(p2)) paisIso = 'México';
+      else if (/^[145]/.test(vin[0])) paisIso = 'Estados Unidos';
+      else if (vin[0] === '2') paisIso = 'Canadá';
+      else if (vin[0] === 'J') paisIso = 'Japón';
+      else if (/^K[L-R]/.test(p2)) paisIso = 'Corea del Sur';
+      else if (/^S[A-M]/.test(p2)) paisIso = 'Reino Unido';
+      else if (/^W/.test(vin[0])) paisIso = 'Alemania';
+      else if (/^V[F-R]/.test(p2)) paisIso = 'Francia';
+      else if (/^V[S-W]/.test(p2)) paisIso = 'España';
+      else if (/^Z[A-R]/.test(p2)) paisIso = 'Italia';
+
+      return { fuente: 'ISO 3779', anio: anioIso, origen: paisIso };
+    }
+
+    async function consultarNhtsaValues(vin) {
+      const json = await fetchJsonSeguro(
+        `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${encodeURIComponent(vin)}?format=json`,
+        'NHTSA Values'
+      );
+      const r = (json && json.Results && json.Results[0]) ? json.Results[0] : {};
+      const ok = String(r.ErrorCode || '').split(',').map(s => s.trim()).includes('0');
+      return {
+        fuente: 'NHTSA Values',
+        ok,
+        marca: ok ? String(r.Make || '').trim() : '',
+        modelo: ok ? String(r.Model || '').trim() : '',
+        anio: ok ? String(r.ModelYear || '').trim() : '',
+        origen: ok ? [r.PlantCity, r.PlantCountry].map(s => String(s || '').trim()).filter(Boolean).join(' · ') : '',
+        motor: ok ? [
+          String(r.EngineModel || '').trim(),
+          String(r.DisplacementL || '').trim() ? `${String(r.DisplacementL || '').trim()}L` : '',
+          String(r.EngineCylinders || '').trim() ? `${String(r.EngineCylinders || '').trim()} cil.` : ''
+        ].filter(Boolean).join(' · ') : '',
+        potencia: ok && String(r.EngineHP || '').trim() ? `${String(r.EngineHP || '').trim()} HP` : '',
+        codigo_chasis: ok ? String(r.Series || r.Trim || '').trim() : '',
+        caja: ok ? String(r.TransmissionStyle || '').trim() : '',
+        traccion: ok ? String(r.DriveType || '').trim() : ''
+      };
+    }
+
+    async function consultarNhtsaWmi(vin) {
+      const wmi = vin.slice(0, 3);
+      const json = await fetchJsonSeguro(
+        `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeWMI/${encodeURIComponent(wmi)}?format=json`,
+        `NHTSA WMI (${wmi})`
+      );
+      const r = (json && json.Results && json.Results[0]) ? json.Results[0] : {};
+      return {
+        fuente: `NHTSA WMI (${wmi})`,
+        ok: Boolean(r.Make || r.CommonName || r.Country),
+        marca: String(r.Make || r.CommonName || r.ManufacturerName || '').trim(),
+        origen: String(r.Country || '').trim()
+      };
+    }
+
+    function elegirCoincidente(lista, campo) {
+      const vals = lista.map(x => String(x[campo] || '').trim()).filter(Boolean);
+      if (!vals.length) return '';
+      const unicos = [...new Set(vals.map(v => v.toLowerCase()))];
+      if (unicos.length === 1) return vals[0];
+      return [...new Set(vals)].join(' / ');
     }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const vin = document.getElementById('vin').value.trim();
+      const vinInput = document.getElementById('vin');
+      const vin = limpiarVin(vinInput.value);
+      vinInput.value = vin;
       const dominio = document.getElementById('dominio').value.trim();
 
+      if (vin.length !== 17) {
+        estado.textContent = `⚠️ El VIN debe tener 17 caracteres (actual: ${vin.length}).`;
+        return;
+      }
+
       btn.disabled = true;
-      btn.textContent = 'Buscando en catálogos y manuales...';
-      estado.textContent = 'Consultando VIN, código de caja, fluidos y despiece...';
+      btn.textContent = 'Buscando en fuentes online...';
+      estado.textContent = 'Consultando fuentes en paralelo...';
+      logDiv.style.display = 'none';
       fichaDiv.style.display = 'none';
 
-      try {
-        const res = await fetch('/api/consultar-vin', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ vin, dominio })
-        });
+      const iso = decodificarIso3779(vin);
+      const settled = await Promise.allSettled([
+        consultarNhtsaValues(vin),
+        consultarNhtsaWmi(vin)
+      ]);
 
-        const data = await res.json();
+      const exitos = [];
+      const estadosFuentes = [`ISO 3779: OK`];
 
-        if (!res.ok) {
-          throw new Error(data.error || 'Error al consultar el VIN.');
+      settled.forEach((s, i) => {
+        if (s.status === 'fulfilled') {
+          exitos.push(s.value);
+          estadosFuentes.push(`${s.value.fuente}: ${s.value.ok ? 'Con datos' : 'Sin coincidencia'}`);
+        } else {
+          const msg = s.reason && s.reason.message ? s.reason.message : `Fuente ${i + 1}: error`;
+          estadosFuentes.push(msg);
         }
+      });
 
-        renderizarFicha(data, dominio);
-        estado.textContent = '';
-      } catch (err) {
-        estado.textContent = '⚠️ ' + err.message;
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Cruzar datos y armar ficha';
-      }
+      const todas = [iso, ...exitos];
+      const marca = elegirCoincidente(todas, 'marca');
+      const modelo = elegirCoincidente(todas, 'modelo');
+      const anio = elegirCoincidente(todas, 'anio');
+      const origen = elegirCoincidente(todas, 'origen');
+      const motor = elegirCoincidente(todas, 'motor');
+      const potencia = elegirCoincidente(todas, 'potencia');
+      const codigoChasis = elegirCoincidente(todas, 'codigo_chasis');
+      // Nunca inventar caja si ninguna fuente la confirma
+      const cajaConfirmada = elegirCoincidente(todas, 'caja');
+      const traccionConfirmada = elegirCoincidente(todas, 'traccion');
+
+      const fichaArmada = {
+        titulo: [marca, modelo].filter(Boolean).join(' ') || `VIN ${vin}`,
+        vin,
+        anio,
+        motor,
+        origen,
+        modelo,
+        potencia,
+        codigo_chasis: codigoChasis,
+        torque: '',
+        transmision: {
+          caja: cajaConfirmada || '',
+          traccion: traccionConfirmada || '',
+          fluido: '',
+          carter: '',
+          total: '',
+          no_usar: ''
+        },
+        identificacion_fisica: [],
+        aceite_motor: {
+          viscosidad_norma: '',
+          capacidad: '',
+          filtros: ''
+        },
+        alerta_importante: !cajaConfirmada
+          ? 'Caja no confirmada en fuentes online: verificar físicamente y en catálogo OEM antes de elegir fluido.'
+          : 'Verificar código exacto de caja y norma del fabricante antes de aplicar.'
+      };
+
+      renderizarFicha(fichaArmada, dominio);
+      estado.textContent = '';
+      logDiv.textContent = 'Fuentes consultadas: ' + estadosFuentes.join(' · ');
+      logDiv.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Cruzar datos y armar ficha';
     });
 
     function renderizarFicha(d, dominio) {
       const tx = d.transmision || {};
       const mot = d.aceite_motor || {};
-      const fisica = Array.isArray(d.identificacion_fisica)
+      const fisica = Array.isArray(d.identificacion_fisica) && d.identificacion_fisica.length
         ? d.identificacion_fisica.map(item => `<li>${esc(item)}</li>`).join('')
-        : '<li>Sin datos físicos cargados</li>';
+        : '<li>Dato no confirmado</li>';
 
       const textoDominio = dominio
         ? `Dominio: ${esc(dominio.toUpperCase())} — Consulta Taller`
