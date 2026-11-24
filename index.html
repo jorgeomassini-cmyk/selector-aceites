@@ -1,27 +1,31 @@
+Dale. Te lo paso en **partes numeradas**. Pegalas una detrás de la otra, sin incluir las marcas de código. Al final vas a tener un solo archivo `index.html`.
 
+**Parte 1 de 3:**
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Buscador local de vehículos</title>
+<title>Buscador de vehículos</title>
 <style>
-:root{color-scheme:dark;--bg:#0f172a;--panel:#1e293b;--input:#0b1120;--border:#334155;--text:#f1f5f9;--muted:#94a3b8;--accent:#f59e0b;--blue:#38bdf8;--red:#f87171}
+:root{color-scheme:dark;--bg:#0f172a;--panel:#1e293b;--input:#0b1120;--border:#334155;--text:#f1f5f9;--muted:#94a3b8;--accent:#f59e0b}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif}
 header{padding:16px;border-bottom:1px solid var(--border);background:#111b2e}
 main,.header-inner{max-width:1050px;margin:auto}
 .header-inner,.actions,.row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
 main{padding:18px 14px 40px}
-h1{font-size:1.2rem;margin:0}h2{font-size:1rem;margin:0 0 12px;color:var(--accent)}
-p{margin:8px 0}.muted{color:var(--muted);font-size:.88rem}
+h1{font-size:1.2rem;margin:0}
+h2{font-size:1rem;margin:0 0 12px;color:var(--accent)}
+.muted{color:var(--muted);font-size:.88rem}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
-input,textarea,select{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--input);color:var(--text);font:inherit}
+input,textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--input);color:var(--text);font:inherit}
 textarea{resize:vertical}
-button,.button{display:inline-block;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:#263349;color:var(--text);font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
-button:hover,.button:hover{border-color:var(--accent)}
+button{padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:#263349;color:var(--text);font:inherit;font-weight:700;cursor:pointer}
+button:hover{border-color:var(--accent)}
 .primary{background:var(--accent);border-color:var(--accent);color:#111827}
-.danger{color:#fecaca;border-color:#7f1d1d}
 .search{display:grid;grid-template-columns:1fr auto;gap:8px}
 .stats{margin-top:9px;color:var(--muted);font-size:.85rem}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:9px}
@@ -44,8 +48,8 @@ input[type=file]{display:none}
 <header>
   <div class="header-inner">
     <div>
-      <h1>🔎 Buscador local de vehículos</h1>
-      <div class="muted">La búsqueda usa tu base guardada; no consulta internet.</div>
+      <h1>🔎 Buscador de vehículos</h1>
+      <div class="muted">VIN: consulta gratuita a NHTSA. Patente: búsqueda en tu base guardada.</div>
     </div>
     <div class="actions">
       <button class="primary" id="nuevoBtn" type="button">＋ Cargar vehículo</button>
@@ -56,26 +60,22 @@ input[type=file]{display:none}
     </div>
   </div>
 </header>
-
 <main>
   <section class="panel">
-    <h2>Buscar en tu base</h2>
+    <h2>Buscar vehículo</h2>
     <div class="search">
-      <input id="busqueda" placeholder="Patente, VIN, marca, modelo, año o motor">
+      <input id="busqueda" placeholder="Ingresá una patente o un VIN">
       <button class="primary" id="buscarBtn" type="button">Buscar</button>
     </div>
-    <div class="stats"><span id="cantidad">0</span> vehículos en esta base. Los datos se guardan en este navegador.</div>
+    <div class="stats"><span id="cantidad">0</span> vehículos guardados en este navegador.</div>
   </section>
-
   <section class="panel">
     <div class="notice">
-      La app no completa datos automáticamente ni determina el aceite por VIN. Cargá las especificaciones solo si las verificaste con una fuente confiable.
+      NHTSA puede no encontrar algunos vehículos argentinos y no informa aceites recomendados. Las patentes se buscan en los registros que cargues en esta app.
     </div>
   </section>
-
   <section id="resultados"></section>
 </main>
-
 <div class="modal" id="modal">
   <section class="dialog">
     <div class="row">
@@ -90,73 +90,63 @@ input[type=file]{display:none}
     </div>
   </section>
 </div>
-
 <script>
 "use strict";
-
 const CLAVE = "buscador_local_vehiculos_v1";
 const CAMPOS = [
-  ["patente","Patente / dominio"],
-  ["vin","VIN / número de chasis"],
-  ["marca","Marca"],
-  ["modelo","Modelo"],
-  ["version","Versión"],
-  ["anio","Año"],
-  ["motor","Motor / código de motor"],
-  ["caja","Caja / transmisión"],
-  ["traccion","Tracción"],
+  ["patente","Patente / dominio"],["vin","VIN / número de chasis"],
+  ["marca","Marca"],["modelo","Modelo"],["version","Versión"],
+  ["anio","Año"],["motor","Motor / código de motor"],
+  ["caja","Caja / transmisión"],["traccion","Tracción"],
   ["aceiteMotor","Aceite de motor verificado"],
   ["capacidadMotor","Capacidad de aceite de motor"],
   ["aceiteCaja","Aceite de caja verificado"],
   ["capacidadCaja","Capacidad de aceite de caja"],
   ["otrosFluidos","Otros fluidos / especificaciones"],
-  ["alertas","Alertas / notas"],
-  ["fuente","Fuente consultada"],
-  ["urlFuente","Enlace de la fuente"],
-  ["fechaRevision","Fecha de revisión"]
+  ["alertas","Alertas / notas"],["fuente","Fuente consultada"],
+  ["urlFuente","Enlace de la fuente"],["fechaRevision","Fecha de revisión"]
 ];
 const $ = id => document.getElementById(id);
 let vehiculos = [];
 
 function escapar(valor) {
   return String(valor ?? "").replace(/[&<>"']/g, caracter => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
   })[caracter]);
 }
-
 function normalizar(valor) {
-  return String(valor ?? "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
+  return String(valor ?? "").normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"").toLowerCase()
+    .replace(/[^a-z0-9]/g,"");
 }
-
+function crearId() {
+  return globalThis.crypto && crypto.randomUUID
+    ? crypto.randomUUID()
+    : String(Date.now()) + Math.random().toString(16).slice(2);
+}
+function actualizarCantidad() {
+  $("cantidad").textContent = String(vehiculos.length);
+}
 function cargarBase() {
   try {
     const guardada = JSON.parse(localStorage.getItem(CLAVE) || "[]");
     vehiculos = Array.isArray(guardada) ? guardada : [];
-  } catch {
-    vehiculos = [];
-  }
+  } catch { vehiculos = []; }
   actualizarCantidad();
 }
-
 function guardarBase() {
   try {
     localStorage.setItem(CLAVE, JSON.stringify(vehiculos));
     actualizarCantidad();
     return true;
   } catch {
-    alert("No se pudo guardar. Exportá la base y revisá el espacio disponible del navegador.");
+    alert("No se pudo guardar. Exportá la base y revisá el espacio disponible.");
     return false;
   }
 }
+``'
 
-function actualizarCantidad() {
-  $("cantidad").textContent = String(vehiculos.length);
-}
-
+```javascript
 function crearFormulario() {
   $("formulario").innerHTML = CAMPOS.map(([clave, etiqueta]) => `
     <div class="field">
@@ -164,7 +154,8 @@ function crearFormulario() {
       ${clave === "alertas" || clave === "otrosFluidos"
         ? `<textarea id="campo_${clave}" rows="2"></textarea>`
         : `<input id="campo_${clave}" ${clave === "fechaRevision" ? 'type="date"' : ""}>`}
-    </div>`).join("");
+    </div>
+  `).join("");
 }
 
 function abrirFormulario(datos = {}) {
@@ -180,8 +171,59 @@ function cerrarFormulario() {
   $("modal").classList.remove("open");
 }
 
+function mostrarResultados(lista) {
+  if (!lista.length) {
+    $("resultados").innerHTML =
+      `<section class="panel empty">No encontré coincidencias en la base guardada.</section>`;
+    return;
+  }
+
+  $("resultados").innerHTML = lista.map(ficha => {
+    const campos = [
+      ["Patente",ficha.patente],["VIN / chasis",ficha.vin],
+      ["Marca",ficha.marca],["Modelo",ficha.modelo],
+      ["Versión",ficha.version],["Año",ficha.anio],
+      ["Motor",ficha.motor],["Caja",ficha.caja],
+      ["Tracción",ficha.traccion],["Aceite de motor",ficha.aceiteMotor],
+      ["Capacidad de aceite de motor",ficha.capacidadMotor],
+      ["Aceite de caja",ficha.aceiteCaja],
+      ["Capacidad de aceite de caja",ficha.capacidadCaja],
+      ["Otros fluidos",ficha.otrosFluidos],["Fuente",ficha.fuente],
+      ["Enlace de la fuente",ficha.urlFuente],
+      ["Fecha de revisión",ficha.fechaRevision]
+    ];
+
+    return `
+      <section class="panel">
+        <div class="result-title">
+          <strong>${escapar(ficha.marca)} ${escapar(ficha.modelo)} ${escapar(ficha.anio)}</strong>
+          ${ficha.id ? `<button type="button" data-editar="${escapar(ficha.id)}">Editar</button>` : ""}
+        </div>
+        <div class="grid">
+          ${campos.map(([etiqueta,valor]) => `
+            <div class="item">
+              <div class="key">${escapar(etiqueta)}</div>
+              <div class="value">${escapar(valor || "No cargado")}</div>
+            </div>
+          `).join("")}
+        </div>
+        ${ficha.alertas
+          ? `<p class="notice"><strong>Notas:</strong> ${escapar(ficha.alertas)}</p>`
+          : ""}
+      </section>
+    `;
+  }).join("");
+
+  $("resultados").querySelectorAll("[data-editar]").forEach(boton => {
+    boton.addEventListener("click", () => {
+      const ficha = vehiculos.find(v => v.id === boton.dataset.editar);
+      if (ficha) abrirFormulario(ficha);
+    });
+  });
+}
+
 function guardarVehiculo() {
-  const ficha = {id: $("registroId").value || crypto.randomUUID()};
+  const ficha = {id: $("registroId").value || crearId()};
   for (const [clave] of CAMPOS) {
     ficha[clave] = $("campo_" + clave).value.trim();
   }
@@ -201,70 +243,84 @@ function guardarVehiculo() {
   }
 }
 
-function buscar() {
-  const termino = normalizar($("busqueda").value);
-  if (!termino) {
-    $("resultados").innerHTML = `<div class="panel empty">Escribí una patente, VIN, marca, modelo u otro dato para buscar.</div>`;
+async function buscar() {
+  const original = $("busqueda").value.trim();
+
+  if (!original) {
+    $("resultados").innerHTML =
+      `<div class="panel empty">Ingresá una patente o un VIN para buscar.</div>`;
     return;
   }
 
-  const encontrados
-```
-Pegá esta continuación inmediatamente después de `const encontrados`:
+  const vin = original.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const pareceVin = /^[A-HJ-NPR-Z0-9]{17}$/.test(vin);
 
-```js
-    = vehiculos.filter(ficha =>
-      CAMPOS.some(([clave]) => normalizar(ficha[clave]).includes(termino))
-    );
+  if (pareceVin) {
+    $("resultados").innerHTML =
+      `<section class="panel">Buscando el VIN en NHTSA…</section>`;
 
+    try {
+      const url =
+        "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/" +
+        encodeURIComponent(vin) + "?format=json";
+      const respuesta = await fetch(url);
+      if (!respuesta.ok) throw new Error("Error al consultar NHTSA.");
+
+      const datos = await respuesta.json();
+      const resultado = datos.Results && datos.Results[0];
+
+      if (!resultado || (!resultado.Make && !resultado.Model)) {
+        $("resultados").innerHTML =
+          `<section class="panel empty">NHTSA no encontró datos para ese VIN. Podés cargar el vehículo manualmente.</section>`;
+        return;
+      }
+
+      const ficha = {
+        vin,
+        marca: resultado.Make || "",
+        modelo: resultado.Model || "",
+        version: resultado.Trim || resultado.Series || "",
+        anio: resultado.ModelYear || "",
+        motor: [
+          resultado.DisplacementL ? resultado.DisplacementL + " L" : "",
+          resultado.EngineCylinders ? resultado.EngineCylinders + " cilindros" : "",
+          resultado.EngineModel || ""
+        ].filter(Boolean).join(" — "),
+        caja: resultado.TransmissionStyle || "",
+        traccion: resultado.DriveType || "",
+        fuente: "NHTSA vPIC",
+        urlFuente: url,
+        alertas: "Datos decodificados por VIN. Verificá motor y versión. NHTSA no informa aceites recomendados."
+      };
+
+      mostrarResultados([ficha]);
+      return;
+    } catch {
+      $("resultados").innerHTML =
+        `<section class="panel empty">No se pudo consultar NHTSA. Revisá tu conexión o buscá el VIN en la base guardada.</section>`;
+      return;
+    }
+  }
+
+  const termino = normalizar(original);
+  const encontrados = vehiculos.filter(ficha =>
+    CAMPOS.some(([clave]) =>
+      normalizar(ficha[clave]).includes(termino)
+    )
+  );
   mostrarResultados(encontrados);
 }
+```
+**Parte 3 de 3:** pegala justo después de la Parte 2. Luego añadí `</script></body></html>` para cerrar el archivo.
 
-function mostrarResultados(lista) {
-  if (!lista.length) {
-    $("resultados").innerHTML =
-      `<section class="panel empty">No encontré coincidencias en tu base local.</section>`;
-    return;
-  }
-
-  $("resultados").innerHTML = lista.map(ficha => {
-    const principales = [
-      ["Patente",ficha.patente],["VIN / chasis",ficha.vin],
-      ["Marca",ficha.marca],["Modelo",ficha.modelo],
-      ["Versión",ficha.version],["Año",ficha.anio],
-      ["Motor",ficha.motor],["Caja",ficha.caja],
-      ["Aceite de motor",ficha.aceiteMotor],
-      ["Capacidad de motor",ficha.capacidadMotor],
-      ["Aceite de caja",ficha.aceiteCaja],
-      ["Capacidad de caja",ficha.capacidadCaja],
-      ["Otros fluidos",ficha.otrosFluidos],
-      ["Fuente",ficha.fuente],["Enlace",ficha.urlFuente],
-      ["Fecha de revisión",ficha.fechaRevision]
-    ];
-
-    return `
-      <section class="panel">
-        <div class="result-title">
-          <strong>${escapar(ficha.marca)} ${escapar(ficha.modelo)} ${escapar(ficha.anio)}</strong>
-          <button type="button" data-editar="${escapar(ficha.id)}">Editar</button>
-        </div>
-        <div class="grid">
-          ${principales.map(([etiqueta,valor]) => `
-            <div class="item">
-              <div class="key">${escapar(etiqueta)}</div>
-              <div class="value">${escapar(valor || "No cargado")}</div>
-            </div>`).join("")}
-        </div>
-        ${ficha.alertas ? `<p class="notice"><strong>Notas:</strong> ${escapar(ficha.alertas)}</p>` : ""}
-      </section>`;
-  }).join("");
-
-  $("resultados").querySelectorAll("[data-editar]").forEach(boton => {
-    boton.addEventListener("click", () => {
-      const ficha = vehiculos.find(v => v.id === boton.dataset.editar);
-      if (ficha) abrirFormulario(ficha);
-    });
-  });
+```javascript
+function descargarArchivo(archivo, nombre) {
+  const url = URL.createObjectURL(archivo);
+  const enlace = document.createElement("a");
+  enlace.href = url;
+  enlace.download = nombre;
+  enlace.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function exportarBase() {
@@ -275,30 +331,31 @@ function exportarBase() {
   descargarArchivo(archivo, "base-vehiculos.json");
 }
 
-function descargarArchivo(archivo, nombre) {
-  const url = URL.createObjectURL(archivo);
-  const enlace = document.createElement("a");
-  enlace.href = url;
-  enlace.download = nombre;
-  enlace.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
 function descargarPlantilla() {
   const encabezados = CAMPOS.map(([clave]) => clave);
   const ejemplo = [
     "AB123CD","VIN_DE_EJEMPLO","Toyota","Corolla","XEi","2020",
-    "2ZR-FE","CVT","","","","","","","","Manual del vehículo","https://ejemplo.com","2026-01-01"
+    "2ZR-FE","CVT","","","","","","","","Manual del vehículo",
+    "https://ejemplo.com","2026-01-01"
   ];
+
   const csv = [encabezados, ejemplo]
-    .map(fila => fila.map(celda => `"${String(celda).replace(/"/g,'""')}"`).join(","))
+    .map(fila => fila.map(celda =>
+      `"${String(celda).replace(/"/g,'""')}"`
+    ).join(","))
     .join("\r\n");
-  descargarArchivo(new Blob(["\uFEFF" + csv], {type:"text/csv;charset=utf-8"}), "plantilla-vehiculos.csv");
+
+  descargarArchivo(
+    new Blob(["\uFEFF" + csv], {type:"text/csv;charset=utf-8"}),
+    "plantilla-vehiculos.csv"
+  );
 }
 
 function leerCsv(texto) {
   const filas = [];
-  let fila = [], celda = "", entreComillas = false;
+  let fila = [];
+  let celda = "";
+  let entreComillas = false;
 
   for (let i = 0; i < texto.length; i++) {
     const caracter = texto[i];
@@ -339,17 +396,22 @@ async function importarArchivo(evento) {
 
     if (archivo.name.toLowerCase().endsWith(".json")) {
       const datos = JSON.parse(texto);
-      if (!Array.isArray(datos)) throw new Error("El JSON debe contener una lista.");
+      if (!Array.isArray(datos)) {
+        throw new Error("El JSON debe contener una lista.");
+      }
       registros = datos;
     } else {
       const filas = leerCsv(texto.replace(/^\uFEFF/, ""));
-      if (filas.length < 2) throw new Error("El CSV no contiene filas de datos.");
+      if (filas.length < 2) {
+        throw new Error("El CSV no contiene filas de datos.");
+      }
 
       const encabezados = filas[0].map(h => h.trim());
       const camposValidos = CAMPOS.map(([clave]) => clave);
       const desconocidos = encabezados.filter(h => !camposValidos.includes(h));
+
       if (desconocidos.length) {
-        throw new Error("Hay encabezados no reconocidos: " + desconocidos.join(", "));
+        throw new Error("Encabezados no reconocidos: " + desconocidos.join(", "));
       }
 
       registros = filas.slice(1).map(fila => {
@@ -362,23 +424,29 @@ async function importarArchivo(evento) {
     }
 
     let importados = 0;
+
     registros.forEach(registro => {
       if (!registro || typeof registro !== "object") return;
+
       const ficha = {};
       CAMPOS.forEach(([clave]) => {
         ficha[clave] = String(registro[clave] ?? "").trim();
       });
 
-      if (!ficha.patente && !ficha.vin && !(ficha.marca && ficha.modelo)) return;
+      if (!ficha.patente && !ficha.vin && !(ficha.marca && ficha.modelo)) {
+        return;
+      }
 
       const existente = vehiculos.findIndex(v =>
         (ficha.vin && normalizar(v.vin) === normalizar(ficha.vin)) ||
         (ficha.patente && normalizar(v.patente) === normalizar(ficha.patente))
       );
 
-      ficha.id = existente >= 0 ? vehiculos[existente].id : crypto.randomUUID();
+      ficha.id = existente >= 0 ? vehiculos[existente].id : crearId();
+
       if (existente >= 0) vehiculos[existente] = ficha;
       else vehiculos.push(ficha);
+
       importados++;
     });
 
