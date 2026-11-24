@@ -1,480 +1,158 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Buscador de vehículos</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Selector Integral de Lubricantes - Pro</title>
 <style>
-:root{color-scheme:dark;--bg:#0f172a;--panel:#1e293b;--input:#0b1120;--border:#334155;--text:#f1f5f9;--muted:#94a3b8;--accent:#f59e0b}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif}
-header{padding:16px;border-bottom:1px solid var(--border);background:#111b2e}
-main,.header-inner{max-width:1050px;margin:auto}
-.header-inner,.actions,.row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-main{padding:18px 14px 40px}
-h1{font-size:1.2rem;margin:0}
-h2{font-size:1rem;margin:0 0 12px;color:var(--accent)}
-.muted{color:var(--muted);font-size:.88rem}
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
-input,textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--input);color:var(--text);font:inherit}
-textarea{resize:vertical}
-button{padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:#263349;color:var(--text);font:inherit;font-weight:700;cursor:pointer}
-button:hover{border-color:var(--accent)}
-.primary{background:var(--accent);border-color:var(--accent);color:#111827}
-.search{display:grid;grid-template-columns:1fr auto;gap:8px}
-.stats{margin-top:9px;color:var(--muted);font-size:.85rem}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:9px}
-.field label{display:block;margin:7px 0 4px;color:var(--muted);font-size:.8rem;font-weight:700}
-.item{padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--input);overflow-wrap:anywhere}
-.key{font-size:.72rem;color:var(--muted);font-weight:800;text-transform:uppercase}
-.value{font-weight:650;margin-top:3px;white-space:pre-wrap}
-.notice{padding:11px;border:1px solid #854d0e;border-radius:8px;background:#422006;color:#fef3c7}
-.result-title{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px}
-.empty{color:var(--muted);padding:10px 0}
-.modal{display:none;position:fixed;inset:0;z-index:2;overflow:auto;padding:14px;background:#000b}
-.modal.open{display:block}
-.dialog{max-width:900px;margin:18px auto;padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
-.modal-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:14px}
-input[type=file]{display:none}
-@media(max-width:550px){.search{grid-template-columns:1fr}.header-inner{align-items:flex-start}}
+:root{font-family:Arial,Helvetica,sans-serif;color:#17202a;background:#f2f5f8}
+*{box-sizing:border-box}body{margin:0}.wrap{max-width:1080px;margin:auto;padding:18px}
+header{background:linear-gradient(120deg,#132746,#205b86);color:#fff;padding:25px;border-radius:18px;margin-bottom:16px}
+h1{margin:0 0 8px;font-size:26px}header p{margin:0;color:#d9e7f4}
+.panel{background:#fff;border:1px solid #dce3ea;border-radius:15px;padding:18px;margin:13px 0;box-shadow:0 2px 8px #1d355710}
+h2{font-size:19px;margin:0 0 13px}h3{font-size:16px;margin:17px 0 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:12px}
+label{font-weight:700;font-size:13px;display:block}input,select,textarea{width:100%;padding:11px;border:1px solid #c8d2de;border-radius:9px;font-size:15px;margin:6px 0 12px;background:white}
+textarea{min-height:72px;resize:vertical}
+button,.tab{border:0;border-radius:9px;padding:11px 14px;background:#e7edf4;color:#173653;font-weight:700;cursor:pointer}
+button.primary{background:#1769aa;color:white}button.dark{background:#172b4d;color:white}button.danger{background:#fae8e8;color:#9b2525}
+button:disabled{opacity:.5;cursor:not-allowed}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 14px}.tab.active{background:#172b4d;color:white}
+.muted,small{color:#667789}.hidden{display:none!important}
+.note{padding:12px;border-radius:9px;background:#fff6df;border:1px solid #efd18b;color:#664b15;font-size:13px}
+.good{padding:12px;border-radius:9px;background:#eaf7ef;border:1px solid #bfe4ca;color:#245b36;font-size:13px}
+.card{background:#f6f9fc;border:1px solid #e1e8ef;border-radius:10px;padding:12px;margin:8px 0}
+table{width:100%;border-collapse:collapse}td,th{padding:9px;border-bottom:1px solid #e7ecf1;text-align:left;font-size:13px;vertical-align:top}th{width:38%}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.brandgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+a{color:#1264a3;font-weight:700;text-decoration:none}a:hover{text-decoration:underline}
+.badge{display:inline-block;background:#e5eef7;color:#245277;border-radius:20px;padding:4px 8px;font-size:11px;font-weight:700}
+footer{font-size:12px;color:#68788a;padding:14px}
+@media(max-width:600px){.wrap{padding:10px}header{padding:20px}h1{font-size:22px}.panel{padding:14px}th{width:44%}}
 </style>
 </head>
-<body>
-<header>
-  <div class="header-inner">
-    <div>
-      <h1>🔎 Buscador de vehículos</h1>
-      <div class="muted">VIN: consulta gratuita a NHTSA. Patente: búsqueda en tu base guardada.</div>
-    </div>
-    <div class="actions">
-      <button class="primary" id="nuevoBtn" type="button">＋ Cargar vehículo</button>
-      <button id="plantillaBtn" type="button">Descargar plantilla CSV</button>
-      <button id="exportarBtn" type="button">Exportar base</button>
-      <button id="importarBtn" type="button">Importar CSV / JSON</button>
-      <input id="archivo" type="file" accept=".csv,.json,text/csv,application/json">
-    </div>
-  </div>
-</header>
-<main>
-  <section class="panel">
-    <h2>Buscar vehículo</h2>
-    <div class="search">
-      <input id="busqueda" placeholder="Ingresá una patente o un VIN">
-      <button class="primary" id="buscarBtn" type="button">Buscar</button>
-    </div>
-    <div class="stats"><span id="cantidad">0</span> vehículos guardados en este navegador.</div>
-  </section>
-  <section class="panel">
-    <div class="notice">
-      NHTSA puede no encontrar algunos vehículos argentinos y no informa aceites recomendados. Las patentes se buscan en los registros que cargues en esta app.
-    </div>
-  </section>
-  <section id="resultados"></section>
-</main>
-<div class="modal" id="modal">
-  <section class="dialog">
-    <div class="row">
-      <h2 id="tituloModal">Cargar vehículo</h2>
-      <button id="cerrarBtn" type="button">Cerrar</button>
-    </div>
-    <input id="registroId" type="hidden">
-    <div class="grid" id="formulario"></div>
-    <div class="modal-actions">
-      <button id="cancelarBtn" type="button">Cancelar</button>
-      <button class="primary" id="guardarBtn" type="button">Guardar</button>
-    </div>
-  </section>
+<body><div class="wrap">
+<header><h1>Selector Integral de Lubricantes · PRO</h1><p>Buscá por patente, VIN o datos manuales. Guardá fichas técnicas verificadas y compará las cinco marcas.</p></header>
+
+<section class="panel">
+<h2>1 · Identificación del vehículo</h2>
+<div class="tabs">
+<button class="tab active" data-mode="patente">Patente</button>
+<button class="tab" data-mode="vin">VIN / chasis</button>
+<button class="tab" data-mode="manual">Datos manuales</button>
+</div>
+<div id="plateBox"><label>Patente argentina</label><input id="plate" placeholder="Ej.: AB123CD"></div>
+<div id="vinBox" class="hidden"><label>VIN (17 caracteres)</label><input id="vin" maxlength="17" placeholder="Número de chasis"></div>
+<div id="manualBox" class="hidden"><div class="grid">
+<div><label>Marca</label><input id="make" placeholder="Volkswagen"></div><div><label>Modelo</label><input id="model" placeholder="Golf"></div>
+<div><label>Año</label><input id="year" placeholder="2017"></div><div><label>Motor / versión</label><input id="engine" placeholder="1.4 TSI"></div>
+<div><label>Combustible</label><select id="fuel"><option>No especificado</option><option>Nafta</option><option>Diésel</option><option>Híbrido</option><option>Eléctrico</option></select></div>
+<div><label>Código de motor / caja</label><input id="codes" placeholder="Ej.: CZDA / DQ200"></div>
+</div></div>
+<div class="grid"><div><label>País</label><select id="country"><option>Argentina</option><option>Uruguay</option><option>Chile</option><option>Otro</option></select></div>
+<div><label>Marca a comparar</label><select id="brand"><option>Todas</option><option>Liqui Moly</option><option>MOTUL</option><option>Valvoline</option><option>Mannol</option><option>Nishimoto</option></select></div></div>
+<div class="actions"><button class="primary" id="search">Identificar vehículo</button><button id="reset">Limpiar</button></div>
+<div id="status" class="muted" aria-live="polite"></div>
+</section>
+
+<section class="panel hidden" id="vehiclePanel"><h2>2 · Vehículo identificado</h2><div id="vehicle"></div>
+<div class="actions"><button class="primary" id="saveVehicle">Guardar ficha en mi biblioteca</button><button id="exportVehicle">Exportar ficha JSON</button></div>
+</section>
+
+<section class="panel hidden" id="editorPanel">
+<h2>3 · Cargar / verificar especificaciones</h2>
+<div class="note">Completá estos datos únicamente con manual de fábrica, catálogo técnico o identificación exacta de la caja. El selector conserva la fuente y fecha de verificación para evitar recomendaciones inventadas.</div>
+<div class="grid">
+<div><label>Conjunto</label><select id="kind"><option>Motor</option><option>Transmisión automática</option><option>Transmisión CVT</option><option>DSG / DCT</option><option>Transmisión manual</option><option>Diferencial</option><option>Transfer / reductora</option><option>Refrigeración</option><option>Frenos</option><option>Dirección</option><option>Otro</option></select></div>
+<div><label>Código / variante</label><input id="variant" placeholder="Código de motor o caja"></div>
+<div><label>Viscosidad / fluido</label><input id="visc" placeholder="Ej.: 5W-30 / ATF según norma"></div>
+<div><label>Norma / homologación OEM</label><input id="norm" placeholder="Ej.: VW 504 00 / ZF TE-ML..."></div>
+<div><label>Capacidad total (L)</label><input id="total" type="number" step="0.01" placeholder="Sin inventar"></div>
+<div><label>Recambio parcial (L)</label><input id="partial" type="number" step="0.01" placeholder="Drenaje habitual"></div>
+<div><label>Diálisis / recambio dinámico (L)</label><input id="dialysis" type="number" step="0.01" placeholder="Si aplica; validar procedimiento"></div>
+<div><label>Filtro / código OEM</label><input id="filter" placeholder="Código y tipo"></div>
+</div>
+<label>Producto exacto y marcas compatibles (producto / código)</label><textarea id="products" placeholder="Una línea por producto: marca | nombre | código | especificación confirmada"></textarea>
+<label>Fuente documental / enlace</label><input id="source" placeholder="URL de manual, boletín técnico o catálogo oficial">
+<label>Observaciones de servicio</label><textarea id="notes" placeholder="Temperatura de nivel, procedimiento, juntas, filtro interno/externo, etc."></textarea>
+<div class="actions"><button class="primary" id="addSpec">Guardar especificación</button><button id="clearSpec">Limpiar campos</button></div>
+</section>
+
+<section class="panel hidden" id="specPanel"><h2>4 · Ficha técnica guardada</h2><div id="specs"></div></section>
+
+<section class="panel">
+<h2>5 · Catálogos y asesores oficiales</h2>
+<p class="muted">Abrí los catálogos para confirmar la aplicación exacta. Un producto de igual viscosidad no necesariamente cumple la homologación requerida.</p>
+<div class="brandgrid">
+<div class="card"><b>LIQUI MOLY</b><p><a target="_blank" rel="noopener" href="https://www.liqui-moly.com/en/service/liqui-moly-app.html">Oil Guide / app oficial ↗</a></p><small>Guía de aceite, búsqueda de vehículos y productos.</small></div>
+<div class="card"><b>MOTUL</b><p><a target="_blank" rel="noopener" href="https://motul.com.ar/asesor-de-lubricantes/?tipo=auto">Asesor de lubricantes Argentina ↗</a></p><small>Motor, transmisión, frenos, refrigerante y capacidades según aplicación.</small></div>
+<div class="card"><b>VALVOLINE</b><p><a target="_blank" rel="noopener" href="https://www.valvolineglobal.com/">Sitio oficial ↗</a></p><small>Verificar hoja técnica y aprobación del producto.</small></div>
+<div class="card"><b>MANNOL</b><p><a target="_blank" rel="noopener" href="https://www.mannol.de/">Catálogo oficial ↗</a></p><small>Consultar ficha técnica y lista de aplicaciones.</small></div>
+<div class="card"><b>NISHIMOTO</b><p><a target="_blank" rel="noopener" href="https://www.nishimotoargentina.com/productos">Catálogo Argentina ↗</a></p><small>Motor, ATF, CVT, DCT y transmisión manual.</small></div>
+</div>
+</section>
+
+<section class="panel">
+<h2>6 · Mi biblioteca de vehículos</h2><div id="library" class="muted">Todavía no guardaste vehículos en este navegador.</div>
+<div class="actions"><button id="exportLibrary">Exportar biblioteca completa</button><button class="danger" id="clearLibrary">Borrar biblioteca local</button></div>
+</section>
+
+<section class="panel">
+<h2>7 · Fuentes argentinas y Mercosur</h2>
+<div class="note">La consulta por patente requiere un proveedor con API key. No pegues claves privadas en este HTML: para una integración real hay que usar un servidor intermediario seguro. La identificación por VIN argentino se debe cruzar con fuentes locales y no depender solamente de NHTSA.</div>
+<h3>Fuentes oficiales para validar VIN y versiones</h3>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.mseg.gba.gov.ar/areas/servicios/automotores/vin.html">Ministerio de Seguridad PBA · estructura VIN y códigos WMI ↗</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.dnrpa.gov.ar/valuacion/informacion/01-10-2025.pdf">DNRPA · tabla oficial de valuaciones (incluye versiones y años) ↗</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.volkswagen.com.ar/app/local/postventa-recall/">Volkswagen Argentina · consulta por chasis/VIN ↗</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.volkswagen.com.ar/es/postventa/informacion-cliente/volkswagen-recall.html">Volkswagen Argentina · campañas y rangos de chasis ↗</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.volkswagen.com.ar/idhub/content/dam/onehub_pkw/importers/ar/tengo-un-volkswagen/manuales/manuales/2015/Manual%20Suran%202015.pdf">Volkswagen · manual oficial Suran (describe SQ200, I-Motion 5 marchas) ↗</a></li>
+</ul>
+<h3>Proveedores de datos por patente para evaluar</h3>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://clasific.ar/docs/v2/vehicles">Clasificar · API de patente y documentación ↗</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.chasis.com.ar/api-patentes">Chasis · API de patentes ↗</a></li>
+<li><a target="_blank" rel="noopener" href="https://patente.ar/api-vehicular">Patente.ar · APIs vehiculares / DNRPA ↗</a></li>
+</ul>
+<p class="muted">Los proveedores informan datos registrales/comerciales; no se debe asumir que entregan código de motor, código de caja, homologación o capacidad de lubricante. Eso requiere documentación técnica adicional.</p>
+</section>
+<section class="panel">
+<h2>8 · Caso de prueba VIN argentino</h2>
+<div class="card"><b>VIN:</b> 8AWPB45Z3KA506256<br><b>Lectura preliminar:</b> WMI 8AW = Volkswagen Argentina. El décimo carácter es K; el código de año apunta a 2019, sujeto a confirmación documental de la unidad.<br><b>Cruce DNRPA:</b> la tabla oficial registra variantes Suran 1.6 16V SD I-Motion con año 2019.<br><b>Estado:</b> identificación de familia/versiones compatible; falta confirmar que el VIN individual corresponda a esa variante y obtener su código de motor/caja.</div>
+<p>El manual oficial de Suran describe la transmisión mecánica automatizada SQ200 de 5 marchas. Es documentación de la familia, no prueba del código de caja de este VIN específico. No cargar aún viscosidad, capacidad ni fluido del robot sin confirmar código y procedimiento.</p>
+<div class="actions"><button id="loadTestVin" class="primary">Cargar VIN de prueba</button><a target="_blank" rel="noopener" href="https://www.dnrpa.gov.ar/valuacion/informacion/01-10-2025.pdf">Abrir tabla DNRPA ↗</a></div>
+</section>
+<footer>Versión PRO local · Los registros se guardan en el almacenamiento de este navegador. Exportá una copia de seguridad. Las recomendaciones solo deben marcarse como verificadas cuando exista una fuente técnica para la variante exacta.</footer>
 </div>
 <script>
-"use strict";
-const CLAVE = "buscador_local_vehiculos_v1";
-const CAMPOS = [
-  ["patente","Patente / dominio"],["vin","VIN / número de chasis"],
-  ["marca","Marca"],["modelo","Modelo"],["version","Versión"],
-  ["anio","Año"],["motor","Motor / código de motor"],
-  ["caja","Caja / transmisión"],["traccion","Tracción"],
-  ["aceiteMotor","Aceite de motor verificado"],
-  ["capacidadMotor","Capacidad de aceite de motor"],
-  ["aceiteCaja","Aceite de caja verificado"],
-  ["capacidadCaja","Capacidad de aceite de caja"],
-  ["otrosFluidos","Otros fluidos / especificaciones"],
-  ["alertas","Alertas / notas"],["fuente","Fuente consultada"],
-  ["urlFuente","Enlace de la fuente"],["fechaRevision","Fecha de revisión"]
-];
-const $ = id => document.getElementById(id);
-let vehiculos = [];
-
-function escapar(valor) {
-  return String(valor ?? "").replace(/[&<>"']/g, caracter => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  })[caracter]);
-}
-function normalizar(valor) {
-  return String(valor ?? "").normalize("NFD")
-    .replace(/[\u0300-\u036f]/g,"").toLowerCase()
-    .replace(/[^a-z0-9]/g,"");
-}
-function crearId() {
-  return globalThis.crypto && crypto.randomUUID
-    ? crypto.randomUUID()
-    : String(Date.now()) + Math.random().toString(16).slice(2);
-}
-function actualizarCantidad() {
-  $("cantidad").textContent = String(vehiculos.length);
-}
-function cargarBase() {
-  try {
-    const guardada = JSON.parse(localStorage.getItem(CLAVE) || "[]");
-    vehiculos = Array.isArray(guardada) ? guardada : [];
-  } catch { vehiculos = []; }
-  actualizarCantidad();
-}
-function guardarBase() {
-  try {
-    localStorage.setItem(CLAVE, JSON.stringify(vehiculos));
-    actualizarCantidad();
-    return true;
-  } catch {
-    alert("No se pudo guardar. Exportá la base y revisá el espacio disponible.");
-    return false;
-  }
-}
-```
-```javascript
-function crearFormulario() {
-  $("formulario").innerHTML = CAMPOS.map(([clave, etiqueta]) => `
-    <div class="field">
-      <label for="campo_${clave}">${escapar(etiqueta)}</label>
-      ${clave === "alertas" || clave === "otrosFluidos"
-        ? `<textarea id="campo_${clave}" rows="2"></textarea>`
-        : `<input id="campo_${clave}" ${clave === "fechaRevision" ? 'type="date"' : ""}>`}
-    </div>
-  `).join("");
-}
-
-function abrirFormulario(datos = {}) {
-  $("registroId").value = datos.id || "";
-  $("tituloModal").textContent = datos.id ? "Editar vehículo" : "Cargar vehículo";
-  for (const [clave] of CAMPOS) {
-    $("campo_" + clave).value = datos[clave] || "";
-  }
-  $("modal").classList.add("open");
-}
-
-function cerrarFormulario() {
-  $("modal").classList.remove("open");
-}
-
-function mostrarResultados(lista) {
-  if (!lista.length) {
-    $("resultados").innerHTML =
-      `<section class="panel empty">No encontré coincidencias en la base guardada.</section>`;
-    return;
-  }
-
-  $("resultados").innerHTML = lista.map(ficha => {
-    const campos = [
-      ["Patente",ficha.patente],["VIN / chasis",ficha.vin],
-      ["Marca",ficha.marca],["Modelo",ficha.modelo],
-      ["Versión",ficha.version],["Año",ficha.anio],
-      ["Motor",ficha.motor],["Caja",ficha.caja],
-      ["Tracción",ficha.traccion],["Aceite de motor",ficha.aceiteMotor],
-      ["Capacidad de aceite de motor",ficha.capacidadMotor],
-      ["Aceite de caja",ficha.aceiteCaja],
-      ["Capacidad de aceite de caja",ficha.capacidadCaja],
-      ["Otros fluidos",ficha.otrosFluidos],["Fuente",ficha.fuente],
-      ["Enlace de la fuente",ficha.urlFuente],
-      ["Fecha de revisión",ficha.fechaRevision]
-    ];
-
-    return `
-      <section class="panel">
-        <div class="result-title">
-          <strong>${escapar(ficha.marca)} ${escapar(ficha.modelo)} ${escapar(ficha.anio)}</strong>
-          ${ficha.id ? `<button type="button" data-editar="${escapar(ficha.id)}">Editar</button>` : ""}
-        </div>
-        <div class="grid">
-          ${campos.map(([etiqueta,valor]) => `
-            <div class="item">
-              <div class="key">${escapar(etiqueta)}</div>
-              <div class="value">${escapar(valor || "No cargado")}</div>
-            </div>
-          `).join("")}
-        </div>
-        ${ficha.alertas
-          ? `<p class="notice"><strong>Notas:</strong> ${escapar(ficha.alertas)}</p>`
-          : ""}
-      </section>
-    `;
-  }).join("");
-
-  $("resultados").querySelectorAll("[data-editar]").forEach(boton => {
-    boton.addEventListener("click", () => {
-      const ficha = vehiculos.find(v => v.id === boton.dataset.editar);
-      if (ficha) abrirFormulario(ficha);
-    });
-  });
-}
-
-function guardarVehiculo() {
-  const ficha = {id: $("registroId").value || crearId()};
-  for (const [clave] of CAMPOS) {
-    ficha[clave] = $("campo_" + clave).value.trim();
-  }
-
-  if (!ficha.patente && !ficha.vin && !(ficha.marca && ficha.modelo)) {
-    alert("Completá al menos una patente, un VIN o la marca y el modelo.");
-    return;
-  }
-
-  const indice = vehiculos.findIndex(v => v.id === ficha.id);
-  if (indice >= 0) vehiculos[indice] = ficha;
-  else vehiculos.unshift(ficha);
-
-  if (guardarBase()) {
-    cerrarFormulario();
-    mostrarResultados([ficha]);
-  }
-}
-
-async function buscar() {
-  const original = $("busqueda").value.trim();
-
-  if (!original) {
-    $("resultados").innerHTML =
-      `<div class="panel empty">Ingresá una patente o un VIN para buscar.</div>`;
-    return;
-  }
-
-  const vin = original.toUpperCase().replace(/[^A-Z0-9]/g, "");
-  const pareceVin = /^[A-HJ-NPR-Z0-9]{17}$/.test(vin);
-
-  if (pareceVin) {
-    $("resultados").innerHTML =
-      `<section class="panel">Buscando el VIN en NHTSA…</section>`;
-
-    try {
-      const url =
-        "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/" +
-        encodeURIComponent(vin) + "?format=json";
-      const respuesta = await fetch(url);
-      if (!respuesta.ok) throw new Error("Error al consultar NHTSA.");
-
-      const datos = await respuesta.json();
-      const resultado = datos.Results && datos.Results[0];
-
-      if (!resultado || (!resultado.Make && !resultado.Model)) {
-        $("resultados").innerHTML =
-          `<section class="panel empty">NHTSA no encontró datos para ese VIN. Podés cargar el vehículo manualmente.</section>`;
-        return;
-      }
-
-      const ficha = {
-        vin,
-        marca: resultado.Make || "",
-        modelo: resultado.Model || "",
-        version: resultado.Trim || resultado.Series || "",
-        anio: resultado.ModelYear || "",
-        motor: [
-          resultado.DisplacementL ? resultado.DisplacementL + " L" : "",
-          resultado.EngineCylinders ? resultado.EngineCylinders + " cilindros" : "",
-          resultado.EngineModel || ""
-        ].filter(Boolean).join(" — "),
-        caja: resultado.TransmissionStyle || "",
-        traccion: resultado.DriveType || "",
-        fuente: "NHTSA vPIC",
-        urlFuente: url,
-        alertas: "Datos decodificados por VIN. Verificá motor y versión. NHTSA no informa aceites recomendados."
-      };
-
-      mostrarResultados([ficha]);
-      return;
-    } catch {
-      $("resultados").innerHTML =
-        `<section class="panel empty">No se pudo consultar NHTSA. Revisá tu conexión o buscá el VIN en la base guardada.</section>`;
-      return;
-    }
-  }
-
-  const termino = normalizar(original);
-  const encontrados = vehiculos.filter(ficha =>
-    CAMPOS.some(([clave]) =>
-      normalizar(ficha[clave]).includes(termino)
-    )
-  );
-  mostrarResultados(encontrados);
-}
-```
- `</script></body></html>` para cerrar el archivo.
-
-```javascript
-function descargarArchivo(archivo, nombre) {
-  const url = URL.createObjectURL(archivo);
-  const enlace = document.createElement("a");
-  enlace.href = url;
-  enlace.download = nombre;
-  enlace.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-function exportarBase() {
-  const archivo = new Blob(
-    [JSON.stringify(vehiculos, null, 2)],
-    {type:"application/json"}
-  );
-  descargarArchivo(archivo, "base-vehiculos.json");
-}
-
-function descargarPlantilla() {
-  const encabezados = CAMPOS.map(([clave]) => clave);
-  const ejemplo = [
-    "AB123CD","VIN_DE_EJEMPLO","Toyota","Corolla","XEi","2020",
-    "2ZR-FE","CVT","","","","","","","","Manual del vehículo",
-    "https://ejemplo.com","2026-01-01"
-  ];
-
-  const csv = [encabezados, ejemplo]
-    .map(fila => fila.map(celda =>
-      `"${String(celda).replace(/"/g,'""')}"`
-    ).join(","))
-    .join("\r\n");
-
-  descargarArchivo(
-    new Blob(["\uFEFF" + csv], {type:"text/csv;charset=utf-8"}),
-    "plantilla-vehiculos.csv"
-  );
-}
-
-function leerCsv(texto) {
-  const filas = [];
-  let fila = [];
-  let celda = "";
-  let entreComillas = false;
-
-  for (let i = 0; i < texto.length; i++) {
-    const caracter = texto[i];
-
-    if (caracter === '"') {
-      if (entreComillas && texto[i + 1] === '"') {
-        celda += '"';
-        i++;
-      } else {
-        entreComillas = !entreComillas;
-      }
-    } else if ((caracter === "," || caracter === ";") && !entreComillas) {
-      fila.push(celda);
-      celda = "";
-    } else if ((caracter === "\n" || caracter === "\r") && !entreComillas) {
-      if (caracter === "\r" && texto[i + 1] === "\n") i++;
-      fila.push(celda);
-      if (fila.some(valor => valor.trim() !== "")) filas.push(fila);
-      fila = [];
-      celda = "";
-    } else {
-      celda += caracter;
-    }
-  }
-
-  fila.push(celda);
-  if (fila.some(valor => valor.trim() !== "")) filas.push(fila);
-  return filas;
-}
-
-async function importarArchivo(evento) {
-  const archivo = evento.target.files && evento.target.files[0];
-  if (!archivo) return;
-
-  try {
-    const texto = await archivo.text();
-    let registros;
-
-    if (archivo.name.toLowerCase().endsWith(".json")) {
-      const datos = JSON.parse(texto);
-      if (!Array.isArray(datos)) {
-        throw new Error("El JSON debe contener una lista.");
-      }
-      registros = datos;
-    } else {
-      const filas = leerCsv(texto.replace(/^\uFEFF/, ""));
-      if (filas.length < 2) {
-        throw new Error("El CSV no contiene filas de datos.");
-      }
-
-      const encabezados = filas[0].map(h => h.trim());
-      const camposValidos = CAMPOS.map(([clave]) => clave);
-      const desconocidos = encabezados.filter(h => !camposValidos.includes(h));
-
-      if (desconocidos.length) {
-        throw new Error("Encabezados no reconocidos: " + desconocidos.join(", "));
-      }
-
-      registros = filas.slice(1).map(fila => {
-        const ficha = {};
-        encabezados.forEach((clave, indice) => {
-          ficha[clave] = (fila[indice] || "").trim();
-        });
-        return ficha;
-      });
-    }
-
-    let importados = 0;
-
-    registros.forEach(registro => {
-      if (!registro || typeof registro !== "object") return;
-
-      const ficha = {};
-      CAMPOS.forEach(([clave]) => {
-        ficha[clave] = String(registro[clave] ?? "").trim();
-      });
-
-      if (!ficha.patente && !ficha.vin && !(ficha.marca && ficha.modelo)) {
-        return;
-      }
-
-      const existente = vehiculos.findIndex(v =>
-        (ficha.vin && normalizar(v.vin) === normalizar(ficha.vin)) ||
-        (ficha.patente && normalizar(v.patente) === normalizar(ficha.patente))
-      );
-
-      ficha.id = existente >= 0 ? vehiculos[existente].id : crearId();
-
-      if (existente >= 0) vehiculos[existente] = ficha;
-      else vehiculos.push(ficha);
-
-      importados++;
-    });
-
-    if (guardarBase()) {
-      alert(`Importación terminada. Registros agregados o actualizados: ${importados}.`);
-      buscar();
-    }
-  } catch (error) {
-    alert("No se pudo importar el archivo: " + error.message);
-  } finally {
-    evento.target.value = "";
-  }
-}
-
-$("buscarBtn").addEventListener("click", buscar);
-$("busqueda").addEventListener("keydown", evento => {
-  if (evento.key === "Enter") buscar();
-});
-$("nuevoBtn").addEventListener("click", () => abrirFormulario());
-$("guardarBtn").addEventListener("click", guardarVehiculo);
-$("cerrarBtn").addEventListener("click", cerrarFormulario);
-$("cancelarBtn").addEventListener("click", cerrarFormulario);
-$("modal").addEventListener("click", evento => {
-  if (evento.target === $("modal")) cerrarFormulario();
-});
-$("exportarBtn").addEventListener("click", exportarBase);
-$("plantillaBtn").addEventListener("click", descargarPlantilla);
-$("importarBtn").addEventListener("click", () => $("archivo").click());
-$("archivo").addEventListener("change", importarArchivo);
-
-crearFormulario();
-cargarBase();
-</script>
-</body>
-</html>
-```
+let mode='patente', current=null, currentSpecs=[];
+const $=id=>document.getElementById(id);
+const STORE='selectorLubricantesPro_v2';
+const getLib=()=>{try{return JSON.parse(localStorage.getItem(STORE)||'[]')}catch{return []}};
+const setLib=x=>localStorage.setItem(STORE,JSON.stringify(x));
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));['plateBox','vinBox','manualBox'].forEach(x=>$(x).classList.add('hidden'));$(({patente:'plateBox',vin:'vinBox',manual:'manualBox'})[mode]).classList.remove('hidden');$('status').textContent='';});
+function renderVehicle(v,origin){current={...v,origen:origin};currentSpecs=[];$('vehiclePanel').classList.remove('hidden');$('editorPanel').classList.remove('hidden');$('specPanel').classList.add('hidden');$('vehicle').innerHTML='<div class="grid">'+Object.entries(v).map(([k,val])=>`<div class="card"><small>${k}</small><div><b>${val||'No informado'}</b></div></div>`).join('')+'</div><p class="muted">Fuente de identificación: '+origin+'</p>';}
+function localVinHints(vin){const wmi=vin.slice(0,3),yearCode=vin[9];const wmiMap={'8AW':'Volkswagen Argentina','9BW':'Volkswagen Brasil','8AP':'Fiat Argentina','8AD':'Peugeot Argentina','8A1':'Renault Argentina','8AF':'Ford Argentina','8AG':'General Motors Argentina','9BD':'Fiat Brasil','9BG':'General Motors Brasil','9BF':'Ford Brasil'};const yearMap={A:1980,L:1990,Y:2000,A2:2010,B:2011,C:2012,D:2013,E:2014,F:2015,G:2016,H:2017,J:2018,K:2019,L2:2020,M:2021,N:2022,P:2023,R:2024,S:2025,T:2026};let year=yearMap[yearCode];if(year===undefined){const cycle={A:2010,B:2011,C:2012,D:2013,E:2014,F:2015,G:2016,H:2017,J:2018,K:2019,L:2020,M:2021,N:2022,P:2023,R:2024,S:2025,T:2026};year=cycle[yearCode];}return {'WMI / fabricante-país':wmiMap[wmi]||('WMI '+wmi+' (pendiente de validar)'),'Código de año (posición 10)':year?year+' (lectura preliminar)':yearCode+' (sin decodificar)'};}
+async function vinDecode(vin){let hints=localVinHints(vin);let base={'VIN':vin,...hints};let u='https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/'+encodeURIComponent(vin)+'?format=json';try{let r=await fetch(u);if(!r.ok)throw Error('NHTSA no disponible');let d=(await r.json()).Results?.[0];if(!d)throw Error('Sin resultados');return {...base,'Marca':d.Make||'No informada por NHTSA','Modelo':d.Model||'No informado por NHTSA','Año NHTSA':d.ModelYear||'No informado','Motor': [d.DisplacementL?d.DisplacementL+' L':'',d.EngineModel,d.FuelTypePrimary].filter(Boolean).join(' / ')||'No informado','Transmisión':d.TransmissionStyle||'No informada','Tracción':d.DriveType||'No informada','Carrocería':d.BodyClass||'No informada'};}catch(e){return {...base,'Resultado NHTSA':'Sin datos concluyentes: '+e.message};}}
+$('search').onclick=async()=>{let o;
+$('status').textContent='';$('vehiclePanel').classList.add('hidden');$('editorPanel').classList.add('hidden');$('specPanel').classList.add('hidden');
+if(mode==='patente'){let p=$('plate').value.trim().toUpperCase();if(!p){$('status').textContent='Ingresá una patente.';return;} $('status').innerHTML='Patente ingresada: <b>'+p+'</b>. Para completar la identificación automática hay que configurar un proveedor habilitado de datos registrales. Mientras tanto, elegí “Datos manuales” o usá el VIN.';return;}
+if(mode==='manual'){o={'Marca':$('make').value,'Modelo':$('model').value,'Año':$('year').value,'Motor / versión':$('engine').value,'Combustible':$('fuel').value,'Código motor / caja':$('codes').value,'País':$('country').value};if(!o.Marca||!o.Modelo||!o.Año){$('status').textContent='Completá marca, modelo y año.';return;}renderVehicle(o,'Datos ingresados manualmente');return;}
+let vin=$('vin').value.trim().toUpperCase();if(!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)){$('status').textContent='El VIN debe tener 17 caracteres válidos.';return;}
+$('search').disabled=true;$('status').textContent='Consultando decodificador VIN…';try{o=await vinDecode(vin);renderVehicle(o,'NHTSA vPIC');$('status').textContent='Lectura preliminar del VIN. WMI/año son pistas de identificación; confirmá modelo, motor y caja con fuente argentina antes de recomendar lubricantes.';}catch(e){$('status').textContent=e.message+'. Probá búsqueda manual.';}finally{$('search').disabled=false;}
+};
+function readSpec(){return {conjunto:$('kind').value,variante:$('variant').value,viscosidad:$('visc').value,norma:$('norm').value,capacidad_total:$('total').value,recambio_parcial:$('partial').value,dialisis:$('dialysis').value,filtro:$('filter').value,productos:$('products').value,fuente:$('source').value,observaciones:$('notes').value,fecha_verificacion:new Date().toLocaleDateString('es-AR')};}
+$('addSpec').onclick=()=>{if(!current)return;let s=readSpec();if(!s.norma&&!s.viscosidad&&!s.fuente){alert('Agregá al menos norma, viscosidad o fuente documental.');return;}currentSpecs.push(s);renderSpecs();};
+$('clearSpec').onclick=()=>['variant','visc','norm','total','partial','dialysis','filter','products','source','notes'].forEach(x=>$(x).value='');
+function renderSpecs(){ $('specPanel').classList.remove('hidden');$('specs').innerHTML=currentSpecs.map((s,i)=>`<div class="card"><div class="actions"><span class="badge">${s.conjunto}</span><span class="badge">Cargado ${s.fecha_verificacion}</span><button class="danger" onclick="removeSpec(${i})">Eliminar</button></div><table><tbody>${Object.entries(s).filter(([k,v])=>v).map(([k,v])=>`<tr><th>${k.replaceAll('_',' ')}</th><td>${String(v).replaceAll('<','&lt;')}</td></tr>`).join('')}</tbody></table></div>`).join('')||'Sin especificaciones cargadas.';}
+window.removeSpec=i=>{currentSpecs.splice(i,1);renderSpecs();};
+function download(name,obj){let blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href);}
+$('saveVehicle').onclick=()=>{if(!current)return;let lib=getLib();lib.unshift({id:Date.now(),vehicle:current,specs:currentSpecs});setLib(lib);renderLibrary();alert('Ficha guardada en este navegador.');};
+$('exportVehicle').onclick=()=>{if(current)download('ficha-vehiculo.json',{vehicle:current,specs:currentSpecs});};
+$('exportLibrary').onclick=()=>download('biblioteca-lubricantes.json',getLib());
+function renderLibrary(){let lib=getLib();$('library').innerHTML=lib.length?lib.map((x,i)=>`<div class="card"><b>${x.vehicle.Marca||''} ${x.vehicle.Modelo||''} ${x.vehicle.Año||''}</b><p class="muted">${x.vehicle['Motor / versión']||x.vehicle.Motor||''} · ${x.specs.length} especificaciones</p><div class="actions"><button onclick="loadVehicle(${i})">Abrir</button><button class="danger" onclick="deleteVehicle(${i})">Eliminar</button></div></div>`).join(''):'Todavía no guardaste vehículos en este navegador.';}
+window.loadVehicle=i=>{let x=getLib()[i];current=x.vehicle;currentSpecs=x.specs||[];$('vehiclePanel').classList.remove('hidden');$('editorPanel').classList.remove('hidden');$('vehicle').innerHTML='<div class="grid">'+Object.entries(current).map(([k,v])=>`<div class="card"><small>${k}</small><b>${v||''}</b></div>`).join('')+'</div>';renderSpecs();window.scrollTo({top:0,behavior:'smooth'});};
+window.deleteVehicle=i=>{let a=getLib();a.splice(i,1);setLib(a);renderLibrary();};
+$('clearLibrary').onclick=()=>{if(confirm('¿Borrar todas las fichas guardadas en este navegador?')){setLib([]);renderLibrary();}};
+$('reset').onclick=()=>{['plate','vin','make','model','year','engine','codes'].forEach(x=>$(x).value='');$('status').textContent='';$('vehiclePanel').classList.add('hidden');$('editorPanel').classList.add('hidden');$('specPanel').classList.add('hidden');current=null;currentSpecs=[];};
+$('loadTestVin').onclick=()=>{document.querySelector('[data-mode=vin]').click();$('vin').value='8AWPB45Z3KA506256';$('status').textContent='VIN de prueba cargado. Tocá Identificar vehículo para iniciar la consulta.';};
+renderLibrary();
+</script></body></html>
